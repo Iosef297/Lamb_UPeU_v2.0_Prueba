@@ -1,0 +1,54 @@
+<div class="pagina">
+  <h2>convenios-institucionales-descuento</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+  @if (errorAccion()) {
+    <div class="error">{{ errorAccion() }}</div>
+  }
+  @if (exito()) {
+    <div class="exito">{{ exito() }}</div>
+  }
+
+  <div class="barra">
+    @if (auth.tieneRol('ADMIN')) {
+      <a [routerLink]="['/convenios-institucionales-descuento/nueva']">Nuevo</a>
+    }
+    <button type="button" (click)="cargar()">Actualizar</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+          <th>ID</th>
+          <th>Institución</th>
+          <th>% descuento</th>
+          <th>Vigente desde</th>
+          <th>Vigente hasta</th>
+        @if (auth.tieneRol('ADMIN')) {
+          <th>Acciones</th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (item of items(); track item.id) {
+        <tr>
+            <td>{{ item.id }}</td>
+            <td>{{ item.institucion }}</td>
+            <td>{{ item.porcentaje }}</td>
+            <td>{{ item.vigenteDesde }}</td>
+            <td>{{ item.vigenteHasta }}</td>
+          @if (auth.tieneRol('ADMIN')) {
+            <td>
+              <a [routerLink]="['/convenios-institucionales-descuento', item.id, 'editar']">Editar</a>
+
+            </td>
+          }
+        </tr>
+      } @empty {
+        <tr><td colspan="6">Sin registros.</td></tr>
+      }
+    </tbody>
+  </table>
+</div>

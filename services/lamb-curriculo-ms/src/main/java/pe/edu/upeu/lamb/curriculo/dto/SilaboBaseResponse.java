@@ -22,4 +22,14 @@ public class SilaboBaseResponse {
     private String evaluacion;
     private String bibliografia;
     private EstadoSilabo estado;
+    private Long idCompetenciaEspecifica;
+    private Long idCompetenciaGeneral;
+    private String resultadoAprendizaje;
+    private String productoAcademico;
+    private String descripcionProducto;
+    private String recursos;
+    private String referenciasBasicas;
+    private String referenciasComplementarias;
+    private String enlacesInternet;
+    private java.math.BigDecimal notaMinimaAprobatoria;
 }

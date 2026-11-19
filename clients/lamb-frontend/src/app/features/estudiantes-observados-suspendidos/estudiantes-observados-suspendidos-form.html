@@ -1,0 +1,32 @@
+<div class="pagina">
+  <h2>estudiantes-observados-suspendidos</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label>
+      ID Persona
+      <input type="number" formControlName="idPersona" />
+    </label>
+    <label>
+      Tipo
+      <input type="text" formControlName="tipo" />
+    </label>
+    <label>
+      Motivo
+      <input type="text" formControlName="motivo" />
+    </label>
+    <label>
+      Fecha inicio
+      <input type="date" formControlName="fechaInicio" />
+    </label>
+    <label>
+      Fecha fin
+      <input type="date" formControlName="fechaFin" />
+    </label>
+
+    <button type="submit">Guardar</button>
+  </form>
+</div>

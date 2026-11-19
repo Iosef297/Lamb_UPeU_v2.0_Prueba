@@ -2,27 +2,23 @@ package pe.edu.upeu.lamb.finanzas.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import pe.edu.upeu.lamb.finanzas.dto.PagarCargoRequest;
 import pe.edu.upeu.lamb.finanzas.dto.PagoRequest;
 import pe.edu.upeu.lamb.finanzas.dto.PagoResponse;
-import pe.edu.upeu.lamb.finanzas.dto.RecaudacionVentanillaRequest;
-import pe.edu.upeu.lamb.finanzas.dto.RecaudacionVentanillaResponse;
-import pe.edu.upeu.lamb.finanzas.dto.VoucherRequest;
-import pe.edu.upeu.lamb.finanzas.dto.VoucherResponse;
 import pe.edu.upeu.lamb.finanzas.service.PagoService;
-import pe.edu.upeu.lamb.finanzas.service.RecaudacionVentanillaService;
-import pe.edu.upeu.lamb.finanzas.service.VoucherService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Dominio "Pagos" (CRUD unificado). Base {@code /api/v1/pagos} preservada
- * sin cambios por ser parte de la saga de matricula-finanzas. Subrecursos:
- * voucher, recaudacion por ventanilla.
+ * sin cambios por ser parte de la saga de matricula-finanzas.
  */
 @RestController
 @RequestMapping("/api/v1/pagos")
@@ -31,19 +27,17 @@ import java.util.List;
 public class PagoController {
 
     private final PagoService pagoService;
-    private final VoucherService voucherService;
-    private final RecaudacionVentanillaService recaudacionVentanillaService;
 
     @GetMapping
-    @Operation(summary = "Listar pagos")
-    public List<PagoResponse> listar() {
-        return pagoService.listar();
+    @Operation(summary = "Listar pagos (ESTUDIANTE solo ve los suyos)")
+    public List<PagoResponse> listar(@AuthenticationPrincipal Jwt jwt) {
+        return pagoService.listar(idPersonaDe(jwt), esPrivilegiado(jwt));
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Obtener un pago")
-    public PagoResponse obtener(@PathVariable Long id) {
-        return pagoService.obtener(id);
+    @Operation(summary = "Obtener un pago (ESTUDIANTE solo si es suyo)")
+    public PagoResponse obtener(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+        return pagoService.obtener(id, idPersonaDe(jwt), esPrivilegiado(jwt));
     }
 
     @PostMapping
@@ -53,79 +47,36 @@ public class PagoController {
         return pagoService.procesar(request);
     }
 
-    @PostMapping("/{id}/pagar")
-    @Operation(summary = "Pagar un cargo pendiente")
-    public PagoResponse pagar(@PathVariable Long id, @Valid @RequestBody PagarCargoRequest request) {
-        return pagoService.pagar(id, request);
-    }
-
     @PostMapping("/{id}/reembolsar")
     @Operation(summary = "Reembolsar un pago")
     public PagoResponse reembolsar(@PathVariable Long id) {
         return pagoService.reembolsar(id);
     }
 
-    // --- Voucher ---
-
-    @GetMapping("/vouchers")
-    @Operation(summary = "Listar vouchers")
-    public List<VoucherResponse> listarVouchers() {
-        return voucherService.listar();
+    @PostMapping("/{id}/aceptar")
+    @Operation(summary = "Aceptar un pago en proceso")
+    public PagoResponse aceptar(@PathVariable Long id) {
+        return pagoService.aceptar(id);
     }
 
-    @GetMapping("/vouchers/{id}")
-    @Operation(summary = "Obtener un voucher")
-    public VoucherResponse obtenerVoucher(@PathVariable Long id) {
-        return voucherService.obtener(id);
+    @PostMapping("/{id}/rechazar")
+    @Operation(summary = "Rechazar un pago en proceso")
+    public PagoResponse rechazar(@PathVariable Long id) {
+        return pagoService.rechazar(id);
     }
 
-    @PostMapping("/vouchers")
-    @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Crear un voucher")
-    public VoucherResponse crearVoucher(@Valid @RequestBody VoucherRequest request) {
-        return voucherService.crear(request);
+    // idPersona viaja en el token via protocol mapper (lamb-realm.json); ADMIN/COORDINADOR
+    // ven todo, ESTUDIANTE solo lo suyo (aislamiento por fila, el Gateway solo filtra por rol).
+    private static Long idPersonaDe(Jwt jwt) {
+        return jwt.getClaim("idPersona");
     }
 
-    @PutMapping("/vouchers/{id}")
-    public VoucherResponse actualizarVoucher(@PathVariable Long id, @Valid @RequestBody VoucherRequest request) {
-        return voucherService.actualizar(id, request);
-    }
-
-    @DeleteMapping("/vouchers/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminarVoucher(@PathVariable Long id) {
-        voucherService.eliminar(id);
-    }
-
-    // --- Recaudacion por ventanilla ---
-
-    @GetMapping("/recaudaciones-ventanilla")
-    @Operation(summary = "Listar recaudaciones por ventanilla")
-    public List<RecaudacionVentanillaResponse> listarRecaudaciones() {
-        return recaudacionVentanillaService.listar();
-    }
-
-    @GetMapping("/recaudaciones-ventanilla/{id}")
-    @Operation(summary = "Obtener una recaudacion por ventanilla")
-    public RecaudacionVentanillaResponse obtenerRecaudacion(@PathVariable Long id) {
-        return recaudacionVentanillaService.obtener(id);
-    }
-
-    @PostMapping("/recaudaciones-ventanilla")
-    @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Crear una recaudacion por ventanilla")
-    public RecaudacionVentanillaResponse crearRecaudacion(@Valid @RequestBody RecaudacionVentanillaRequest request) {
-        return recaudacionVentanillaService.crear(request);
-    }
-
-    @PutMapping("/recaudaciones-ventanilla/{id}")
-    public RecaudacionVentanillaResponse actualizarRecaudacion(@PathVariable Long id, @Valid @RequestBody RecaudacionVentanillaRequest request) {
-        return recaudacionVentanillaService.actualizar(id, request);
-    }
-
-    @DeleteMapping("/recaudaciones-ventanilla/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminarRecaudacion(@PathVariable Long id) {
-        recaudacionVentanillaService.eliminar(id);
+    private static boolean esPrivilegiado(Jwt jwt) {
+        Map<String, Object> realmAccess = jwt.getClaimAsMap("realm_access");
+        Object roles = realmAccess == null ? null : realmAccess.get("roles");
+        if (!(roles instanceof Collection<?> lista)) {
+            return false;
+        }
+        return lista.contains("ADMIN") || lista.contains("COORDINADOR");
     }
 }

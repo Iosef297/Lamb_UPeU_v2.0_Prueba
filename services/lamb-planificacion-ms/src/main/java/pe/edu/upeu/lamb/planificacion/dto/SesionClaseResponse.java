@@ -19,4 +19,16 @@ public class SesionClaseResponse {
     private String tema;
     private Long idUnidadAprendizaje;
     private String actividades;
+    private String tipoSesion;
+    private java.time.LocalDate fecha;
+    private Integer horasTeoria;
+    private Integer horasPractica;
+    private Integer horasAutonomas;
+    private String actividadPractica;
+    private String actividadAutonoma;
+    private String evidencia;
+    private String instrumentos;
+    private String actividadSincrona;
+    private String actividadAsincrona;
+    private String adjuntoUrl;
 }

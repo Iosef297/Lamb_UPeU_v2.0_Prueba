@@ -12,10 +12,8 @@ import pe.edu.upeu.lms.repository.CalificacionRepository;
 import pe.edu.upeu.lms.repository.EvaluacionRepository;
 
 import java.util.List;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class CalificacionService {
 
@@ -25,6 +23,13 @@ public class CalificacionService {
 
     public List<CalificacionResponse> listar() {
         return calificacionRepository.findAllConEvaluacion().stream()
+                .map(calificacionMapper::toResponse)
+                .toList();
+    }
+
+    public List<CalificacionResponse> listarPorEstudiante(String idEstudiante) {
+        return calificacionRepository.findAllConEvaluacion().stream()
+                .filter(c -> idEstudiante.equals(c.getIdEstudiante()))
                 .map(calificacionMapper::toResponse)
                 .toList();
     }

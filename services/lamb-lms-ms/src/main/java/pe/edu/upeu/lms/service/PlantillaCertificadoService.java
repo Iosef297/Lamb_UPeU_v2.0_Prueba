@@ -10,10 +10,8 @@ import pe.edu.upeu.lms.mapper.PlantillaCertificadoMapper;
 import pe.edu.upeu.lms.repository.PlantillaCertificadoRepository;
 
 import java.util.List;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class PlantillaCertificadoService {
 

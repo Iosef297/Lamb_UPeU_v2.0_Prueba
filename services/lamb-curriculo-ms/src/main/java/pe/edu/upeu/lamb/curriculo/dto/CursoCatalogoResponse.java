@@ -1,5 +1,6 @@
 package pe.edu.upeu.lamb.curriculo.dto;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,8 +17,15 @@ public class CursoCatalogoResponse {
     private String codigo;
     private String nombre;
     private Integer creditos;
+    private Integer horasTeoria;
+    private Integer horasPractica;
+    private Integer horasNoPresenciales;
+    private Integer horasAprendizajeAutonomo;
+    private Integer creditosTeoria;
+    private Integer creditosPractica;
+    private Integer horasTotales;
     private Long idDepartamento;
-    private String codigoDepartamento;
+    private Long idPrograma;
     private Long idModalidad;
     private String codigoModalidad;
 }

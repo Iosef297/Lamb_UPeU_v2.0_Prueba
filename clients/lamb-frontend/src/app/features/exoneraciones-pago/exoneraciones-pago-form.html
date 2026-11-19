@@ -1,0 +1,28 @@
+<div class="pagina">
+  <h2>exoneraciones-pago</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label>
+      ID Persona
+      <input type="number" formControlName="idPersona" />
+    </label>
+    <label>
+      ID Concepto
+      <input type="number" formControlName="idConceptoPago" />
+    </label>
+    <label>
+      Motivo
+      <input type="text" formControlName="motivo" />
+    </label>
+    <label>
+      Fecha exoneración
+      <input type="date" formControlName="fechaExoneracion" />
+    </label>
+
+    <button type="submit">Guardar</button>
+  </form>
+</div>

@@ -24,4 +24,13 @@ public class AsignacionDocenteRequest {
     @Min(1)
     @Max(40)
     private Integer horasSemanales;
+
+    // Permisos del docente en el grupo; si no vienen se ponen segun el rol (el de PRACTICA no pone notas)
+    private Boolean gestionaNota;
+
+    private Boolean gestionaAsistencia;
+
+    private Boolean verHorario;
+
+    private Boolean muestraPortal;
 }

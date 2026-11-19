@@ -23,6 +23,11 @@ public class SolicitudAperturaGrupo {
     @JoinColumn(name = "id_oferta", nullable = false)
     private OfertaAcademica oferta;
 
+    // Extraprogramatico (SE) o dirigido (SD), como los tipos de solicitud del LAMB
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo", nullable = false, length = 20)
+    private TipoSolicitudApertura tipo;
+
     @Column(name = "cupo_propuesto", nullable = false)
     private Integer cupoPropuesto;
 

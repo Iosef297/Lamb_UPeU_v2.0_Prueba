@@ -10,7 +10,7 @@
     <select id="idOferta" formControlName="idOferta">
       <option [ngValue]="null" disabled>Selecciona una oferta</option>
       @for (o of ofertas(); track o.id) {
-        <option [ngValue]="o.id">{{ o.codigoCurso }} · periodo {{ o.codigoPeriodo }} · ciclo {{ o.ciclo }} ({{ o.estado }})</option>
+        <option [ngValue]="o.id">{{ o.codigoCurso }} · periodo {{ o.codigoPeriodo }} · ciclo {{ o.ciclo }} ({{ o.estado | sinGuion }})</option>
       }
     </select>
     <small class="ayuda">

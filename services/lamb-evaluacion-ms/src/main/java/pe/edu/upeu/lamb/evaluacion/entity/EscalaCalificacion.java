@@ -43,4 +43,18 @@ public class EscalaCalificacion {
 
     @Column(name = "vigente", nullable = false)
     private Boolean vigente;
+
+    // Modo competencia: si EP < umbral la nota final es EP
+    @Column(name = "umbral_producto", nullable = false, precision = 4, scale = 2)
+    private BigDecimal umbralProducto;
+
+    // Pesos ES/EP/ECG cuando el grupo no programo evidencias con peso
+    @Column(name = "peso_sesiones", nullable = false, precision = 5, scale = 2)
+    private BigDecimal pesoSesiones;
+
+    @Column(name = "peso_producto", nullable = false, precision = 5, scale = 2)
+    private BigDecimal pesoProducto;
+
+    @Column(name = "peso_competencia_generica", nullable = false, precision = 5, scale = 2)
+    private BigDecimal pesoCompetenciaGenerica;
 }

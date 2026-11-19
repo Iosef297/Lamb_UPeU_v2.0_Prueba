@@ -17,5 +17,5 @@ public class RequisitoExtracurricularResponse {
     private Long idPlan;
     private String versionPlan;
     private TipoActividadFormacion tipo;
-    private Integer creditosExigidos;
+    private Integer horasExigidas;
 }

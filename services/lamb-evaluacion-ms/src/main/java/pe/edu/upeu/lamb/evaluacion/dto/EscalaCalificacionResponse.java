@@ -24,4 +24,8 @@ public class EscalaCalificacionResponse {
     private Integer decimales;
     private TipoRedondeo redondeo;
     private Boolean vigente;
+    private BigDecimal umbralProducto;
+    private BigDecimal pesoSesiones;
+    private BigDecimal pesoProducto;
+    private BigDecimal pesoCompetenciaGenerica;
 }

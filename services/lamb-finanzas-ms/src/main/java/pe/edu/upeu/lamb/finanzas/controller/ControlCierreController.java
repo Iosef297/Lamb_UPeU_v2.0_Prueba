@@ -8,19 +8,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import pe.edu.upeu.lamb.finanzas.dto.ConstanciaNoAdeudoRequest;
 import pe.edu.upeu.lamb.finanzas.dto.ConstanciaNoAdeudoResponse;
-import pe.edu.upeu.lamb.finanzas.dto.EstadoCuentaEstudianteRequest;
-import pe.edu.upeu.lamb.finanzas.dto.EstadoCuentaEstudianteResponse;
 import pe.edu.upeu.lamb.finanzas.dto.ReclamoPagoRequest;
 import pe.edu.upeu.lamb.finanzas.dto.ReclamoPagoResponse;
 import pe.edu.upeu.lamb.finanzas.service.ConstanciaNoAdeudoService;
-import pe.edu.upeu.lamb.finanzas.service.EstadoCuentaEstudianteService;
 import pe.edu.upeu.lamb.finanzas.service.ReclamoPagoService;
 
 import java.util.List;
 
 /**
  * Dominio "Control y cierre" (CRUD unificado). Subrecursos: reclamo de pago,
- * estado de cuenta del estudiante, constancia de no adeudo.
+ * constancia de no adeudo.
  */
 @RestController
 @RequestMapping("/api/v1/control-cierre")
@@ -29,7 +26,6 @@ import java.util.List;
 public class ControlCierreController {
 
     private final ReclamoPagoService reclamoPagoService;
-    private final EstadoCuentaEstudianteService estadoCuentaEstudianteService;
     private final ConstanciaNoAdeudoService constanciaNoAdeudoService;
 
     // --- Reclamo de pago ---
@@ -53,49 +49,6 @@ public class ControlCierreController {
         return reclamoPagoService.crear(request);
     }
 
-    @PutMapping("/reclamos-pago/{id}")
-    public ReclamoPagoResponse actualizarReclamoPago(@PathVariable Long id, @Valid @RequestBody ReclamoPagoRequest request) {
-        return reclamoPagoService.actualizar(id, request);
-    }
-
-    @DeleteMapping("/reclamos-pago/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminarReclamoPago(@PathVariable Long id) {
-        reclamoPagoService.eliminar(id);
-    }
-
-    // --- Estado de cuenta del estudiante ---
-
-    @GetMapping("/estados-cuenta-estudiante")
-    @Operation(summary = "Listar estados de cuenta del estudiante")
-    public List<EstadoCuentaEstudianteResponse> listarEstadosCuentaEstudiante() {
-        return estadoCuentaEstudianteService.listar();
-    }
-
-    @GetMapping("/estados-cuenta-estudiante/{id}")
-    @Operation(summary = "Obtener un estado de cuenta del estudiante")
-    public EstadoCuentaEstudianteResponse obtenerEstadoCuentaEstudiante(@PathVariable Long id) {
-        return estadoCuentaEstudianteService.obtener(id);
-    }
-
-    @PostMapping("/estados-cuenta-estudiante")
-    @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Crear un estado de cuenta del estudiante")
-    public EstadoCuentaEstudianteResponse crearEstadoCuentaEstudiante(@Valid @RequestBody EstadoCuentaEstudianteRequest request) {
-        return estadoCuentaEstudianteService.crear(request);
-    }
-
-    @PutMapping("/estados-cuenta-estudiante/{id}")
-    public EstadoCuentaEstudianteResponse actualizarEstadoCuentaEstudiante(@PathVariable Long id, @Valid @RequestBody EstadoCuentaEstudianteRequest request) {
-        return estadoCuentaEstudianteService.actualizar(id, request);
-    }
-
-    @DeleteMapping("/estados-cuenta-estudiante/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminarEstadoCuentaEstudiante(@PathVariable Long id) {
-        estadoCuentaEstudianteService.eliminar(id);
-    }
-
     // --- Constancia de no adeudo ---
 
     @GetMapping("/constancias-no-adeudo")
@@ -115,16 +68,5 @@ public class ControlCierreController {
     @Operation(summary = "Crear una constancia de no adeudo")
     public ConstanciaNoAdeudoResponse crearConstanciaNoAdeudo(@Valid @RequestBody ConstanciaNoAdeudoRequest request) {
         return constanciaNoAdeudoService.crear(request);
-    }
-
-    @PutMapping("/constancias-no-adeudo/{id}")
-    public ConstanciaNoAdeudoResponse actualizarConstanciaNoAdeudo(@PathVariable Long id, @Valid @RequestBody ConstanciaNoAdeudoRequest request) {
-        return constanciaNoAdeudoService.actualizar(id, request);
-    }
-
-    @DeleteMapping("/constancias-no-adeudo/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminarConstanciaNoAdeudo(@PathVariable Long id) {
-        constanciaNoAdeudoService.eliminar(id);
     }
 }

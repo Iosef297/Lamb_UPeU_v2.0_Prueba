@@ -3,13 +3,11 @@ package pe.edu.upeu.lamb.curriculo.service;
 import pe.edu.upeu.lamb.curriculo.dto.CursoCatalogoRequest;
 import pe.edu.upeu.lamb.curriculo.dto.CursoCatalogoResponse;
 import pe.edu.upeu.lamb.curriculo.entity.CursoCatalogo;
-import pe.edu.upeu.lamb.curriculo.entity.DepartamentoAcademico;
 import pe.edu.upeu.lamb.curriculo.entity.Modalidad;
 import pe.edu.upeu.lamb.curriculo.exception.BusinessRuleException;
 import pe.edu.upeu.lamb.curriculo.exception.ResourceNotFoundException;
 import pe.edu.upeu.lamb.curriculo.mapper.CursoCatalogoMapper;
 import pe.edu.upeu.lamb.curriculo.repository.CursoCatalogoRepository;
-import pe.edu.upeu.lamb.curriculo.repository.DepartamentoAcademicoRepository;
 import pe.edu.upeu.lamb.curriculo.repository.ModalidadRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,7 +20,6 @@ import java.util.List;
 public class CursoCatalogoService {
 
     private final CursoCatalogoRepository cursoCatalogoRepository;
-    private final DepartamentoAcademicoRepository departamentoAcademicoRepository;
     private final ModalidadRepository modalidadRepository;
     private final CursoCatalogoMapper cursoCatalogoMapper;
 
@@ -30,7 +27,7 @@ public class CursoCatalogoService {
     public List<CursoCatalogoResponse> listar(Long idDepartamento) {
         List<CursoCatalogo> lista = idDepartamento == null
                 ? cursoCatalogoRepository.findAll()
-                : cursoCatalogoRepository.findByDepartamentoId(idDepartamento);
+                : cursoCatalogoRepository.findByIdDepartamento(idDepartamento);
         return lista.stream().map(cursoCatalogoMapper::toResponse).toList();
     }
 
@@ -78,8 +75,24 @@ public class CursoCatalogoService {
     }
 
     private void asignarRelaciones(CursoCatalogo cursoCatalogo, CursoCatalogoRequest request) {
-        cursoCatalogo.setDepartamento(request.getIdDepartamento() == null ? null : departamentoAcademicoRepository.findById(request.getIdDepartamento())
-                .orElseThrow(() -> new ResourceNotFoundException("Departamento academico no encontrado: " + request.getIdDepartamento())));
+        cursoCatalogo.setIdDepartamento(request.getIdDepartamento());
+        if (request.getIdPrograma() != null) {
+            cursoCatalogo.setIdPrograma(request.getIdPrograma());
+        }
+        if (request.getHorasTeoria() + request.getHorasPractica() < 1) {
+            throw new BusinessRuleException("El curso debe tener al menos 1 hora de teoria o de practica");
+        }
+        int ct = request.getCreditosTeoria() == null ? 0 : request.getCreditosTeoria();
+        int cp = request.getCreditosPractica() == null ? 0 : request.getCreditosPractica();
+        if (ct + cp != 0 && ct + cp != request.getCreditos()) {
+            throw new BusinessRuleException("Los creditos de teoria y de practica deben sumar los creditos del curso (" + request.getCreditos() + ")");
+        }
+        cursoCatalogo.setHorasTeoria(request.getHorasTeoria());
+        cursoCatalogo.setHorasPractica(request.getHorasPractica());
+        cursoCatalogo.setHorasNoPresenciales(request.getHorasNoPresenciales());
+        cursoCatalogo.setHorasAprendizajeAutonomo(request.getHorasAprendizajeAutonomo());
+        cursoCatalogo.setCreditosTeoria(ct);
+        cursoCatalogo.setCreditosPractica(cp);
         cursoCatalogo.setModalidad(request.getIdModalidad() == null ? null : modalidadRepository.findById(request.getIdModalidad())
                 .orElseThrow(() -> new ResourceNotFoundException("Modalidad no encontrada: " + request.getIdModalidad())));
     }

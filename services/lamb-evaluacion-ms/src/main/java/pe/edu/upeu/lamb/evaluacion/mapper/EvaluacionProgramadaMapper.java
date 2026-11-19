@@ -14,6 +14,11 @@ public class EvaluacionProgramadaMapper {
                 .idGrupo(request.getIdGrupo())
                 .fecha(request.getFecha())
                 .descripcion(request.getDescripcion())
+                .unidad(request.getUnidad())
+                .producto(request.getProducto())
+                .nroSesiones(request.getNroSesiones())
+                .orden(request.getOrden())
+                .peso(request.getPeso())
                 .build();
     }
 
@@ -25,6 +30,12 @@ public class EvaluacionProgramadaMapper {
                 .codigoComponente(evaluacionProgramada.getComponente().getCodigo())
                 .fecha(evaluacionProgramada.getFecha())
                 .descripcion(evaluacionProgramada.getDescripcion())
+                .unidad(evaluacionProgramada.getUnidad())
+                .producto(evaluacionProgramada.getProducto())
+                .nroSesiones(evaluacionProgramada.getNroSesiones())
+                .orden(evaluacionProgramada.getOrden())
+                .peso(evaluacionProgramada.getPeso())
+                .tipoComponente(evaluacionProgramada.getComponente().getTipo().name())
                 .build();
     }
 }

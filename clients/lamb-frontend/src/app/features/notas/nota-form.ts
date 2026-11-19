@@ -8,10 +8,11 @@ import { GrupoResponse } from '../grupos/grupo.model';
 import { PersonaService } from '../personas/persona-service';
 import { PersonaResponse } from '../personas/persona.model';
 import { NotaService } from './nota-service';
+import { SinGuion } from '../../core/sin-guion.pipe';
 
 @Component({
   selector: 'app-nota-form',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [SinGuion, ReactiveFormsModule, RouterLink],
   templateUrl: './nota-form.html',
 })
 export class NotaForm {

@@ -55,6 +55,7 @@ public class SolicitudAperturaGrupoService {
         SolicitudAperturaGrupo solicitudAperturaGrupo = buscarOFallar(id);
         validarPendiente(solicitudAperturaGrupo);
         validar(request, id);
+        solicitudAperturaGrupo.setTipo(request.getTipo());
         solicitudAperturaGrupo.setCupoPropuesto(request.getCupoPropuesto());
         solicitudAperturaGrupo.setJustificacion(request.getJustificacion().trim());
         asignarRelaciones(solicitudAperturaGrupo, request);

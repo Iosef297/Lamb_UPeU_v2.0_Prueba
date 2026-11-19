@@ -21,4 +21,5 @@ public class RegistroAsistenciaResponse {
     private Long idSesionClase;
     private LocalDate fecha;
     private EstadoAsistencia estado;
+    private pe.edu.upeu.lamb.evaluacion.entity.TipoHorarioAsistencia tipoHorario;
 }

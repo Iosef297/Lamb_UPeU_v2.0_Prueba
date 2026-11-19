@@ -31,7 +31,7 @@
         <td>{{ acta.codigoCurso }}</td>
         <td>{{ acta.periodo }}</td>
         <td>{{ acta.idDocente ?? '-' }}</td>
-        <td>{{ acta.estado }}</td>
+        <td>{{ acta.estado | sinGuion }}</td>
         <td>{{ acta.fechaCierre ?? '-' }}</td>
         @if (auth.tieneRol('ADMIN', 'COORDINADOR')) {
           <td>

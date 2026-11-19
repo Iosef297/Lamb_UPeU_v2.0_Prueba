@@ -19,4 +19,8 @@ public class AsignacionDocenteResponse {
     private Long idDocente;
     private RolDocente rol;
     private Integer horasSemanales;
+    private Boolean gestionaNota;
+    private Boolean gestionaAsistencia;
+    private Boolean verHorario;
+    private Boolean muestraPortal;
 }

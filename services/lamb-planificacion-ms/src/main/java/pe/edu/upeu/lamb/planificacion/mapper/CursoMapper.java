@@ -13,6 +13,9 @@ public class CursoMapper {
                 .codigo(curso.getCodigo())
                 .nombre(curso.getNombre())
                 .creditos(curso.getCreditos())
+                .horasTeoria(curso.getHorasTeoria())
+                .horasPractica(curso.getHorasPractica())
+                .horasNoPresenciales(curso.getHorasNoPresenciales())
                 .build();
     }
 }

@@ -19,6 +19,10 @@ public class EscalaCalificacionMapper {
                 .decimales(request.getDecimales())
                 .redondeo(request.getRedondeo())
                 .vigente(request.getVigente())
+                .umbralProducto(valor(request.getUmbralProducto(), "12.5"))
+                .pesoSesiones(valor(request.getPesoSesiones(), "20"))
+                .pesoProducto(valor(request.getPesoProducto(), "70"))
+                .pesoCompetenciaGenerica(valor(request.getPesoCompetenciaGenerica(), "10"))
                 .build();
     }
 
@@ -33,6 +37,14 @@ public class EscalaCalificacionMapper {
                 .decimales(escalaCalificacion.getDecimales())
                 .redondeo(escalaCalificacion.getRedondeo())
                 .vigente(escalaCalificacion.getVigente())
+                .umbralProducto(escalaCalificacion.getUmbralProducto())
+                .pesoSesiones(escalaCalificacion.getPesoSesiones())
+                .pesoProducto(escalaCalificacion.getPesoProducto())
+                .pesoCompetenciaGenerica(escalaCalificacion.getPesoCompetenciaGenerica())
                 .build();
+    }
+
+    public static java.math.BigDecimal valor(java.math.BigDecimal dado, String porDefecto) {
+        return dado != null ? dado : new java.math.BigDecimal(porDefecto);
     }
 }

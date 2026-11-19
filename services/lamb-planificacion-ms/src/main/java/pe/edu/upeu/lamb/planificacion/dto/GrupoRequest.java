@@ -1,6 +1,7 @@
 package pe.edu.upeu.lamb.planificacion.dto;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -30,6 +31,11 @@ public class GrupoRequest {
     @NotNull
     @Min(1)
     private Integer cupoMaximo;
+
+    // Opcional: si no llega, el grupo toma el ciclo de la oferta
+    @Min(1)
+    @Max(14)
+    private Integer ciclo;
 
     @NotEmpty
     private List<@Valid @NotNull HorarioDetalleRequest> horarios = new ArrayList<>();

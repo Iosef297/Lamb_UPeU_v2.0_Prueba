@@ -1,0 +1,28 @@
+<div class="pagina">
+  <h2>reservas-devolucion</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label>
+      ID Cuenta
+      <input type="number" formControlName="idCuenta" />
+    </label>
+    <label>
+      Monto
+      <input type="number" formControlName="monto" step="0.01" />
+    </label>
+    <label>
+      Motivo
+      <input type="text" formControlName="motivo" />
+    </label>
+    <label>
+      Fecha reserva
+      <input type="date" formControlName="fechaReserva" />
+    </label>
+
+    <button type="submit">Guardar</button>
+  </form>
+</div>

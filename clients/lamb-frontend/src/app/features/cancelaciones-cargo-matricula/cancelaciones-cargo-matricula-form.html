@@ -1,0 +1,24 @@
+<div class="pagina">
+  <h2>cancelaciones-cargo-matricula</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label>
+      ID Matrícula
+      <input type="number" formControlName="idMatricula" />
+    </label>
+    <label>
+      Motivo
+      <input type="text" formControlName="motivo" />
+    </label>
+    <label>
+      Fecha cancelación
+      <input type="datetime-local" formControlName="fechaCancelacion" />
+    </label>
+
+    <button type="submit">Guardar</button>
+  </form>
+</div>

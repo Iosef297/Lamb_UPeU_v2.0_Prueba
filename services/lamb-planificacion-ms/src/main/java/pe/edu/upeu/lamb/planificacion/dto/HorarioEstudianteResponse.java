@@ -24,4 +24,11 @@ public class HorarioEstudianteResponse {
     private String codigoCurso;
     private String nombreCurso;
     private String codigoAmbiente;
+    private Long idHorario;
+    private String etiquetaTipo;
+    private String rolDocente;
+    private java.time.LocalDate fechaInicio;
+    private java.time.LocalDate fechaFin;
+    // Se cruza con otro bloque de los grupos consultados (mismo dia, horas y fechas que se pisan)
+    private boolean cruce;
 }

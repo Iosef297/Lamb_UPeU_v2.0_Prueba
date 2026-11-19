@@ -1,5 +1,6 @@
 package pe.edu.upeu.lamb.evaluacion.controller;
 
+import pe.edu.upeu.lamb.evaluacion.entity.ModoEvaluacion;
 import pe.edu.upeu.lamb.evaluacion.entity.Acta;
 import pe.edu.upeu.lamb.evaluacion.service.ActaService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -35,5 +36,18 @@ public class ActaController {
     @GetMapping("/grupo/{idGrupo}")
     public Acta obtenerPorGrupo(@PathVariable Long idGrupo) {
         return actaService.obtenerPorGrupo(idGrupo);
+    }
+
+    @PutMapping("/{id}/modo")
+    public Acta cambiarModo(@PathVariable Long id, @RequestParam ModoEvaluacion modo) {
+        return actaService.cambiarModo(id, modo);
+    }
+
+    // Abre o cierra al docente el registro de notas y de asistencia del grupo
+    @PutMapping("/{id}/permisos")
+    public Acta cambiarPermisos(@PathVariable Long id,
+                                @RequestParam(required = false) Boolean notas,
+                                @RequestParam(required = false) Boolean asistencia) {
+        return actaService.cambiarPermisos(id, notas, asistencia);
     }
 }

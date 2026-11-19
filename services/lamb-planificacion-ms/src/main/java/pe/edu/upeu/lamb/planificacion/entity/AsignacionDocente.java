@@ -33,4 +33,22 @@ public class AsignacionDocente {
 
     @Column(name = "horas_semanales", nullable = false)
     private Integer horasSemanales;
+
+    // Permisos del docente en el grupo (LAMB: gestiona_nota, gestiona_asistencia, ver_horario)
+    @Column(name = "gestiona_nota", nullable = false)
+    @Builder.Default
+    private Boolean gestionaNota = true;
+
+    @Column(name = "gestiona_asistencia", nullable = false)
+    @Builder.Default
+    private Boolean gestionaAsistencia = true;
+
+    @Column(name = "ver_horario", nullable = false)
+    @Builder.Default
+    private Boolean verHorario = true;
+
+    // El curso del docente se muestra en el portal del alumno (LAMB: muestra_portal)
+    @Column(name = "muestra_portal", nullable = false)
+    @Builder.Default
+    private Boolean muestraPortal = true;
 }

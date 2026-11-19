@@ -11,5 +11,10 @@ public interface PlanCursoRepository extends JpaRepository<PlanCurso, Long> {
 
     Optional<PlanCurso> findFirstByCursoCatalogoCodigoAndPlanEstado(String codigoCurso, EstadoPlan estado);
 
+    // Un curso retirado del plan nuevo se sigue dictando mientras haya cohortes en el plan que lo tiene (EN_EXTINCION)
+    Optional<PlanCurso> findFirstByCursoCatalogoCodigoAndPlanEstadoIn(String codigoCurso, java.util.Collection<EstadoPlan> estados);
+
+    Optional<PlanCurso> findByPlanIdAndCursoCatalogoId(Long idPlan, Long idCursoCatalogo);
+
     boolean existsByPlanIdAndCursoCatalogoId(Long idPlan, Long idCursoCatalogo);
 }

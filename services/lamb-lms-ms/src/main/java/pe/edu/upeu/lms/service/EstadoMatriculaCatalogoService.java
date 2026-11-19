@@ -10,10 +10,8 @@ import pe.edu.upeu.lms.mapper.EstadoMatriculaCatalogoMapper;
 import pe.edu.upeu.lms.repository.EstadoMatriculaCatalogoRepository;
 
 import java.util.List;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class EstadoMatriculaCatalogoService {
 

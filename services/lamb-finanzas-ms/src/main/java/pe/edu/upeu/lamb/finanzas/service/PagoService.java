@@ -1,14 +1,15 @@
 package pe.edu.upeu.lamb.finanzas.service;
 
-import pe.edu.upeu.lamb.finanzas.dto.PagarCargoRequest;
 import pe.edu.upeu.lamb.finanzas.dto.PagoRequest;
 import pe.edu.upeu.lamb.finanzas.dto.PagoResponse;
 import pe.edu.upeu.lamb.finanzas.entity.EstadoPago;
 import pe.edu.upeu.lamb.finanzas.entity.Pago;
 import pe.edu.upeu.lamb.finanzas.event.MatriculaConfirmadaEvento;
+import pe.edu.upeu.lamb.finanzas.event.PagoAceptadoEvento;
 import pe.edu.upeu.lamb.finanzas.exception.BusinessRuleException;
 import pe.edu.upeu.lamb.finanzas.exception.ResourceNotFoundException;
 import pe.edu.upeu.lamb.finanzas.mapper.PagoMapper;
+import pe.edu.upeu.lamb.finanzas.messaging.PagoEventosProducer;
 import pe.edu.upeu.lamb.finanzas.repository.PagoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +32,7 @@ public class PagoService {
 
     private final PagoRepository pagoRepository;
     private final PagoMapper pagoMapper;
+    private final PagoEventosProducer pagoEventosProducer;
 
     /**
      * Idempotente por matriculaId: si el evento matricula.confirmada se reentrega, no genera
@@ -56,37 +58,56 @@ public class PagoService {
                 evento.getMatriculaId(), evento.getIdPersona(), guardado.getId(), guardado.getEstado());
     }
 
-    public List<PagoResponse> listar() {
-        return pagoRepository.findAll().stream()
-                .map(pagoMapper::toResponse)
-                .toList();
+    public List<PagoResponse> listar(Long idPersonaSolicitante, boolean privilegiado) {
+        List<Pago> pagos = privilegiado
+                ? pagoRepository.findAll()
+                : pagoRepository.findByIdPersona(idPersonaSolicitante);
+        return pagos.stream().map(pagoMapper::toResponse).toList();
     }
 
-    public PagoResponse obtener(Long id) {
-        return pagoMapper.toResponse(buscarOFallar(id));
+    public PagoResponse obtener(Long id, Long idPersonaSolicitante, boolean privilegiado) {
+        Pago pago = buscarOFallar(id);
+        if (!privilegiado && !pago.getIdPersona().equals(idPersonaSolicitante)) {
+            throw new ResourceNotFoundException("Pago no encontrado: " + id);
+        }
+        return pagoMapper.toResponse(pago);
     }
 
-    @Transactional
+    /**
+     * El estudiante registra el pago (voucher) pero queda EN_PROCESO hasta que
+     * ADMIN/COORDINADOR lo valide con aceptar()/rechazar() (saga paga-antes-de-confirmar).
+     */
     public PagoResponse procesar(PagoRequest request) {
         Pago pago = pagoMapper.toEntity(request);
-        pago.setEstado(EstadoPago.APROBADO);
+        pago.setEstado(EstadoPago.EN_PROCESO);
         pago.setReferenciaExterna(UUID.randomUUID().toString());
         return pagoMapper.toResponse(pagoRepository.save(pago));
     }
 
-    /** Cancela un cargo PENDIENTE (el de matricula lo genera matricula.confirmada). */
     @Transactional
-    public PagoResponse pagar(Long id, PagarCargoRequest request) {
+    public PagoResponse aceptar(Long id) {
         Pago pago = buscarOFallar(id);
-        validarEstado(pago, EstadoPago.PENDIENTE, "pagar");
-        pago.setMetodo(request.getMetodo());
+        validarEstado(pago, EstadoPago.EN_PROCESO, "aceptar");
         pago.setEstado(EstadoPago.APROBADO);
-        pago.setFechaPago(Instant.now());
-        pago.setReferenciaExterna(UUID.randomUUID().toString());
+        Pago guardado = pagoRepository.save(pago);
+        pagoEventosProducer.publicarTrasCommit(PagoAceptadoEvento.builder()
+                .tipoEvento("pago.aceptado")
+                .idPago(guardado.getId())
+                .matriculaId(guardado.getMatriculaId())
+                .idPersona(guardado.getIdPersona())
+                .monto(guardado.getMonto())
+                .fechaAceptacion(Instant.now())
+                .build());
+        return pagoMapper.toResponse(guardado);
+    }
+
+    public PagoResponse rechazar(Long id) {
+        Pago pago = buscarOFallar(id);
+        validarEstado(pago, EstadoPago.EN_PROCESO, "rechazar");
+        pago.setEstado(EstadoPago.RECHAZADO);
         return pagoMapper.toResponse(pagoRepository.save(pago));
     }
 
-    @Transactional
     public PagoResponse reembolsar(Long id) {
         Pago pago = buscarOFallar(id);
         validarEstado(pago, EstadoPago.APROBADO, "reembolsar");

@@ -52,6 +52,11 @@ public class CalendarioAcademicoService {
         calendarioAcademico.setNombre(request.getNombre().trim());
         calendarioAcademico.setResolucion(request.getResolucion());
         calendarioAcademico.setEstado(request.getEstado());
+        calendarioAcademico.setUrlDocumento(pe.edu.upeu.lamb.planificacion.mapper.CalendarioAcademicoMapper.blancoANull(request.getUrlDocumento()));
+        calendarioAcademico.setNombreArchivo(pe.edu.upeu.lamb.planificacion.mapper.CalendarioAcademicoMapper.blancoANull(request.getNombreArchivo()));
+        if (request.getModoHorarioAlumno() != null) {
+            calendarioAcademico.setModoHorarioAlumno(request.getModoHorarioAlumno());
+        }
         asignarRelaciones(calendarioAcademico, request);
         return calendarioAcademicoMapper.toResponse(calendarioAcademicoRepository.save(calendarioAcademico));
     }

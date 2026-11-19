@@ -95,6 +95,26 @@
         }
       }
 
+      @if (showFinanzas()) {
+        <div class="nav-group">Finanzas</div>
+        @for (bucket of finanzasGrouped(); track bucket.subgroup) {
+          <button type="button" class="nav-subgroup" (click)="toggleSubgroup(bucket.subgroup, bucket.items)">
+            <span class="material-symbols-outlined nav-subgroup__chev">
+              {{ isSubgroupOpen(bucket.subgroup, bucket.items) ? 'expand_more' : 'chevron_right' }}
+            </span>
+            <span class="nav-subgroup__label">{{ bucket.subgroup }}</span>
+          </button>
+          @if (isSubgroupOpen(bucket.subgroup, bucket.items)) {
+            @for (item of bucket.items; track item.slug) {
+              <a class="nav-item nav-item--sub" [routerLink]="['/crud', item.slug]" routerLinkActive="nav-item--active">
+                <span class="material-symbols-outlined nav-item__icon">{{ item.icon }}</span>
+                <span class="nav-item__label">{{ item.label }}</span>
+              </a>
+            }
+          }
+        }
+      }
+
       @if (!activeModule()) {
         <div class="nav-group">Módulos</div>
         <a class="nav-item" routerLink="/crud/convocatorias">

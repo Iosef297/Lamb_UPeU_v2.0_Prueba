@@ -43,7 +43,13 @@ public class PlanEstudioMapper {
                 .estado(plan.getEstado())
                 .fechaRegistro(plan.getFechaRegistro())
                 .fechaPublicacion(plan.getFechaPublicacion())
+                .notaAprobatoria(plan.getNotaAprobatoria())
+                .numeroCursos(plan.getCursos().size())
                 .totalCreditos(plan.getCursos().stream().mapToInt(PlanCurso::getCreditos).sum())
+                .totalHorasTeoria(plan.getCursos().stream().mapToInt(c -> c.getCursoCatalogo().getHorasTeoria()).sum())
+                .totalHorasPractica(plan.getCursos().stream().mapToInt(c -> c.getCursoCatalogo().getHorasPractica()).sum())
+                .totalHorasNoPresenciales(plan.getCursos().stream().mapToInt(c -> c.getCursoCatalogo().getHorasNoPresenciales()).sum())
+                .totalHoras(plan.getCursos().stream().mapToInt(c -> c.getCursoCatalogo().getHorasTotales()).sum())
                 .cursos(plan.getCursos().stream().map(this::toResponse).toList())
                 .build();
     }
@@ -56,6 +62,10 @@ public class PlanEstudioMapper {
                 .nombreCurso(curso.getNombreCurso())
                 .ciclo(curso.getCiclo())
                 .creditos(curso.getCreditos())
+                .horasTeoria(curso.getCursoCatalogo().getHorasTeoria())
+                .horasPractica(curso.getCursoCatalogo().getHorasPractica())
+                .horasNoPresenciales(curso.getCursoCatalogo().getHorasNoPresenciales())
+                .horasTotales(curso.getCursoCatalogo().getHorasTotales())
                 .tipo(curso.getTipo().getCodigo())
                 .areaCurricular(curso.getAreaCurricular() != null ? curso.getAreaCurricular().getCodigo() : null)
                 .prerrequisitos(codigosPrerrequisitos(curso))
@@ -71,7 +81,9 @@ public class PlanEstudioMapper {
                 .idPlanDerogado(idPlanDerogado)
                 .codigosCursos(plan.getCursos().stream().map(PlanCurso::getCodigoCurso).toList())
                 .cursos(plan.getCursos().stream()
-                        .map(c -> new PlanPublicadoEvento.CursoPublicado(c.getCodigoCurso(), c.getNombreCurso(), c.getCreditos()))
+                        .map(c -> new PlanPublicadoEvento.CursoPublicado(c.getCodigoCurso(), c.getNombreCurso(), c.getCreditos(),
+                                c.getCursoCatalogo().getHorasTeoria(), c.getCursoCatalogo().getHorasPractica(),
+                                c.getCursoCatalogo().getHorasNoPresenciales()))
                         .toList())
                 .origen(origen)
                 .timestamp(Instant.now().toEpochMilli())

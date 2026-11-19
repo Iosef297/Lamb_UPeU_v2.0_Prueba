@@ -7,10 +7,11 @@ import { AuthService } from '../../core/auth/auth-service';
 import { CatalogosService, CursoCatalogo, ItemCatalogo } from '../../core/catalogos/catalogos-service';
 import { PlanEstudioService } from './plan-estudio-service';
 import { PlanCursoResponse, PlanEstudioResponse } from './plan-estudio.model';
+import { SinGuion } from '../../core/sin-guion.pipe';
 
 @Component({
   selector: 'app-plan-estudio-detalle',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [SinGuion, ReactiveFormsModule, RouterLink],
   templateUrl: './plan-estudio-detalle.html',
 })
 export class PlanEstudioDetalle {

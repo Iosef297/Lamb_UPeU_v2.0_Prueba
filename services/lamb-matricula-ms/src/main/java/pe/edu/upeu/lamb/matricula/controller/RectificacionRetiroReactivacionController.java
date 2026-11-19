@@ -6,32 +6,23 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import pe.edu.upeu.lamb.matricula.dto.AnulacionMasivaImpagoRequest;
-import pe.edu.upeu.lamb.matricula.dto.AnulacionMasivaImpagoResponse;
 import pe.edu.upeu.lamb.matricula.dto.ReactivacionMatriculaAnuladaRequest;
 import pe.edu.upeu.lamb.matricula.dto.ReactivacionMatriculaAnuladaResponse;
-import pe.edu.upeu.lamb.matricula.dto.RehabilitacionMatriculaRequest;
-import pe.edu.upeu.lamb.matricula.dto.RehabilitacionMatriculaResponse;
 import pe.edu.upeu.lamb.matricula.dto.RetiroInasistenciaRequest;
 import pe.edu.upeu.lamb.matricula.dto.RetiroInasistenciaResponse;
 import pe.edu.upeu.lamb.matricula.dto.RetiroOficioRequest;
 import pe.edu.upeu.lamb.matricula.dto.RetiroOficioResponse;
-import pe.edu.upeu.lamb.matricula.dto.SolicitudRectificacionRequest;
-import pe.edu.upeu.lamb.matricula.dto.SolicitudRectificacionResponse;
-import pe.edu.upeu.lamb.matricula.service.AnulacionMasivaImpagoService;
 import pe.edu.upeu.lamb.matricula.service.ReactivacionMatriculaAnuladaService;
-import pe.edu.upeu.lamb.matricula.service.RehabilitacionMatriculaService;
 import pe.edu.upeu.lamb.matricula.service.RetiroInasistenciaService;
 import pe.edu.upeu.lamb.matricula.service.RetiroOficioService;
-import pe.edu.upeu.lamb.matricula.service.SolicitudRectificacionService;
 
 import java.util.List;
 
 /**
  * Dominio "Rectificacion, retiro y reactivacion" (CRUD unificado). Subrecursos:
- * solicitud de rectificacion, retiro de oficio, retiro por inasistencia,
- * reactivacion de matricula anulada, anulacion masiva por impago,
- * rehabilitacion de matricula.
+ * retiro de oficio, retiro por inasistencia, reactivacion de matricula
+ * anulada. El job de anulacion masiva por impago sigue interno, sin endpoint
+ * expuesto.
  */
 @RestController
 @RequestMapping("/api/v1/rectificacion-retiro-reactivacion")
@@ -39,44 +30,9 @@ import java.util.List;
 @Tag(name = "rectificacion-retiro-y-reactivacion-controller")
 public class RectificacionRetiroReactivacionController {
 
-    private final SolicitudRectificacionService solicitudRectificacionService;
     private final RetiroOficioService retiroOficioService;
     private final RetiroInasistenciaService retiroInasistenciaService;
     private final ReactivacionMatriculaAnuladaService reactivacionMatriculaAnuladaService;
-    private final AnulacionMasivaImpagoService anulacionMasivaImpagoService;
-    private final RehabilitacionMatriculaService rehabilitacionMatriculaService;
-
-    // --- Solicitud de rectificacion (item 73) ---
-
-    @GetMapping("/solicitudes-rectificacion")
-    @Operation(summary = "Listar solicitudes de rectificacion")
-    public List<SolicitudRectificacionResponse> listarSolicitudesRectificacion() {
-        return solicitudRectificacionService.listar();
-    }
-
-    @GetMapping("/solicitudes-rectificacion/{id}")
-    @Operation(summary = "Obtener una solicitud de rectificacion")
-    public SolicitudRectificacionResponse obtenerSolicitudRectificacion(@PathVariable Long id) {
-        return solicitudRectificacionService.obtener(id);
-    }
-
-    @PostMapping("/solicitudes-rectificacion")
-    @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Crear una solicitud de rectificacion")
-    public SolicitudRectificacionResponse crearSolicitudRectificacion(@Valid @RequestBody SolicitudRectificacionRequest request) {
-        return solicitudRectificacionService.crear(request);
-    }
-
-    @PutMapping("/solicitudes-rectificacion/{id}")
-    public SolicitudRectificacionResponse actualizarSolicitudRectificacion(@PathVariable Long id, @Valid @RequestBody SolicitudRectificacionRequest request) {
-        return solicitudRectificacionService.actualizar(id, request);
-    }
-
-    @DeleteMapping("/solicitudes-rectificacion/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminarSolicitudRectificacion(@PathVariable Long id) {
-        solicitudRectificacionService.eliminar(id);
-    }
 
     // --- Retiro de oficio (item 74) ---
 
@@ -97,17 +53,6 @@ public class RectificacionRetiroReactivacionController {
     @Operation(summary = "Crear un retiro de oficio")
     public RetiroOficioResponse crearRetiroOficio(@Valid @RequestBody RetiroOficioRequest request) {
         return retiroOficioService.crear(request);
-    }
-
-    @PutMapping("/retiros-oficio/{id}")
-    public RetiroOficioResponse actualizarRetiroOficio(@PathVariable Long id, @Valid @RequestBody RetiroOficioRequest request) {
-        return retiroOficioService.actualizar(id, request);
-    }
-
-    @DeleteMapping("/retiros-oficio/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminarRetiroOficio(@PathVariable Long id) {
-        retiroOficioService.eliminar(id);
     }
 
     // --- Retiro por inasistencia (item 75, opcional segun universidad) ---
@@ -131,17 +76,6 @@ public class RectificacionRetiroReactivacionController {
         return retiroInasistenciaService.crear(request);
     }
 
-    @PutMapping("/retiros-inasistencia/{id}")
-    public RetiroInasistenciaResponse actualizarRetiroInasistencia(@PathVariable Long id, @Valid @RequestBody RetiroInasistenciaRequest request) {
-        return retiroInasistenciaService.actualizar(id, request);
-    }
-
-    @DeleteMapping("/retiros-inasistencia/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminarRetiroInasistencia(@PathVariable Long id) {
-        retiroInasistenciaService.eliminar(id);
-    }
-
     // --- Reactivacion de matricula anulada (item 76) ---
 
     @GetMapping("/reactivaciones-matricula-anulada")
@@ -161,80 +95,5 @@ public class RectificacionRetiroReactivacionController {
     @Operation(summary = "Crear una reactivacion de matricula anulada")
     public ReactivacionMatriculaAnuladaResponse crearReactivacion(@Valid @RequestBody ReactivacionMatriculaAnuladaRequest request) {
         return reactivacionMatriculaAnuladaService.crear(request);
-    }
-
-    @PutMapping("/reactivaciones-matricula-anulada/{id}")
-    public ReactivacionMatriculaAnuladaResponse actualizarReactivacion(@PathVariable Long id, @Valid @RequestBody ReactivacionMatriculaAnuladaRequest request) {
-        return reactivacionMatriculaAnuladaService.actualizar(id, request);
-    }
-
-    @DeleteMapping("/reactivaciones-matricula-anulada/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminarReactivacion(@PathVariable Long id) {
-        reactivacionMatriculaAnuladaService.eliminar(id);
-    }
-
-    // --- Anulacion masiva por impago (item 77) ---
-
-    @GetMapping("/anulaciones-masivas-impago")
-    @Operation(summary = "Listar anulaciones masivas por impago")
-    public List<AnulacionMasivaImpagoResponse> listarAnulacionesMasivas() {
-        return anulacionMasivaImpagoService.listar();
-    }
-
-    @GetMapping("/anulaciones-masivas-impago/{id}")
-    @Operation(summary = "Obtener una anulacion masiva por impago")
-    public AnulacionMasivaImpagoResponse obtenerAnulacionMasiva(@PathVariable Long id) {
-        return anulacionMasivaImpagoService.obtener(id);
-    }
-
-    @PostMapping("/anulaciones-masivas-impago")
-    @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Crear una anulacion masiva por impago")
-    public AnulacionMasivaImpagoResponse crearAnulacionMasiva(@Valid @RequestBody AnulacionMasivaImpagoRequest request) {
-        return anulacionMasivaImpagoService.crear(request);
-    }
-
-    @PutMapping("/anulaciones-masivas-impago/{id}")
-    public AnulacionMasivaImpagoResponse actualizarAnulacionMasiva(@PathVariable Long id, @Valid @RequestBody AnulacionMasivaImpagoRequest request) {
-        return anulacionMasivaImpagoService.actualizar(id, request);
-    }
-
-    @DeleteMapping("/anulaciones-masivas-impago/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminarAnulacionMasiva(@PathVariable Long id) {
-        anulacionMasivaImpagoService.eliminar(id);
-    }
-
-    // --- Rehabilitacion de matricula (item 78, opcional segun universidad) ---
-
-    @GetMapping("/rehabilitaciones-matricula")
-    @Operation(summary = "Listar rehabilitaciones de matricula")
-    public List<RehabilitacionMatriculaResponse> listarRehabilitaciones() {
-        return rehabilitacionMatriculaService.listar();
-    }
-
-    @GetMapping("/rehabilitaciones-matricula/{id}")
-    @Operation(summary = "Obtener una rehabilitacion de matricula")
-    public RehabilitacionMatriculaResponse obtenerRehabilitacion(@PathVariable Long id) {
-        return rehabilitacionMatriculaService.obtener(id);
-    }
-
-    @PostMapping("/rehabilitaciones-matricula")
-    @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Crear una rehabilitacion de matricula")
-    public RehabilitacionMatriculaResponse crearRehabilitacion(@Valid @RequestBody RehabilitacionMatriculaRequest request) {
-        return rehabilitacionMatriculaService.crear(request);
-    }
-
-    @PutMapping("/rehabilitaciones-matricula/{id}")
-    public RehabilitacionMatriculaResponse actualizarRehabilitacion(@PathVariable Long id, @Valid @RequestBody RehabilitacionMatriculaRequest request) {
-        return rehabilitacionMatriculaService.actualizar(id, request);
-    }
-
-    @DeleteMapping("/rehabilitaciones-matricula/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminarRehabilitacion(@PathVariable Long id) {
-        rehabilitacionMatriculaService.eliminar(id);
     }
 }

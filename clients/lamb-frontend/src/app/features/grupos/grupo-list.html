@@ -41,20 +41,20 @@
         <td>{{ grupo.cupoMaximo }}</td>
         <td>
           @for (h of grupo.horarios; track h.id) {
-            <div>{{ h.diaSemana }} {{ h.horaInicio }}-{{ h.horaFin }} ({{ h.codigoAmbiente }})</div>
+            <div>{{ h.diaSemana | sinGuion }} {{ h.horaInicio }}-{{ h.horaFin }} ({{ h.codigoAmbiente }})</div>
           } @empty {
             -
           }
         </td>
         <td>
           @for (d of grupo.docentes; track d.id) {
-            <div>Persona {{ d.idDocente }} · {{ d.rol }} · {{ d.horasSemanales }} h</div>
+            <div>Persona {{ d.idDocente }} · {{ d.rol | sinGuion }} · {{ d.horasSemanales }} h</div>
           } @empty {
             -
           }
         </td>
         <td>
-          <span class="estado" [class]="grupo.estado">{{ grupo.estado }}</span>
+          <span class="estado" [class]="grupo.estado">{{ grupo.estado | sinGuion }}</span>
           @if (grupo.motivo) {
             <div><small class="ayuda">{{ grupo.motivo }}</small></div>
           }

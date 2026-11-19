@@ -20,4 +20,10 @@ public class EvaluacionProgramadaResponse {
     private String codigoComponente;
     private LocalDate fecha;
     private String descripcion;
+    private String unidad;
+    private String producto;
+    private Integer nroSesiones;
+    private Integer orden;
+    private java.math.BigDecimal peso;
+    private String tipoComponente;
 }

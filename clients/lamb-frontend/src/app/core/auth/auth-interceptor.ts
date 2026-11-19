@@ -16,10 +16,10 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         return throwError(() => error);
       }
       // Un 401 con token aun "vigente" (reloj desfasado, sesion revocada): un reintento con token renovado
-      // TEMPORAL: redirect a login desactivado junto con los guards (ver CONTEXTO_SESION.md seccion 7)
       return from(auth.renovar()).pipe(
         switchMap((token) => {
           if (!token) {
+            auth.iniciarLogin(location.pathname);
             return throwError(() => error);
           }
           return next(conToken(token));

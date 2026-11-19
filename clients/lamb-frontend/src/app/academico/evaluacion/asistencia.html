@@ -1,0 +1,137 @@
+<div class="ac-page">
+  <div class="ac-head">
+    <div>
+      <h2>Control de Asistencia</h2>
+      <p class="sub">Marcación por sesión: presente, tardanza, falta o justificada · faltas y tardanzas se justifican hasta 7 días después</p>
+    </div>
+  </div>
+
+  @if (aviso()) {
+    <div class="ac-alerta ok ac-toast">{{ aviso() }}</div>
+  }
+  @if (error()) {
+    <div class="ac-alerta error">{{ error() }} <button type="button" class="cerrar" (click)="error.set(null)">✕</button></div>
+  }
+
+  <div class="ac-card">
+    <div class="ac-filtros" style="border-bottom: none">
+      <div class="ac-field" style="min-width: 320px">
+        <label>Grupo</label>
+        <select class="ac-input" (change)="elegirGrupo($any($event.target).value)">
+          <option value="">— Elige un grupo —</option>
+          @for (a of grupos(); track a['id']) {
+            <option [value]="a['idGrupo']" [selected]="a['idGrupo'] === idGrupo()">{{ a['codigoCurso'] }} · grupo #{{ a['idGrupo'] }} · {{ a['periodo'] }}</option>
+          }
+        </select>
+      </div>
+      <div class="ac-field">
+        <label>Fecha</label>
+        <input class="ac-input" type="date" [(ngModel)]="fecha" (change)="cambiarFecha()" />
+      </div>
+      <div class="ac-field">
+        <label>Sesión de clase (opcional)</label>
+        <input class="ac-input" type="number" placeholder="Id sesión" [(ngModel)]="idSesionClase" (change)="cambiarFecha()" />
+      </div>
+      <div class="ac-field">
+        <label>Bloque (como en el LAMB)</label>
+        <select class="ac-input" [(ngModel)]="tipoHorario" (change)="cambiarFecha()">
+          <option value="TEORIA">Teoría</option>
+          <option value="PRACTICA">Práctica</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  @if (idGrupo() && mis.soloDocente() && miPermiso(); as p) {
+    @if (!p.gestionaAsistencia) {
+      <div class="ac-alerta aviso">Tu asignación en este grupo ({{ p.rol | sinGuion }}) no gestiona asistencia: solo lectura.</div>
+    } @else if (!p.puedeRegistrarAsistencia) {
+      <div class="ac-alerta aviso">El registro de asistencia de este grupo está cerrado: solo lectura.</div>
+    }
+  }
+
+  @if (idGrupo()) {
+    @if (cargando()) {
+      <div class="ac-cargando"><span class="ac-spin"></span> Cargando estudiantes…</div>
+    } @else {
+      <div class="ac-card" style="margin-top: 20px">
+        <div class="ac-card-head">
+          <h3>Marcación del {{ fecha }}</h3>
+          @if (editable()) {
+            <div style="display: flex; gap: 8px">
+              <button type="button" class="ac-btn-out" (click)="todosPresentes()">Marcar el resto presentes</button>
+              <button type="button" class="ac-btn-navy" [disabled]="guardando() || cambios() === 0" (click)="guardar()">
+                {{ guardando() ? 'Guardando…' : 'Guardar (' + cambios() + ')' }}
+              </button>
+            </div>
+          }
+        </div>
+        <table class="ac-table">
+          <thead><tr><th>N°</th><th>ESTUDIANTE</th><th>MARCACIÓN</th><th>ESTADO</th></tr></thead>
+          <tbody>
+            @for (f of filas(); track f.est.idPersona; let i = $index) {
+              <tr>
+                <td class="n">{{ i + 1 }}</td>
+                <td class="fuerte">{{ f.est.nombre }}</td>
+                <td>
+                  <div class="acc">
+                    @for (o of opciones; track o.estado) {
+                      <button
+                        type="button"
+                        class="ac-chip"
+                        style="padding: 3px 10px"
+                        [disabled]="!editable()"
+                        [style.background]="f.estado === o.estado ? o.bg : null"
+                        [style.color]="f.estado === o.estado ? o.color : null"
+                        [style.border-color]="f.estado === o.estado ? o.color : null"
+                        (click)="marcar(f, o.estado)"
+                      >
+                        {{ o.corto }}
+                      </button>
+                    }
+                  </div>
+                </td>
+                <td>
+                  @if (f.estado) {
+                    <span class="ac-badge" [style.background]="estilo(f.estado)?.bg" [style.color]="estilo(f.estado)?.color">{{ f.estado | sinGuion }}</span>
+                    @if (f.estado !== f.original) {
+                      <span style="font-size: 0.7rem; color: #b45309; margin-left: 4px">sin guardar</span>
+                    }
+                  } @else {
+                    <span style="font-size: 0.75rem; color: #94a3b8">Sin marcación</span>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="4"><div class="ac-vacio">Sin estudiantes en el grupo (matrícula no responde o no hay matriculados).</div></td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="ac-card" style="margin-top: 20px">
+        <div class="ac-card-head"><h3>Resumen por estudiante</h3><span style="font-size: 0.75rem; color: #94a3b8">30 % de faltas = inhabilitado</span></div>
+        <table class="ac-table compacta">
+          <thead><tr><th>ESTUDIANTE</th><th>SESIONES</th><th>FALTAS</th><th>% INASISTENCIA</th><th>SITUACIÓN</th></tr></thead>
+          <tbody>
+            @for (r of resumen(); track r.est.idPersona) {
+              <tr>
+                <td class="fuerte">{{ r.est.nombre }}</td>
+                <td>{{ r.sesiones }}</td>
+                <td>{{ r.faltas }}</td>
+                <td style="min-width: 140px">
+                  <div class="ac-barra"><div [style.width.%]="r.pct" [style.background]="r.pct >= 30 ? '#ef4444' : r.pct >= 20 ? '#f59e0b' : null"></div></div>
+                  <span style="font-size: 0.7rem">{{ r.pct }} %</span>
+                </td>
+                <td>
+                  <span class="ac-badge" [style.background]="r.riesgo === 'NORMAL' ? '#DCFCE7' : r.riesgo === 'EN RIESGO' ? '#FEF3C7' : '#FEE2E2'"
+                        [style.color]="r.riesgo === 'NORMAL' ? '#16A34A' : r.riesgo === 'EN RIESGO' ? '#B45309' : '#DC2626'">{{ r.riesgo }}</span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+</div>

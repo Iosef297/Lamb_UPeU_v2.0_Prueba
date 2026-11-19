@@ -12,10 +12,8 @@ import pe.edu.upeu.ingresospagos.repository.ArqueoCajaRepository;
 import pe.edu.upeu.ingresospagos.repository.SesionCajaRepository;
 
 import java.util.List;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class ArqueoCajaService {
 

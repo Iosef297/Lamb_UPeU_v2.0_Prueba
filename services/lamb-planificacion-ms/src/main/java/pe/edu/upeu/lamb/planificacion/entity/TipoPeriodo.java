@@ -3,7 +3,7 @@ package pe.edu.upeu.lamb.planificacion.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-// CRUD 2 · Tipo de periodo (regular, verano, nivelacion)
+// CRUD 2 · Tipo de periodo (regular)
 @Entity
 @Table(name = "tipos_periodo")
 @Getter

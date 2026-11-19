@@ -15,6 +15,10 @@ public class AsignacionDocenteMapper {
                 .idDocente(asignacion.getIdDocente())
                 .rol(asignacion.getRol())
                 .horasSemanales(asignacion.getHorasSemanales())
+                .gestionaNota(asignacion.getGestionaNota())
+                .gestionaAsistencia(asignacion.getGestionaAsistencia())
+                .verHorario(asignacion.getVerHorario())
+                .muestraPortal(asignacion.getMuestraPortal())
                 .build();
     }
 }

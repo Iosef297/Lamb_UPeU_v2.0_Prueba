@@ -1,16 +1,17 @@
 package pe.edu.upeu.ingresospagos.controller;
 
+import pe.edu.upeu.ingresospagos.dto.PageResponse;
+import pe.edu.upeu.ingresospagos.util.PageUtil;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import pe.edu.upeu.ingresospagos.dto.PagoResponse;
 import pe.edu.upeu.ingresospagos.service.PagoService;
 
 import java.util.List;
 
+// Solo lectura: los pagos se registran via la pasarela/evento de matricula, no se crean por API directa
 @RestController
 @RequestMapping("/api/v1/pagos")
 @RequiredArgsConstructor
@@ -19,8 +20,10 @@ public class PagoController {
     private final PagoService pagoService;
 
     @GetMapping
-    public List<PagoResponse> listar() {
-        return pagoService.listar();
+    public PageResponse<PagoResponse> listar(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "20") int size) {
+        return PageUtil.paginate(pagoService.listar(), page, size);
     }
 
     @GetMapping("/{id}")

@@ -34,7 +34,7 @@ export interface CrudDef {
   label: string;
   icon: string;
   path: string;
-  group: 'Admisión' | 'Trayectoria' | 'Institucional' | 'Personas' | 'Currículo';
+  group: 'Admisión' | 'Trayectoria' | 'Institucional' | 'Personas' | 'Currículo' | 'Finanzas';
   subgroup?: string;
   description: string;
   fields: FieldDef[];
@@ -1454,6 +1454,593 @@ export const CRUDS: CrudDef[] = [
       f("url", "URL del documento", "text", { required: true }),
       f("version", "Versión", "number", { required: true }),
       f("fechaCarga", "Fecha de carga", "date", { required: true })
+    ]
+  },
+
+  // ============ FINANZAS (21) ============
+  {
+    group: 'Finanzas', subgroup: 'Caja y Transacciones', slug: 'fin-arqueos-caja', label: 'Arqueo de caja',
+    icon: 'point_of_sale', path: '/api/v1/arqueos-caja',
+    description: 'Arqueo de una sesión de caja: monto contado vs. monto de sistema',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('sesionCajaId', 'Sesión Caja', 'ref', { required: true, refPath: '/api/v1/sesiones-caja', refLabelKey: 'idCajero' }),
+      f('montoContado', 'Monto contado', 'decimal', { required: true }),
+      f('montoSistema', 'Monto sistema', 'decimal', { required: true }),
+      f('observaciones', 'Observaciones', 'textarea', { listed: false })
+    ]
+  },
+  {
+    group: 'Finanzas', subgroup: 'Convenios y Becas', slug: 'fin-becas', label: 'Beca',
+    icon: 'school', path: '/api/v1/becas',
+    description: 'Catálogo de becas y su porcentaje de descuento',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('nombre', 'Nombre', 'text', { required: true }),
+      f('descripcion', 'Descripción', 'textarea', { listed: false }),
+      f('porcentajeDescuento', 'Porcentaje descuento', 'number', { required: true }),
+      f('activo', 'Activo', 'boolean', { required: true, default: true })
+    ]
+  },
+  {
+    group: 'Finanzas', subgroup: 'Convenios y Becas', slug: 'fin-becas-asignadas', label: 'Beca asignada',
+    icon: 'card_giftcard', path: '/api/v1/becas-asignadas',
+    description: 'Asignación de una beca a un estudiante',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('idEstudiante', 'ID Estudiante', 'text', { required: true }),
+      f('becaId', 'Beca', 'ref', { required: true, refPath: '/api/v1/becas', refLabelKey: 'nombre' }),
+      f('activo', 'Activo', 'boolean', { required: true, default: true })
+    ]
+  },
+  {
+    group: 'Finanzas', subgroup: 'Auditoría y Sistema', slug: 'fin-bitacoras-auditoria-pago', label: 'Bitácora de auditoría de pago',
+    icon: 'history', path: '/api/v1/bitacoras-auditoria-pago',
+    description: 'Registro de acciones realizadas sobre un pago',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('pagoId', 'Pago', 'ref', { required: true, refPath: '/api/v1/pagos', refLabelKey: 'estado' }),
+      f('accion', 'Acción', 'text', { required: true }),
+      f('idUsuario', 'Usuario', 'text', { required: true }),
+      f('observaciones', 'Observaciones', 'textarea', { listed: false })
+    ]
+  },
+  {
+    group: 'Finanzas', subgroup: 'Caja y Transacciones', slug: 'fin-cajas', label: 'Caja',
+    icon: 'inventory_2', path: '/api/v1/cajas',
+    description: 'Puntos de cobro físicos',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('nombre', 'Nombre', 'text', { required: true }),
+      f('ubicacion', 'Ubicación', 'text'),
+      f('activo', 'Activo', 'boolean', { required: true, default: true })
+    ]
+  },
+  {
+    group: 'Finanzas', subgroup: 'Configuración Financiera', slug: 'fin-conceptos-pago', label: 'Concepto de pago',
+    icon: 'sell', path: '/api/v1/conceptos-pago',
+    description: 'Catálogo de conceptos de pago (matrícula, pensión, etc.)',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('nombre', 'Nombre', 'text', { required: true }),
+      f('descripcion', 'Descripción', 'textarea', { listed: false }),
+      f('monto', 'Monto', 'decimal'),
+      f('activo', 'Activo', 'boolean', { required: true, default: true })
+    ]
+  },
+  {
+    group: 'Finanzas', subgroup: 'Convenios y Becas', slug: 'fin-convenios-institucionales', label: 'Convenio institucional',
+    icon: 'handshake', path: '/api/v1/convenios-institucionales',
+    description: 'Convenio con empresas para descuentos institucionales',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('nombreEmpresa', 'Empresa', 'text', { required: true }),
+      f('ruc', 'RUC', 'text', { required: true }),
+      f('porcentajeDescuento', 'Porcentaje descuento', 'number', { required: true }),
+      f('fechaInicio', 'Inicio', 'date', { required: true }),
+      f('fechaFin', 'Fin', 'date'),
+      f('activo', 'Activo', 'boolean', { required: true, default: true })
+    ]
+  },
+  {
+    group: 'Finanzas', subgroup: 'Convenios y Becas', slug: 'fin-entidades-financieras', label: 'Entidad financiera',
+    icon: 'account_balance', path: '/api/v1/entidades-financieras',
+    description: 'Bancos y entidades que otorgan financiamiento educativo',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('nombre', 'Nombre', 'text', { required: true }),
+      f('codigo', 'Código', 'text', { required: true }),
+      f('activo', 'Activo', 'boolean', { required: true, default: true })
+    ]
+  },
+  {
+    group: 'Finanzas', subgroup: 'Convenios y Becas', slug: 'fin-financiamientos-educativos', label: 'Financiamiento educativo',
+    icon: 'request_quote', path: '/api/v1/financiamientos-educativos',
+    description: 'Crédito educativo otorgado a un estudiante por una entidad financiera',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('entidadFinancieraId', 'Entidad financiera', 'ref', { required: true, refPath: '/api/v1/entidades-financieras', refLabelKey: 'nombre' }),
+      f('idEstudiante', 'ID Estudiante', 'text', { required: true }),
+      f('montoFinanciado', 'Monto financiado', 'decimal', { required: true }),
+      f('numeroCuotas', 'N° cuotas', 'number', { required: true }),
+      f('fechaInicio', 'Inicio', 'date', { required: true }),
+      f('activo', 'Activo', 'boolean', { required: true, default: true })
+    ]
+  },
+  {
+    group: 'Finanzas', subgroup: 'Auditoría y Sistema', slug: 'fin-logs-transaccion-pasarela', label: 'Log de pasarela de pago',
+    icon: 'receipt_long', path: '/api/v1/logs-transaccion-pasarela',
+    description: 'Registro de transacciones con la pasarela de pago externa',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('pagoId', 'Pago', 'ref', { required: true, refPath: '/api/v1/pagos', refLabelKey: 'estado' }),
+      f('proveedor', 'Proveedor', 'text', { required: true }),
+      f('referenciaExterna', 'Referencia externa', 'text', { required: true }),
+      f('estado', 'Estado', 'text', { required: true }),
+      f('payloadRespuesta', 'Payload respuesta', 'textarea', { listed: false })
+    ]
+  },
+  {
+    group: 'Finanzas', subgroup: 'Configuración Financiera', slug: 'fin-metodos-pago', label: 'Método de pago',
+    icon: 'credit_card', path: '/api/v1/metodos-pago',
+    description: 'Catálogo de métodos de pago disponibles',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('nombre', 'Nombre', 'text', { required: true }),
+      f('activo', 'Activo', 'boolean', { required: true, default: true })
+    ]
+  },
+  {
+    group: 'Finanzas', subgroup: 'Configuración Financiera', slug: 'fin-notas-credito-debito', label: 'Nota de crédito/débito',
+    icon: 'difference', path: '/api/v1/notas-credito-debito',
+    description: 'Ajuste contable sobre un pago (crédito o débito)',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('pagoId', 'Pago', 'ref', { required: true, refPath: '/api/v1/pagos', refLabelKey: 'estado' }),
+      f('tipo', 'Tipo', 'text', { required: true }),
+      f('motivo', 'Motivo', 'textarea', { required: true }),
+      f('monto', 'Monto', 'decimal', { required: true })
+    ]
+  },
+  {
+    group: 'Finanzas', subgroup: 'Convenios y Becas', slug: 'fin-pagadores-terceros', label: 'Pagador tercero',
+    icon: 'person_pin', path: '/api/v1/pagadores-terceros',
+    description: 'Tercero autorizado para pagar en nombre de un estudiante',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('idEstudiante', 'ID Estudiante', 'text', { required: true }),
+      f('nombres', 'Nombres', 'text', { required: true }),
+      f('apellidos', 'Apellidos', 'text', { required: true }),
+      f('tipoDocumento', 'Tipo documento', 'text', { required: true }),
+      f('numeroDocumento', 'N° documento', 'text', { required: true }),
+      f('telefono', 'Teléfono', 'text', { listed: false }),
+      f('email', 'Email', 'text', { listed: false }),
+      f('activo', 'Activo', 'boolean', { required: true, default: true })
+    ]
+  },
+  {
+    group: 'Finanzas', subgroup: 'Auditoría y Sistema', slug: 'fin-plantillas-notificacion', label: 'Plantilla de notificación',
+    icon: 'mark_email_read', path: '/api/v1/plantillas-notificacion',
+    description: 'Plantilla de mensaje para notificaciones de pago',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('codigo', 'Código', 'text', { required: true }),
+      f('asunto', 'Asunto', 'text', { required: true }),
+      f('cuerpo', 'Cuerpo', 'textarea', { required: true }),
+      f('canal', 'Canal', 'text', { required: true }),
+      f('activo', 'Activo', 'boolean', { required: true, default: true })
+    ]
+  },
+  {
+    group: 'Finanzas', subgroup: 'Configuración Financiera', slug: 'fin-recargos-mora', label: 'Recargo por mora',
+    icon: 'event_busy', path: '/api/v1/recargos-mora',
+    description: 'Configuración de recargos por pago atrasado',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('nombre', 'Nombre', 'text', { required: true }),
+      f('tipoCalculo', 'Tipo cálculo', 'text', { required: true }),
+      f('valor', 'Valor', 'decimal', { required: true }),
+      f('diasGracia', 'Días gracia', 'number', { required: true }),
+      f('activo', 'Activo', 'boolean', { required: true, default: true })
+    ]
+  },
+  {
+    group: 'Finanzas', subgroup: 'Configuración Financiera', slug: 'fin-series-comprobante', label: 'Serie de comprobante',
+    icon: 'format_list_numbered', path: '/api/v1/series-comprobante',
+    description: 'Serie y correlativo vigente de un tipo de comprobante',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('tipoComprobanteId', 'Tipo comprobante', 'ref', { required: true, refPath: '/api/v1/tipos-comprobante', refLabelKey: 'nombre' }),
+      f('serie', 'Serie', 'text', { required: true }),
+      f('correlativoActual', 'Correlativo actual', 'number', { required: true }),
+      f('activo', 'Activo', 'boolean', { required: true, default: true })
+    ]
+  },
+  {
+    group: 'Finanzas', subgroup: 'Caja y Transacciones', slug: 'fin-sesiones-caja', label: 'Sesión de caja',
+    icon: 'schedule', path: '/api/v1/sesiones-caja',
+    description: 'Apertura y cierre de una sesión de caja',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('cajaId', 'Caja', 'ref', { required: true, refPath: '/api/v1/cajas', refLabelKey: 'nombre' }),
+      f('idCajero', 'Cajero', 'text', { required: true }),
+      f('fechaApertura', 'Apertura', 'datetime', { required: true }),
+      f('fechaCierre', 'Cierre', 'datetime'),
+      f('montoInicial', 'Monto inicial', 'decimal', { required: true }),
+      f('montoFinal', 'Monto final', 'decimal')
+    ]
+  },
+  {
+    group: 'Finanzas', subgroup: 'Configuración Financiera', slug: 'fin-tarifarios-programa', label: 'Tarifario de programa',
+    icon: 'price_change', path: '/api/v1/tarifarios-programa',
+    description: 'Monto de un concepto de pago vigente para un programa',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('programa', 'Programa', 'text', { required: true }),
+      f('conceptoPagoId', 'Concepto de pago', 'ref', { required: true, refPath: '/api/v1/conceptos-pago', refLabelKey: 'nombre' }),
+      f('monto', 'Monto', 'decimal', { required: true }),
+      f('vigenteDesde', 'Vigente desde', 'date', { required: true }),
+      f('vigenteHasta', 'Vigente hasta', 'date'),
+      f('activo', 'Activo', 'boolean', { required: true, default: true })
+    ]
+  },
+  {
+    group: 'Finanzas', subgroup: 'Configuración Financiera', slug: 'fin-tipos-cambio', label: 'Tipo de cambio',
+    icon: 'currency_exchange', path: '/api/v1/tipos-cambio',
+    description: 'Tipo de cambio entre monedas por fecha',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('fecha', 'Fecha', 'date', { required: true }),
+      f('monedaOrigen', 'Moneda origen', 'text', { required: true }),
+      f('monedaDestino', 'Moneda destino', 'text', { required: true }),
+      f('valor', 'Valor', 'decimal', { required: true })
+    ]
+  },
+  {
+    group: 'Finanzas', subgroup: 'Configuración Financiera', slug: 'fin-tipos-comprobante', label: 'Tipo de comprobante',
+    icon: 'description', path: '/api/v1/tipos-comprobante',
+    description: 'Catálogo de tipos de comprobante de pago',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('codigo', 'Código', 'text', { required: true }),
+      f('nombre', 'Nombre', 'text', { required: true }),
+      f('activo', 'Activo', 'boolean', { required: true, default: true })
+    ]
+  },
+  {
+    group: 'Finanzas', subgroup: 'Caja y Transacciones', slug: 'fin-pagos', label: 'Pago',
+    icon: 'payments', path: '/api/v1/pagos',
+    description: 'Pagos registrados (solo lectura y edición de estado; no se crean ni eliminan desde aquí)',
+    lockedCatalog: true,
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('matriculaId', 'Matrícula', 'number', { editable: false }),
+      f('monto', 'Monto', 'decimal', { editable: false }),
+      f('estado', 'Estado', 'text'),
+      f('fechaPago', 'Fecha pago', 'datetime', { editable: false })
+    ]
+  },
+
+  // ============ LMS (27, de 29: se omiten "mallas-curriculares" y "periodos-academicos" que ya existen en Currículo/Institucional) ============
+  {
+    group: 'Currículo', subgroup: 'LMS', slug: 'lms-anuncios-curso', label: 'Anuncio de curso',
+    icon: 'campaign', path: '/api/v1/anuncios-curso',
+    description: 'Anuncios publicados por el docente en un curso',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('cursoId', 'Curso', 'ref', { required: true, refPath: '/api/v1/cursos', refLabelKey: 'nombre' }),
+      f('titulo', 'Título', 'text', { required: true }),
+      f('mensaje', 'Mensaje', 'textarea', { required: true })
+    ]
+  },
+  {
+    group: 'Currículo', subgroup: 'LMS', slug: 'lms-asistencias', label: 'Asistencia',
+    icon: 'fact_check', path: '/api/v1/asistencias',
+    description: 'Asistencia de un estudiante a una sesión de clase',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('sesionClaseId', 'Sesión de clase', 'ref', { required: true, refPath: '/api/v1/sesiones-clase', refLabelKey: 'fecha' }),
+      f('idEstudiante', 'ID Estudiante', 'text', { required: true }),
+      f('presente', 'Presente', 'boolean', { required: true })
+    ]
+  },
+  {
+    group: 'Currículo', subgroup: 'LMS', slug: 'lms-avances-contenido', label: 'Avance de contenido',
+    icon: 'trending_up', path: '/api/v1/avances-contenido',
+    description: 'Avance del estudiante sobre un recurso complementario',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('idRecurso', 'Recurso', 'ref', { required: true, refPath: '/api/v1/recursos-complementarios', refLabelKey: 'nombre' }),
+      f('idEstudiante', 'ID Estudiante', 'text', { required: true }),
+      f('consumido', 'Consumido', 'boolean', { required: true })
+    ]
+  },
+  {
+    group: 'Currículo', subgroup: 'LMS', slug: 'lms-calificaciones', label: 'Calificación',
+    icon: 'grade', path: '/api/v1/calificaciones',
+    description: 'Nota de un estudiante en una evaluación del curso',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('evaluacionId', 'Evaluación', 'number', { required: true }),
+      f('idEstudiante', 'ID Estudiante', 'text', { required: true }),
+      f('nota', 'Nota', 'number', { required: true })
+    ]
+  },
+  {
+    group: 'Currículo', subgroup: 'LMS', slug: 'lms-categorias-curso', label: 'Categoría de curso',
+    icon: 'category', path: '/api/v1/categorias-curso',
+    description: 'Catálogo de categorías de curso',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('nombre', 'Nombre', 'text', { required: true }),
+      f('descripcion', 'Descripción', 'textarea', { listed: false }),
+      f('activo', 'Activo', 'boolean', { required: true, default: true })
+    ]
+  },
+  {
+    group: 'Currículo', subgroup: 'LMS', slug: 'lms-convalidaciones-curso', label: 'Convalidación de curso',
+    icon: 'rule_folder', path: '/api/v1/convalidaciones-curso',
+    description: 'Convalidación de un curso por estudios externos',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('cursoId', 'Curso', 'ref', { required: true, refPath: '/api/v1/cursos', refLabelKey: 'nombre' }),
+      f('idEstudiante', 'ID Estudiante', 'text', { required: true }),
+      f('institucionOrigen', 'Institución origen', 'text', { required: true }),
+      f('cursoOrigen', 'Curso origen', 'text', { required: true }),
+      f('fechaConvalidacion', 'Fecha convalidación', 'date', { required: true })
+    ]
+  },
+  {
+    group: 'Currículo', subgroup: 'LMS', slug: 'lms-cursos', label: 'Curso',
+    icon: 'menu_book', path: '/api/v1/cursos',
+    description: 'Catálogo de cursos del LMS',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('nombre', 'Nombre', 'text', { required: true }),
+      f('descripcion', 'Descripción', 'textarea', { listed: false })
+    ]
+  },
+  {
+    group: 'Currículo', subgroup: 'LMS', slug: 'lms-docentes', label: 'Docente',
+    icon: 'person', path: '/api/v1/docentes',
+    description: 'Catálogo de docentes del LMS',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('nombres', 'Nombres', 'text', { required: true }),
+      f('apellidos', 'Apellidos', 'text', { required: true }),
+      f('email', 'Email', 'text', { required: true }),
+      f('especialidad', 'Especialidad', 'text', { listed: false }),
+      f('activo', 'Activo', 'boolean', { required: true, default: true })
+    ]
+  },
+  {
+    group: 'Currículo', subgroup: 'LMS', slug: 'lms-encuestas-satisfaccion', label: 'Encuesta de satisfacción',
+    icon: 'reviews', path: '/api/v1/encuestas-satisfaccion',
+    description: 'Encuesta de satisfacción de un estudiante sobre un curso',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('cursoId', 'Curso', 'ref', { required: true, refPath: '/api/v1/cursos', refLabelKey: 'nombre' }),
+      f('idEstudiante', 'ID Estudiante', 'text', { required: true }),
+      f('calificacion', 'Calificación', 'number', { required: true }),
+      f('comentario', 'Comentario', 'textarea', { listed: false })
+    ]
+  },
+  {
+    group: 'Currículo', subgroup: 'LMS', slug: 'lms-entregas-tarea', label: 'Entrega de tarea',
+    icon: 'upload_file', path: '/api/v1/entregas-tarea',
+    description: 'Entrega de un estudiante para una tarea del curso',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('tareaId', 'Tarea', 'number', { required: true }),
+      f('idEstudiante', 'ID Estudiante', 'text', { required: true }),
+      f('urlArchivo', 'Archivo', 'file', { fileUrlTarget: 'urlArchivo' }),
+      f('nota', 'Nota', 'number')
+    ]
+  },
+  {
+    group: 'Currículo', subgroup: 'LMS', slug: 'lms-estados-matricula', label: 'Estado de matrícula (catálogo)',
+    icon: 'flag', path: '/api/v1/estados-matricula',
+    description: 'Catálogo de estados de matrícula del LMS',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('codigo', 'Código', 'text', { required: true }),
+      f('nombre', 'Nombre', 'text', { required: true }),
+      f('descripcion', 'Descripción', 'textarea', { listed: false }),
+      f('activo', 'Activo', 'boolean', { required: true, default: true })
+    ]
+  },
+  {
+    group: 'Currículo', subgroup: 'LMS', slug: 'lms-evaluaciones', label: 'Evaluación',
+    icon: 'assignment', path: '/api/v1/evaluaciones',
+    description: 'Evaluación programada de un curso',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('cursoId', 'Curso', 'ref', { required: true, refPath: '/api/v1/cursos', refLabelKey: 'nombre' }),
+      f('titulo', 'Título', 'text', { required: true }),
+      f('descripcion', 'Descripción', 'textarea', { listed: false }),
+      f('fechaEvaluacion', 'Fecha evaluación', 'datetime'),
+      f('puntajeMaximo', 'Puntaje máximo', 'text', { required: true }),
+      f('activo', 'Activo', 'boolean', { required: true, default: true })
+    ]
+  },
+  {
+    group: 'Currículo', subgroup: 'LMS', slug: 'lms-foros-hilo', label: 'Hilo de foro',
+    icon: 'forum', path: '/api/v1/foros-hilo',
+    description: 'Hilo de discusión en el foro de un curso',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('cursoId', 'Curso', 'ref', { required: true, refPath: '/api/v1/cursos', refLabelKey: 'nombre' }),
+      f('titulo', 'Título', 'text', { required: true }),
+      f('idEstudianteCreador', 'ID Estudiante creador', 'text', { required: true })
+    ]
+  },
+  {
+    group: 'Currículo', subgroup: 'LMS', slug: 'lms-horarios-clase', label: 'Horario de clase',
+    icon: 'schedule', path: '/api/v1/horarios-clase',
+    description: 'Horario semanal de una sección de curso',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('seccionCursoId', 'Sección de curso', 'number', { required: true }),
+      f('diaSemana', 'Día de la semana', 'text', { required: true }),
+      f('horaInicio', 'Hora inicio', 'text', { required: true, placeholder: '08:00' } as any),
+      f('horaFin', 'Hora fin', 'text', { required: true, placeholder: '10:00' } as any)
+    ]
+  },
+  {
+    group: 'Currículo', subgroup: 'LMS', slug: 'lms-insignias', label: 'Insignia',
+    icon: 'military_tech', path: '/api/v1/insignias',
+    description: 'Catálogo de insignias (logros) del LMS',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('nombre', 'Nombre', 'text', { required: true }),
+      f('descripcion', 'Descripción', 'textarea', { listed: false }),
+      f('criterio', 'Criterio', 'textarea', { listed: false }),
+      f('activo', 'Activo', 'boolean', { required: true, default: true })
+    ]
+  },
+  {
+    group: 'Currículo', subgroup: 'LMS', slug: 'lms-insignias-estudiante', label: 'Insignia de estudiante',
+    icon: 'workspace_premium', path: '/api/v1/insignias-estudiante',
+    description: 'Insignia otorgada a un estudiante',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('insigniaId', 'Insignia', 'ref', { required: true, refPath: '/api/v1/insignias', refLabelKey: 'nombre' }),
+      f('idEstudiante', 'ID Estudiante', 'text', { required: true })
+    ]
+  },
+  {
+    group: 'Currículo', subgroup: 'LMS', slug: 'lms-listas-espera', label: 'Lista de espera',
+    icon: 'hourglass_bottom', path: '/api/v1/listas-espera',
+    description: 'Lista de espera de un estudiante para una sección llena',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('seccionCursoId', 'Sección de curso', 'number', { required: true }),
+      f('idEstudiante', 'ID Estudiante', 'text', { required: true }),
+      f('posicion', 'Posición', 'number', { required: true })
+    ]
+  },
+  {
+    group: 'Currículo', subgroup: 'LMS', slug: 'lms-plantillas-certificado', label: 'Plantilla de certificado',
+    icon: 'workspace_premium', path: '/api/v1/plantillas-certificado',
+    description: 'Plantilla de contenido para certificados emitidos',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('nombre', 'Nombre', 'text', { required: true }),
+      f('contenidoPlantilla', 'Contenido de plantilla', 'textarea', { required: true }),
+      f('activo', 'Activo', 'boolean', { required: true, default: true })
+    ]
+  },
+  {
+    group: 'Currículo', subgroup: 'LMS', slug: 'lms-preguntas-banco', label: 'Pregunta de banco',
+    icon: 'quiz', path: '/api/v1/preguntas-banco',
+    description: 'Banco de preguntas reutilizables para evaluaciones',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('enunciado', 'Enunciado', 'textarea', { required: true }),
+      f('tipo', 'Tipo', 'text', { required: true }),
+      f('puntajeSugerido', 'Puntaje sugerido', 'number', { required: true }),
+      f('categoria', 'Categoría', 'text', { listed: false }),
+      f('activo', 'Activo', 'boolean', { required: true, default: true })
+    ]
+  },
+  {
+    group: 'Currículo', subgroup: 'LMS', slug: 'lms-prerequisitos-curso', label: 'Prerequisito de curso',
+    icon: 'link', path: '/api/v1/prerequisitos-curso',
+    description: 'Relación de prerequisito entre dos cursos',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('cursoId', 'Curso', 'ref', { required: true, refPath: '/api/v1/cursos', refLabelKey: 'nombre' }),
+      f('cursoPrerequisitoId', 'Curso prerequisito', 'ref', { required: true, refPath: '/api/v1/cursos', refLabelKey: 'nombre' })
+    ]
+  },
+  {
+    group: 'Currículo', subgroup: 'LMS', slug: 'lms-recursos-complementarios', label: 'Recurso complementario',
+    icon: 'folder_open', path: '/api/v1/recursos-complementarios',
+    description: 'Material complementario (PDF, video o enlace) de un curso',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('cursoId', 'Curso', 'ref', { required: true, refPath: '/api/v1/cursos', refLabelKey: 'nombre' }),
+      f('nombre', 'Nombre', 'text', { required: true }),
+      f('tipo', 'Tipo', 'enum', { required: true, options: ['PDF', 'VIDEO', 'LINK'] }),
+      f('url', 'URL', 'textarea', { required: true }),
+      f('activo', 'Activo', 'boolean', { required: true, default: true })
+    ]
+  },
+  {
+    group: 'Currículo', subgroup: 'LMS', slug: 'lms-respuestas-foro', label: 'Respuesta de foro',
+    icon: 'reply', path: '/api/v1/respuestas-foro',
+    description: 'Respuesta de un estudiante a un hilo del foro',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('foroHiloId', 'Hilo de foro', 'number', { required: true }),
+      f('idEstudiante', 'ID Estudiante', 'text', { required: true }),
+      f('mensaje', 'Mensaje', 'textarea', { required: true })
+    ]
+  },
+  {
+    group: 'Currículo', subgroup: 'LMS', slug: 'lms-rubricas-evaluacion', label: 'Rúbrica de evaluación',
+    icon: 'checklist', path: '/api/v1/rubricas-evaluacion',
+    description: 'Rúbrica de criterios para calificar una evaluación',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('nombre', 'Nombre', 'text', { required: true }),
+      f('descripcion', 'Descripción', 'textarea', { listed: false }),
+      f('puntajeMaximo', 'Puntaje máximo', 'number', { required: true }),
+      f('activo', 'Activo', 'boolean', { required: true, default: true })
+    ]
+  },
+  {
+    group: 'Currículo', subgroup: 'LMS', slug: 'lms-secciones-curso', label: 'Sección de curso',
+    icon: 'groups', path: '/api/v1/secciones-curso',
+    description: 'Sección de un curso para un periodo, con docente y cupo',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('cursoId', 'Curso', 'ref', { required: true, refPath: '/api/v1/cursos', refLabelKey: 'nombre' }),
+      f('docenteId', 'Docente', 'ref', { required: true, refPath: '/api/v1/docentes', refLabelKey: 'nombres' }),
+      f('periodoAcademicoId', 'Periodo académico', 'number', { required: true }),
+      f('nombreSeccion', 'Nombre de sección', 'text', { required: true }),
+      f('cupoMaximo', 'Cupo máximo', 'number', { required: true }),
+      f('activo', 'Activo', 'boolean', { required: true, default: true })
+    ]
+  },
+  {
+    group: 'Currículo', subgroup: 'LMS', slug: 'lms-sesiones-clase', label: 'Sesión de clase',
+    icon: 'event', path: '/api/v1/sesiones-clase',
+    description: 'Sesión concreta de clase de una sección, con fecha y horario',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('seccionCursoId', 'Sección de curso', 'ref', { required: true, refPath: '/api/v1/secciones-curso', refLabelKey: 'nombreSeccion' }),
+      f('fecha', 'Fecha', 'date', { required: true }),
+      f('horaInicio', 'Hora inicio', 'text', { required: true, placeholder: '08:00' } as any),
+      f('horaFin', 'Hora fin', 'text', { required: true, placeholder: '10:00' } as any),
+      f('enlaceVirtual', 'Enlace virtual', 'textarea', { listed: false }),
+      f('activo', 'Activo', 'boolean', { required: true, default: true })
+    ]
+  },
+  {
+    group: 'Currículo', subgroup: 'LMS', slug: 'lms-tareas', label: 'Tarea',
+    icon: 'assignment_turned_in', path: '/api/v1/tareas',
+    description: 'Tarea asignada a los estudiantes de un curso',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('cursoId', 'Curso', 'ref', { required: true, refPath: '/api/v1/cursos', refLabelKey: 'nombre' }),
+      f('titulo', 'Título', 'text', { required: true }),
+      f('descripcion', 'Descripción', 'textarea', { listed: false }),
+      f('fechaLimite', 'Fecha límite', 'datetime', { required: true }),
+      f('puntajeMaximo', 'Puntaje máximo', 'number', { required: true }),
+      f('activo', 'Activo', 'boolean', { required: true, default: true })
+    ]
+  },
+  {
+    group: 'Currículo', subgroup: 'LMS', slug: 'lms-matriculas', label: 'Matrícula (LMS)',
+    icon: 'how_to_reg', path: '/api/v1/matriculas',
+    description: 'Matrícula del estudiante (solo lectura; no se crea ni elimina desde aquí)',
+    lockedCatalog: true,
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('periodoAcademico', 'Periodo académico', 'text', { editable: false }),
+      f('metodoPago', 'Método de pago', 'text', { editable: false }),
+      f('detalles', 'Detalles', 'text', { editable: false })
     ]
   }
 ];

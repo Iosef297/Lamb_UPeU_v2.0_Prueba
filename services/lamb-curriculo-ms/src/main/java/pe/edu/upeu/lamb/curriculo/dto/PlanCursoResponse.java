@@ -20,6 +20,11 @@ public class PlanCursoResponse {
     private String nombreCurso;
     private Integer ciclo;
     private Integer creditos;
+    // Columnas del plan en el LAMB: CR, HT, HP, TH (+ HNP)
+    private Integer horasTeoria;
+    private Integer horasPractica;
+    private Integer horasNoPresenciales;
+    private Integer horasTotales;
     private String tipo;
     private String areaCurricular;
     private List<String> prerrequisitos;

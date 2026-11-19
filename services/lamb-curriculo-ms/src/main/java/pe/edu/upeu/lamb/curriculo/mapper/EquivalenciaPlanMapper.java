@@ -23,6 +23,20 @@ public class EquivalenciaPlanMapper {
                 .idPlanCursoDestino(equivalenciaPlan.getPlanCursoDestino().getId())
                 .tipo(equivalenciaPlan.getTipo())
                 .observacion(equivalenciaPlan.getObservacion())
+                .codigoCursoDestino(equivalenciaPlan.getPlanCursoDestino().getCodigoCurso())
+                .nombreCursoDestino(equivalenciaPlan.getPlanCursoDestino().getNombreCurso())
+                .idPlanDestino(equivalenciaPlan.getPlanCursoDestino().getPlan().getId())
+                .versionPlanDestino(equivalenciaPlan.getPlanCursoDestino().getPlan().getVersion())
+                .idProgramaDestino(equivalenciaPlan.getPlanCursoDestino().getPlan().getIdPrograma())
+                .nombrePlanDestino(equivalenciaPlan.getPlanCursoDestino().getPlan().getNombre())
+                .cicloDestino(equivalenciaPlan.getPlanCursoDestino().getCiclo())
+                .tipoCursoDestino(equivalenciaPlan.getPlanCursoDestino().getTipo() == null ? null : equivalenciaPlan.getPlanCursoDestino().getTipo().getNombre())
+                .idDepartamentoDestino(equivalenciaPlan.getPlanCursoDestino().getCursoCatalogo().getIdDepartamento())
+                .creditosDestino(equivalenciaPlan.getPlanCursoDestino().getCreditos())
+                .horasTeoriaDestino(equivalenciaPlan.getPlanCursoDestino().getCursoCatalogo().getHorasTeoria())
+                .horasPracticaDestino(equivalenciaPlan.getPlanCursoDestino().getCursoCatalogo().getHorasPractica())
+                .horasNoPresencialesDestino(equivalenciaPlan.getPlanCursoDestino().getCursoCatalogo().getHorasNoPresenciales())
+                .horasTotalesDestino(equivalenciaPlan.getPlanCursoDestino().getCursoCatalogo().getHorasTotales())
                 .build();
     }
 }

@@ -1,0 +1,32 @@
+<div class="pagina">
+  <h2>documentos-pago</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label>
+      ID Pago
+      <input type="number" formControlName="idPago" />
+    </label>
+    <label>
+      Tipo documento
+      <input type="text" formControlName="tipoDocumento" />
+    </label>
+    <label>
+      Número
+      <input type="text" formControlName="numero" />
+    </label>
+    <label>
+      Fecha emisión
+      <input type="datetime-local" formControlName="fechaEmision" />
+    </label>
+    <label>
+      URL documento
+      <input type="text" formControlName="urlDocumento" />
+    </label>
+
+    <button type="submit">Guardar</button>
+  </form>
+</div>

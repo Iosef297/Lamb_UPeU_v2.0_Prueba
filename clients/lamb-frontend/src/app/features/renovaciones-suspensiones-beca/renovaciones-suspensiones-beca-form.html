@@ -1,0 +1,28 @@
+<div class="pagina">
+  <h2>renovaciones-suspensiones-beca</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label>
+      ID Beca aplicada
+      <input type="number" formControlName="idBecaAplicada" />
+    </label>
+    <label>
+      Tipo
+      <input type="text" formControlName="tipo" />
+    </label>
+    <label>
+      Motivo
+      <input type="text" formControlName="motivo" />
+    </label>
+    <label>
+      Fecha
+      <input type="date" formControlName="fecha" />
+    </label>
+
+    <button type="submit">Guardar</button>
+  </form>
+</div>

@@ -24,4 +24,17 @@ public class HorarioGrupoResponse {
     private LocalTime horaInicio;
     private LocalTime horaFin;
     private Boolean activo;
+    private java.time.LocalDate fechaInicio;
+    private java.time.LocalDate fechaFin;
+    private String tipoHorario;
+    private Integer numeroSubgrupo;
+    private String codigoTipo;
+    private String etiquetaTipo;
+    private Long idAsignacionDocente;
+    private Long idDocente;
+    private String rolDocente;
+    private Long idModulo;
+    private String nombreModulo;
+    // Calculado por la hora de inicio (MANANA, TARDE, NOCHE)
+    private pe.edu.upeu.lamb.planificacion.entity.Turno turno;
 }

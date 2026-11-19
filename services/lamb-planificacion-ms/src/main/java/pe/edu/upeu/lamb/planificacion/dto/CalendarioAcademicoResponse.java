@@ -20,4 +20,7 @@ public class CalendarioAcademicoResponse {
     private String nombre;
     private String resolucion;
     private EstadoCalendario estado;
+    private String urlDocumento;
+    private String nombreArchivo;
+    private String modoHorarioAlumno;
 }

@@ -20,4 +20,8 @@ public class UnidadAprendizajeResponse {
     private Integer semanaInicio;
     private Integer semanaFin;
     private String contenidos;
+    private String resultadoAprendizaje;
+    private String producto;
+    private String descripcionProducto;
+    private String criteriosEvaluacion;
 }

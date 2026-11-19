@@ -13,11 +13,9 @@ import pe.edu.upeu.lamb.finanzas.repository.PagoRepository;
 import pe.edu.upeu.lamb.finanzas.repository.SolicitudDevolucionRepository;
 
 import java.util.List;
-import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class SolicitudDevolucionService {
 
@@ -48,26 +46,6 @@ public class SolicitudDevolucionService {
                 .build();
 
         return solicitudDevolucionMapper.toResponse(solicitudDevolucionRepository.save(entity));
-    }
-
-    public SolicitudDevolucionResponse actualizar(Long id, SolicitudDevolucionRequest request) {
-        SolicitudDevolucion existente = buscarOFallar(id);
-        Pago pago = pagoRepository.findById(request.getIdPago())
-                .orElseThrow(() -> new ResourceNotFoundException("No se encontro el pago con id " + request.getIdPago()));
-
-        SolicitudDevolucion entity = SolicitudDevolucion.builder()
-                .pago(pago)
-                .motivo(request.getMotivo())
-                .montoSolicitado(request.getMontoSolicitado())
-                .estado(request.getEstado())
-                .fecha(request.getFecha())
-                .build();
-
-        return solicitudDevolucionMapper.toResponse(solicitudDevolucionRepository.save(Actualizacion.copiar(entity, existente)));
-    }
-
-    public void eliminar(Long id) {
-        solicitudDevolucionRepository.delete(buscarOFallar(id));
     }
 
     private SolicitudDevolucion buscarOFallar(Long id) {

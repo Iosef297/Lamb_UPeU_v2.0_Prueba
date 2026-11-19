@@ -46,4 +46,17 @@ public class Acta {
 
     @Column(name = "fecha_cierre")
     private LocalDateTime fechaCierre;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "modo_evaluacion", nullable = false, length = 20)
+    private ModoEvaluacion modoEvaluacion;
+
+    // Permisos por grupo (LAMB: puede_editar_notas, gestiona_asistencia); solo restringen al docente
+    @Column(name = "notas_habilitadas", nullable = false)
+    @Builder.Default
+    private Boolean notasHabilitadas = true;
+
+    @Column(name = "asistencia_habilitada", nullable = false)
+    @Builder.Default
+    private Boolean asistenciaHabilitada = true;
 }

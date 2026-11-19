@@ -1,0 +1,56 @@
+<div class="pagina">
+  <h2>transferencias-pago</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+  @if (errorAccion()) {
+    <div class="error">{{ errorAccion() }}</div>
+  }
+  @if (exito()) {
+    <div class="exito">{{ exito() }}</div>
+  }
+
+  <div class="barra">
+    @if (auth.tieneRol('ADMIN')) {
+      <a [routerLink]="['/transferencias-pago/nueva']">Nuevo</a>
+    }
+    <button type="button" (click)="cargar()">Actualizar</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+          <th>ID</th>
+          <th>ID Pago origen</th>
+          <th>ID Pago destino</th>
+          <th>Monto</th>
+          <th>Motivo</th>
+          <th>Fecha transferencia</th>
+        @if (auth.tieneRol('ADMIN')) {
+          <th>Acciones</th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (item of items(); track item.id) {
+        <tr>
+            <td>{{ item.id }}</td>
+            <td>{{ item.idPagoOrigen }}</td>
+            <td>{{ item.idPagoDestino }}</td>
+            <td>{{ item.monto }}</td>
+            <td>{{ item.motivo }}</td>
+            <td>{{ item.fechaTransferencia }}</td>
+          @if (auth.tieneRol('ADMIN')) {
+            <td>
+              <a [routerLink]="['/transferencias-pago', item.id, 'editar']">Editar</a>
+
+            </td>
+          }
+        </tr>
+      } @empty {
+        <tr><td colspan="7">Sin registros.</td></tr>
+      }
+    </tbody>
+  </table>
+</div>

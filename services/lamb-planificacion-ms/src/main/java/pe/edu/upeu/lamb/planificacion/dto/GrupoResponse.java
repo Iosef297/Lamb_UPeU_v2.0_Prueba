@@ -21,10 +21,15 @@ public class GrupoResponse {
     private Long idPrograma;
     private String periodo;
     private Integer cupoMaximo;
+    private Integer ciclo;
     private EstadoGrupo estado;
     private String motivo;
     private Long version;
     private CursoResponse curso;
     private List<HorarioGrupoResponse> horarios;
     private List<AsignacionDocenteResponse> docentes;
+    private Boolean puedeEditarSilabo;
+    private Long idDelegado;
+    // "Lun 09:20–11:10 · Jue 07:30–09:15"
+    private String horarioResumen;
 }

@@ -1,0 +1,54 @@
+<div class="pagina">
+  <h2>elecciones-curso-electivo</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+  @if (errorAccion()) {
+    <div class="error">{{ errorAccion() }}</div>
+  }
+  @if (exito()) {
+    <div class="exito">{{ exito() }}</div>
+  }
+
+  <div class="barra">
+    @if (auth.tieneRol('ADMIN')) {
+      <a [routerLink]="['/elecciones-curso-electivo/nueva']">Nuevo</a>
+    }
+    <button type="button" (click)="cargar()">Actualizar</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+          <th>ID</th>
+          <th>ID Persona</th>
+          <th>ID Curso</th>
+          <th>Periodo</th>
+          <th>Fecha elección</th>
+        @if (auth.tieneRol('ADMIN')) {
+          <th>Acciones</th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (item of items(); track item.id) {
+        <tr>
+            <td>{{ item.id }}</td>
+            <td>{{ item.idPersona }}</td>
+            <td>{{ item.idCurso }}</td>
+            <td>{{ item.periodo }}</td>
+            <td>{{ item.fechaEleccion }}</td>
+          @if (auth.tieneRol('ADMIN')) {
+            <td>
+              <a [routerLink]="['/elecciones-curso-electivo', item.id, 'editar']">Editar</a>
+
+            </td>
+          }
+        </tr>
+      } @empty {
+        <tr><td colspan="6">Sin registros.</td></tr>
+      }
+    </tbody>
+  </table>
+</div>

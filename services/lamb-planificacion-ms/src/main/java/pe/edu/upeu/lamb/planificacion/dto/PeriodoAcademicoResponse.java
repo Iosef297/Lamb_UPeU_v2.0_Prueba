@@ -20,6 +20,8 @@ public class PeriodoAcademicoResponse {
     private String nombre;
     private Long idTipoPeriodo;
     private String codigoTipoPeriodo;
+    // "Regular": el LAMB muestra el periodo como tipo + codigo ("Regular 2026-2")
+    private String nombreTipoPeriodo;
     private LocalDate fechaInicio;
     private LocalDate fechaFin;
     private EstadoPeriodo estado;

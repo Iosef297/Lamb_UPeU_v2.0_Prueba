@@ -1,0 +1,28 @@
+<div class="pagina">
+  <h2>reembolsos-pago</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label>
+      ID Pago
+      <input type="number" formControlName="idPago" />
+    </label>
+    <label>
+      Monto reembolsado
+      <input type="number" formControlName="montoReembolsado" step="0.01" />
+    </label>
+    <label>
+      Fecha reembolso
+      <input type="datetime-local" formControlName="fechaReembolso" />
+    </label>
+    <label>
+      Estado
+      <input type="text" formControlName="estado" />
+    </label>
+
+    <button type="submit">Guardar</button>
+  </form>
+</div>

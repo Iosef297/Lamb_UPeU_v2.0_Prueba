@@ -1,17 +1,18 @@
 package pe.edu.upeu.lms.controller;
 
+import pe.edu.upeu.lms.dto.PageResponse;
+import pe.edu.upeu.lms.util.PageUtil;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 import pe.edu.upeu.lms.dto.CursoRequest;
 import pe.edu.upeu.lms.dto.CursoResponse;
 import pe.edu.upeu.lms.service.CursoService;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/v1/cursos")
 @RequiredArgsConstructor
@@ -20,9 +21,10 @@ public class CursoController {
     private final CursoService cursoService;
 
     @GetMapping
-    public List<CursoResponse> listar() {
-        log.info("Listando cursos");
-        return cursoService.listar();
+    public PageResponse<CursoResponse> listar(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "20") int size) {
+        return PageUtil.paginate(cursoService.listar(), page, size);
     }
 
     @GetMapping("/{id}")

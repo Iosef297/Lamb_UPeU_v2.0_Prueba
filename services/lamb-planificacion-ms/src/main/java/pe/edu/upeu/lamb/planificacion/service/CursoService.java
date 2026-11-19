@@ -45,6 +45,12 @@ public class CursoService {
                     .orElseGet(() -> Curso.builder().codigo(publicado.getCodigo()).build());
             curso.setNombre(publicado.getNombre());
             curso.setCreditos(publicado.getCreditos());
+            // Eventos antiguos no traen horas: se conservan las que ya tenia
+            if (publicado.getHorasTeoria() != null) {
+                curso.setHorasTeoria(publicado.getHorasTeoria());
+                curso.setHorasPractica(publicado.getHorasPractica() == null ? 0 : publicado.getHorasPractica());
+                curso.setHorasNoPresenciales(publicado.getHorasNoPresenciales() == null ? 0 : publicado.getHorasNoPresenciales());
+            }
             cursoRepository.save(curso);
         }
         log.info("component=processor cursos={} status=synchronized", cursos.size());

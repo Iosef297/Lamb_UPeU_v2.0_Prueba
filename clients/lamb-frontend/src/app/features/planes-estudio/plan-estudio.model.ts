@@ -1,4 +1,4 @@
-export type EstadoPlan = 'BORRADOR' | 'VIGENTE' | 'DEROGADO';
+export type EstadoPlan = 'BORRADOR' | 'VIGENTE' | 'EN_EXTINCION' | 'DEROGADO';
 
 export interface PlanEstudioRequest {
   idPrograma: number;

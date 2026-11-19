@@ -6,5 +6,7 @@ public enum EstadoActa {
     // no se pudo abrir (regla de negocio): dispara la compensacion en planificacion
     RECHAZADA,
     // notas finales calculadas y publicadas (acta.cerrada): ya no se editan notas
-    CERRADA
+    CERRADA,
+    // el grupo se cerro o se fusiono en planificacion (solicitud aprobada): el acta queda sin efecto
+    ANULADA
 }

@@ -24,4 +24,7 @@ public class RegistroAsistenciaRequest {
 
     @NotNull
     private EstadoAsistencia estado;
+
+    // Opcional: TEORIA por defecto
+    private pe.edu.upeu.lamb.evaluacion.entity.TipoHorarioAsistencia tipoHorario;
 }

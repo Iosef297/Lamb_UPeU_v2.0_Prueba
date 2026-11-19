@@ -1,0 +1,28 @@
+<div class="pagina">
+  <h2>ampliaciones-plazo-matricula</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label>
+      ID Cronograma
+      <input type="number" formControlName="idCronograma" />
+    </label>
+    <label>
+      Fecha ampliada
+      <input type="date" formControlName="fechaAmpliada" />
+    </label>
+    <label>
+      Motivo
+      <input type="text" formControlName="motivo" />
+    </label>
+    <label>
+      Autorizado por
+      <input type="text" formControlName="autorizadoPor" />
+    </label>
+
+    <button type="submit">Guardar</button>
+  </form>
+</div>

@@ -11,14 +11,12 @@ import pe.edu.upeu.lamb.finanzas.mapper.ConvenioInstitucionalDescuentoMapper;
 import pe.edu.upeu.lamb.finanzas.repository.ConvenioInstitucionalDescuentoRepository;
 
 import java.util.List;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * CRUD opcional: depende de la universidad. Item 35 del documento.
  */
 @Slf4j
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class ConvenioInstitucionalDescuentoService {
 
@@ -39,17 +37,6 @@ public class ConvenioInstitucionalDescuentoService {
         ConvenioInstitucionalDescuento entity = convenioInstitucionalDescuentoMapper.toEntity(request);
         ConvenioInstitucionalDescuento guardado = convenioInstitucionalDescuentoRepository.save(entity);
         return convenioInstitucionalDescuentoMapper.toResponse(guardado);
-    }
-
-    public ConvenioInstitucionalDescuentoResponse actualizar(Long id, ConvenioInstitucionalDescuentoRequest request) {
-        ConvenioInstitucionalDescuento existente = buscarOFallar(id);
-        ConvenioInstitucionalDescuento entity = convenioInstitucionalDescuentoMapper.toEntity(request);
-        ConvenioInstitucionalDescuento guardado = convenioInstitucionalDescuentoRepository.save(Actualizacion.copiar(entity, existente));
-        return convenioInstitucionalDescuentoMapper.toResponse(guardado);
-    }
-
-    public void eliminar(Long id) {
-        convenioInstitucionalDescuentoRepository.delete(buscarOFallar(id));
     }
 
     private ConvenioInstitucionalDescuento buscarOFallar(Long id) {

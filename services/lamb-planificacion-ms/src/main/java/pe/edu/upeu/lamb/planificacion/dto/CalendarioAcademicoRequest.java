@@ -26,4 +26,14 @@ public class CalendarioAcademicoRequest {
 
     @NotNull
     private EstadoCalendario estado;
+
+    @Size(max = 500)
+    @jakarta.validation.constraints.Pattern(regexp = "^(https?://.+)?$", message = "debe ser una URL http(s)")
+    private String urlDocumento;
+
+    @Size(max = 150)
+    private String nombreArchivo;
+
+    @jakarta.validation.constraints.Pattern(regexp = "HMC|HML", message = "HMC (calendario) o HML (lista)")
+    private String modoHorarioAlumno;
 }

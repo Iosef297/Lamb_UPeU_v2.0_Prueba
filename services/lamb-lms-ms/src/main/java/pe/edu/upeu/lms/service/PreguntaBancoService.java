@@ -10,10 +10,8 @@ import pe.edu.upeu.lms.mapper.PreguntaBancoMapper;
 import pe.edu.upeu.lms.repository.PreguntaBancoRepository;
 
 import java.util.List;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class PreguntaBancoService {
 

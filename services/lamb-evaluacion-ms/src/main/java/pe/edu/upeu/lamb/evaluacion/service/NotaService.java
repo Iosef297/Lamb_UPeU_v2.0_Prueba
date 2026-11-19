@@ -1,5 +1,7 @@
 package pe.edu.upeu.lamb.evaluacion.service;
 
+import pe.edu.upeu.lamb.evaluacion.repository.EvaluacionProgramadaRepository;
+import pe.edu.upeu.lamb.evaluacion.entity.EvaluacionProgramada;
 import pe.edu.upeu.lamb.evaluacion.dto.NotaRequest;
 import pe.edu.upeu.lamb.evaluacion.dto.NotaResponse;
 import pe.edu.upeu.lamb.evaluacion.entity.ComponenteEvaluacion;
@@ -28,6 +30,8 @@ public class NotaService {
     private final ActaRepository actaRepository;
     private final ComponenteEvaluacionRepository componenteEvaluacionRepository;
     private final CalculoNotasService calculoNotasService;
+    private final EvaluacionProgramadaRepository evaluacionProgramadaRepository;
+    private final DocenteGrupoService docenteGrupoService;
 
     @Transactional(readOnly = true)
     public List<NotaResponse> listar(Long idGrupo) {
@@ -48,6 +52,7 @@ public class NotaService {
         validarDentroDeEscala(request.getCalificacion());
         Nota nota = notaMapper.toEntity(request);
         nota.setComponente(buscarComponente(request.getIdComponente()));
+        validarEvidencia(nota, request.getIdEvaluacionProgramada(), null);
         return notaMapper.toResponse(notaRepository.save(nota));
     }
 
@@ -55,12 +60,17 @@ public class NotaService {
     public NotaResponse actualizar(Long id, NotaRequest request) {
         Nota nota = buscarOFallar(id);
         validarActaNoCerrada(nota.getIdGrupo());
+        if (!nota.getIdGrupo().equals(request.getIdGrupo())) {
+            validarActaNoCerrada(request.getIdGrupo());
+        }
         validarDentroDeEscala(request.getCalificacion());
         nota.setIdPersona(request.getIdPersona());
         nota.setIdGrupo(request.getIdGrupo());
         nota.setComponente(buscarComponente(request.getIdComponente()));
         nota.setCalificacion(request.getCalificacion());
         nota.setPeriodo(request.getPeriodo());
+        nota.setIdEvaluacionProgramada(request.getIdEvaluacionProgramada());
+        validarEvidencia(nota, request.getIdEvaluacionProgramada(), id);
         return notaMapper.toResponse(notaRepository.save(nota));
     }
 
@@ -73,10 +83,15 @@ public class NotaService {
 
     // Con el acta CERRADA las notas ya se publicaron a trayectoria: no se pueden cambiar
     private void validarActaNoCerrada(Long idGrupo) {
+        docenteGrupoService.validarPuedeNotas(idGrupo);
         actaRepository.findByIdGrupo(idGrupo)
-                .filter(acta -> acta.getEstado() == EstadoActa.CERRADA)
                 .ifPresent(acta -> {
-                    throw new BusinessRuleException("El acta del grupo " + idGrupo + " esta CERRADA: no se pueden registrar ni modificar notas");
+                    if (acta.getEstado() == EstadoActa.CERRADA || acta.getEstado() == EstadoActa.ANULADA) {
+                        throw new BusinessRuleException("El acta del grupo " + idGrupo + " esta " + acta.getEstado() + ": no se pueden registrar ni modificar notas");
+                    }
+                    if (!Boolean.TRUE.equals(acta.getNotasHabilitadas()) && !pe.edu.upeu.lamb.evaluacion.config.JwtClaims.esGestion()) {
+                        throw new BusinessRuleException("El registro de notas del grupo " + idGrupo + " esta cerrado; pide al coordinador que lo habilite");
+                    }
                 });
     }
 
@@ -86,6 +101,30 @@ public class NotaService {
         if (calificacion.compareTo(escala.getNotaMinima()) < 0 || calificacion.compareTo(escala.getNotaMaxima()) > 0) {
             throw new BusinessRuleException("La calificacion " + calificacion + " esta fuera de la escala " + escala.getCodigo()
                     + " (" + escala.getNotaMinima() + " a " + escala.getNotaMaxima() + ")");
+        }
+    }
+
+    /**
+     * Si la nota es de una evidencia programada (modo competencia): la evidencia debe ser del mismo grupo,
+     * el componente pasa a ser el de la evidencia y el estudiante tiene una sola nota por evidencia.
+     */
+    private void validarEvidencia(Nota nota, Long idEvaluacionProgramada, Long idNota) {
+        if (idEvaluacionProgramada == null) {
+            return;
+        }
+        EvaluacionProgramada evidencia = evaluacionProgramadaRepository.findById(idEvaluacionProgramada)
+                .orElseThrow(() -> new ResourceNotFoundException("Evaluacion programada no encontrada: " + idEvaluacionProgramada));
+        if (!evidencia.getIdGrupo().equals(nota.getIdGrupo())) {
+            throw new BusinessRuleException("La evaluacion programada " + idEvaluacionProgramada + " es del grupo "
+                    + evidencia.getIdGrupo() + ", no del grupo " + nota.getIdGrupo());
+        }
+        nota.setComponente(evidencia.getComponente());
+        boolean repetida = notaRepository.findByIdPersonaAndIdGrupo(nota.getIdPersona(), nota.getIdGrupo()).stream()
+                .anyMatch(n -> idEvaluacionProgramada.equals(n.getIdEvaluacionProgramada()) && !n.getId().equals(idNota));
+        if (repetida) {
+            throw new BusinessRuleException("El estudiante " + nota.getIdPersona() + " ya tiene nota en la evaluacion "
+                    + (evidencia.getUnidad() != null ? evidencia.getUnidad() + " " : "") + evidencia.getComponente().getCodigo()
+                    + "; edita la nota existente");
         }
     }
 

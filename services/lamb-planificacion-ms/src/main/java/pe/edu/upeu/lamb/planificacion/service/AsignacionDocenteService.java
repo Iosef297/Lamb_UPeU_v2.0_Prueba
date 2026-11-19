@@ -28,6 +28,13 @@ public class AsignacionDocenteService {
     private final AsignacionDocenteMapper asignacionDocenteMapper;
     private final GrupoService grupoService;
     private final ReglasGrupoService reglas;
+    private final pe.edu.upeu.lamb.planificacion.mapper.GrupoMapper grupoMapper;
+    private final pe.edu.upeu.lamb.planificacion.messaging.PlanificacionEventosProducer producer;
+
+    @org.springframework.beans.factory.annotation.Value("${spring.application.name}")
+    private String nombreServicio;
+
+    static final String DOCENTES_ACTUALIZADOS = "grupo.docentes-actualizados";
 
     @Transactional(readOnly = true)
     public List<AsignacionDocenteResponse> listar(Long idGrupo) {
@@ -47,8 +54,11 @@ public class AsignacionDocenteService {
         Grupo grupo = grupoService.buscarOFallar(request.getIdGrupo());
         AsignacionDocente asignacion = AsignacionDocente.builder().grupo(grupo).build();
         asignar(asignacion, request.getIdDocente(), request.getRol(), request.getHorasSemanales());
+        aplicarPermisos(asignacion, request);
         grupo.getDocentes().add(asignacion);
-        return asignacionDocenteMapper.toResponse(asignacionDocenteRepository.saveAndFlush(asignacion));
+        AsignacionDocente guardada = asignacionDocenteRepository.saveAndFlush(asignacion);
+        publicarDocentes(grupo);
+        return asignacionDocenteMapper.toResponse(guardada);
     }
 
     @Transactional
@@ -57,7 +67,10 @@ public class AsignacionDocenteService {
         if (!asignacion.getGrupo().getId().equals(request.getIdGrupo())) {
             throw new BusinessRuleException("Una asignacion no se mueve a otro grupo: eliminala y creala en el grupo destino");
         }
-        reasignar(asignacion, request.getIdDocente(), request.getRol(), request.getHorasSemanales());
+        asignar(asignacion, request.getIdDocente(), request.getRol(), request.getHorasSemanales());
+        aplicarPermisos(asignacion, request);
+        asignacionDocenteRepository.saveAndFlush(asignacion);
+        publicarDocentes(asignacion.getGrupo());
         return asignacionDocenteMapper.toResponse(asignacion);
     }
 
@@ -66,13 +79,27 @@ public class AsignacionDocenteService {
         AsignacionDocente asignacion = buscarOFallar(id);
         grupoService.validarNoAnulado(asignacion.getGrupo());
         asignacion.getGrupo().getDocentes().remove(asignacion);
+        publicarDocentes(asignacion.getGrupo());
     }
 
-    // Lo usan el PUT y la aprobacion de la solicitud de cambio de docente (CRUD 30)
+    // Lo usa la aprobacion de la solicitud de cambio de docente (CRUD 30)
     @Transactional
     public void reasignar(AsignacionDocente asignacion, Long idDocente, RolDocente rol, int horasSemanales) {
         asignar(asignacion, idDocente, rol, horasSemanales);
         asignacionDocenteRepository.saveAndFlush(asignacion);
+        publicarDocentes(asignacion.getGrupo());
+    }
+
+    // evaluacion guarda una copia de los docentes del grupo para validar quien registra notas y asistencia
+    private void publicarDocentes(Grupo grupo) {
+        producer.publicarTrasCommit(grupoMapper.toGrupoAbiertoEvento(grupo, DOCENTES_ACTUALIZADOS, nombreServicio));
+    }
+
+    private void aplicarPermisos(AsignacionDocente asignacion, AsignacionDocenteRequest request) {
+        asignacion.setGestionaNota(ReglasGrupoService.permiso(request.getGestionaNota(), request.getRol() != pe.edu.upeu.lamb.planificacion.entity.RolDocente.PRACTICA));
+        asignacion.setGestionaAsistencia(ReglasGrupoService.permiso(request.getGestionaAsistencia(), true));
+        asignacion.setVerHorario(ReglasGrupoService.permiso(request.getVerHorario(), true));
+        asignacion.setMuestraPortal(ReglasGrupoService.permiso(request.getMuestraPortal(), true));
     }
 
     AsignacionDocente buscarOFallar(Long id) {
@@ -98,9 +125,12 @@ public class AsignacionDocenteService {
                 throw new BusinessRuleException("El grupo " + grupo.getId() + " ya tiene un docente TITULAR");
             }
         }
+        // Solo los bloques que dicta esta asignacion (o los que no tienen docente propio)
         for (HorarioGrupo h : grupo.getHorarios()) {
-            if (Boolean.TRUE.equals(h.getActivo())) {
-                reglas.validarDocenteLibre(idDocente, idPeriodo, grupo.getId(), h.getDiaSemana(), h.getHoraInicio(), h.getHoraFin());
+            boolean loDicta = h.getAsignacionDocente() == null || h.getAsignacionDocente() == asignacion;
+            if (Boolean.TRUE.equals(h.getActivo()) && loDicta) {
+                reglas.validarDocenteLibre(idDocente, idPeriodo, grupo.getId(), h.getDiaSemana(), h.getHoraInicio(), h.getHoraFin(),
+                        h.getFechaInicio(), h.getFechaFin());
             }
         }
         reglas.validarCargaLectiva(idDocente, idPeriodo, horasSemanales, idExcluido);

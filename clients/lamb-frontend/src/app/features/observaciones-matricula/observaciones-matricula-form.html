@@ -1,0 +1,28 @@
+<div class="pagina">
+  <h2>observaciones-matricula</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label>
+      ID Matrícula
+      <input type="number" formControlName="idMatricula" />
+    </label>
+    <label>
+      Observación
+      <textarea formControlName="observacion"></textarea>
+    </label>
+    <label>
+      Fecha
+      <input type="datetime-local" formControlName="fechaObservacion" />
+    </label>
+    <label>
+      Usuario registro
+      <input type="text" formControlName="usuarioRegistro" />
+    </label>
+
+    <button type="submit">Guardar</button>
+  </form>
+</div>

@@ -1,0 +1,32 @@
+<div class="pagina">
+  <h2>cargas-academicas-periodo</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label>
+      ID Persona
+      <input type="number" formControlName="idPersona" />
+    </label>
+    <label>
+      Periodo
+      <input type="text" formControlName="periodo" />
+    </label>
+    <label>
+      Total créditos
+      <input type="number" formControlName="totalCreditos" />
+    </label>
+    <label>
+      Total cursos
+      <input type="number" formControlName="totalCursos" />
+    </label>
+    <label>
+      Fecha cálculo
+      <input type="datetime-local" formControlName="fechaCalculo" />
+    </label>
+
+    <button type="submit">Guardar</button>
+  </form>
+</div>

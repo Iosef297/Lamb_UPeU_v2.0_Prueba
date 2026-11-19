@@ -11,10 +11,11 @@ import { ProgramaService } from '../programas/programa-service';
 import { ProgramaResponse } from '../programas/programa.model';
 import { GrupoService } from './grupo-service';
 import { DIAS_SEMANA, DiaSemana, ROLES_DOCENTE, RolDocente } from './grupo.model';
+import { SinGuion } from '../../core/sin-guion.pipe';
 
 @Component({
   selector: 'app-grupo-form',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [SinGuion, ReactiveFormsModule, RouterLink],
   templateUrl: './grupo-form.html',
 })
 export class GrupoForm {

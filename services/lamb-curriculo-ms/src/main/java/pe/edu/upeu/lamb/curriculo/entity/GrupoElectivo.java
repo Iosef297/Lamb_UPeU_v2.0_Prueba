@@ -30,7 +30,14 @@ public class GrupoElectivo {
     @Column(name = "cantidad_elegir", nullable = false)
     private Integer cantidadElegir;
 
-    // Cursos del plan que forman el grupo (M)
+    // Bolsa de opciones: cursos del catalogo del grupo. Mientras el grupo no esta en la malla solo existe esto
+    @ElementCollection
+    @CollectionTable(name = "grupo_electivo_catalogo", joinColumns = @JoinColumn(name = "id_grupo_electivo"))
+    @Column(name = "id_curso_catalogo", nullable = false)
+    @Builder.Default
+    private List<Long> idCursosCatalogo = new ArrayList<>();
+
+    // Cursos del plan que forman el grupo (M); vacio = el grupo todavia no se ubico en la malla
     @ElementCollection
     @CollectionTable(name = "grupo_electivo_cursos", joinColumns = @JoinColumn(name = "id_grupo_electivo"))
     @Column(name = "id_plan_curso", nullable = false)

@@ -1,0 +1,28 @@
+<div class="pagina">
+  <h2>convenios-institucionales-descuento</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label>
+      Institución
+      <input type="text" formControlName="institucion" />
+    </label>
+    <label>
+      % descuento
+      <input type="number" formControlName="porcentaje" step="0.01" />
+    </label>
+    <label>
+      Vigente desde
+      <input type="date" formControlName="vigenteDesde" />
+    </label>
+    <label>
+      Vigente hasta
+      <input type="date" formControlName="vigenteHasta" />
+    </label>
+
+    <button type="submit">Guardar</button>
+  </form>
+</div>

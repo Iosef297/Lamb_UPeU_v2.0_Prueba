@@ -17,6 +17,16 @@ public class SilaboBaseMapper {
                 .evaluacion(request.getEvaluacion())
                 .bibliografia(request.getBibliografia())
                 .estado(request.getEstado())
+                .idCompetenciaEspecifica(request.getIdCompetenciaEspecifica())
+                .idCompetenciaGeneral(request.getIdCompetenciaGeneral())
+                .resultadoAprendizaje(request.getResultadoAprendizaje())
+                .productoAcademico(request.getProductoAcademico())
+                .descripcionProducto(request.getDescripcionProducto())
+                .recursos(request.getRecursos())
+                .referenciasBasicas(request.getReferenciasBasicas())
+                .referenciasComplementarias(request.getReferenciasComplementarias())
+                .enlacesInternet(request.getEnlacesInternet())
+                .notaMinimaAprobatoria(request.getNotaMinimaAprobatoria())
                 .build();
     }
 
@@ -31,6 +41,16 @@ public class SilaboBaseMapper {
                 .evaluacion(silaboBase.getEvaluacion())
                 .bibliografia(silaboBase.getBibliografia())
                 .estado(silaboBase.getEstado())
+                .idCompetenciaEspecifica(silaboBase.getIdCompetenciaEspecifica())
+                .idCompetenciaGeneral(silaboBase.getIdCompetenciaGeneral())
+                .resultadoAprendizaje(silaboBase.getResultadoAprendizaje())
+                .productoAcademico(silaboBase.getProductoAcademico())
+                .descripcionProducto(silaboBase.getDescripcionProducto())
+                .recursos(silaboBase.getRecursos())
+                .referenciasBasicas(silaboBase.getReferenciasBasicas())
+                .referenciasComplementarias(silaboBase.getReferenciasComplementarias())
+                .enlacesInternet(silaboBase.getEnlacesInternet())
+                .notaMinimaAprobatoria(silaboBase.getNotaMinimaAprobatoria())
                 .build();
     }
 }

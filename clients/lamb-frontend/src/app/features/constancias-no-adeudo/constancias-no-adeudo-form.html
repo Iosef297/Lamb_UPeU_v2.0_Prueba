@@ -1,0 +1,28 @@
+<div class="pagina">
+  <h2>constancias-no-adeudo</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label>
+      ID Persona
+      <input type="number" formControlName="idPersona" />
+    </label>
+    <label>
+      Fecha emisión
+      <input type="datetime-local" formControlName="fechaEmision" />
+    </label>
+    <label>
+      Código verificación
+      <input type="text" formControlName="codigoVerificacion" />
+    </label>
+    <label>
+      URL documento
+      <input type="text" formControlName="urlDocumento" />
+    </label>
+
+    <button type="submit">Guardar</button>
+  </form>
+</div>

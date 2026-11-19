@@ -54,6 +54,10 @@ public class UnidadAprendizajeService {
         unidadAprendizaje.setSemanaFin(request.getSemanaFin());
         unidadAprendizaje.setContenidos(request.getContenidos());
         asignarRelaciones(unidadAprendizaje, request);
+        unidadAprendizaje.setResultadoAprendizaje(request.getResultadoAprendizaje());
+        unidadAprendizaje.setProducto(request.getProducto());
+        unidadAprendizaje.setDescripcionProducto(request.getDescripcionProducto());
+        unidadAprendizaje.setCriteriosEvaluacion(request.getCriteriosEvaluacion());
         return unidadAprendizajeMapper.toResponse(unidadAprendizajeRepository.save(unidadAprendizaje));
     }
 

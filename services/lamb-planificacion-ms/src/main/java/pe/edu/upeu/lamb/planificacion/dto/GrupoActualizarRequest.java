@@ -1,5 +1,6 @@
 package pe.edu.upeu.lamb.planificacion.dto;
 
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -19,6 +20,11 @@ public class GrupoActualizarRequest {
     @NotNull
     @Min(1)
     private Integer cupoMaximo;
+
+    // Opcional: si no llega, se conserva el ciclo actual
+    @Min(1)
+    @Max(14)
+    private Integer ciclo;
 
     // Version que el cliente leyo; si otro la cambio antes, responde 409
     @NotNull

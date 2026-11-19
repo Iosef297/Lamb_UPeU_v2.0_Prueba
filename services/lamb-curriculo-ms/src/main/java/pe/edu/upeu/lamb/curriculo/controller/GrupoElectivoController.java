@@ -40,6 +40,12 @@ public class GrupoElectivoController {
         return grupoElectivoService.actualizar(id, request);
     }
 
+    // Pone el grupo en la malla con su nombre y ciclo: sus cursos del catalogo pasan al plan como Electivo
+    @PostMapping("/{id}/ubicar")
+    public GrupoElectivoResponse ubicar(@PathVariable Long id, @Valid @RequestBody pe.edu.upeu.lamb.curriculo.dto.UbicarGrupoElectivoRequest request) {
+        return grupoElectivoService.ubicar(id, request);
+    }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void eliminar(@PathVariable Long id) {

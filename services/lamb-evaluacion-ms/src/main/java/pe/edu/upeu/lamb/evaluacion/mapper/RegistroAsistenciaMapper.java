@@ -16,7 +16,14 @@ public class RegistroAsistenciaMapper {
                 .idSesionClase(request.getIdSesionClase())
                 .fecha(request.getFecha())
                 .estado(request.getEstado())
+                .tipoHorario(tipoHorario(request))
+                .fechaRegistro(java.time.LocalDateTime.now())
                 .build();
+    }
+
+    public static pe.edu.upeu.lamb.evaluacion.entity.TipoHorarioAsistencia tipoHorario(RegistroAsistenciaRequest request) {
+        return request.getTipoHorario() == null
+                ? pe.edu.upeu.lamb.evaluacion.entity.TipoHorarioAsistencia.TEORIA : request.getTipoHorario();
     }
 
     public RegistroAsistenciaResponse toResponse(RegistroAsistencia registroAsistencia) {
@@ -27,6 +34,7 @@ public class RegistroAsistenciaMapper {
                 .idSesionClase(registroAsistencia.getIdSesionClase())
                 .fecha(registroAsistencia.getFecha())
                 .estado(registroAsistencia.getEstado())
+                .tipoHorario(registroAsistencia.getTipoHorario())
                 .build();
     }
 }

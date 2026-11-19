@@ -14,6 +14,7 @@ public class NotaMapper {
                 .idGrupo(request.getIdGrupo())
                 .calificacion(request.getCalificacion())
                 .periodo(request.getPeriodo())
+                .idEvaluacionProgramada(request.getIdEvaluacionProgramada())
                 .build();
     }
 
@@ -26,6 +27,7 @@ public class NotaMapper {
                 .codigoComponente(nota.getComponente().getCodigo())
                 .calificacion(nota.getCalificacion())
                 .periodo(nota.getPeriodo())
+                .idEvaluacionProgramada(nota.getIdEvaluacionProgramada())
                 .build();
     }
 }

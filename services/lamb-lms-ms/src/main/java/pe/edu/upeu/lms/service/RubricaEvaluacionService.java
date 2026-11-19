@@ -10,10 +10,8 @@ import pe.edu.upeu.lms.mapper.RubricaEvaluacionMapper;
 import pe.edu.upeu.lms.repository.RubricaEvaluacionRepository;
 
 import java.util.List;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class RubricaEvaluacionService {
 

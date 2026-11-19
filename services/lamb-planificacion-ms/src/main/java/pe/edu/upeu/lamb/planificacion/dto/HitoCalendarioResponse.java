@@ -22,4 +22,10 @@ public class HitoCalendarioResponse {
     private String nombre;
     private LocalDate fechaInicio;
     private LocalDate fechaFin;
+    private String descripcion;
+    private pe.edu.upeu.lamb.planificacion.entity.AreaResponsable areaResponsable;
+    private Long idPrograma;
+    private Long idSede;
+    private pe.edu.upeu.lamb.planificacion.entity.EstadoHito estado;
+    private Boolean visibleAlumno;
 }

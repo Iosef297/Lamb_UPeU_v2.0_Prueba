@@ -1,0 +1,24 @@
+<div class="pagina">
+  <h2>retiros-oficio</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label>
+      ID Matrícula
+      <input type="number" formControlName="idMatricula" />
+    </label>
+    <label>
+      Motivo
+      <input type="text" formControlName="motivo" />
+    </label>
+    <label>
+      Fecha retiro
+      <input type="datetime-local" formControlName="fechaRetiro" />
+    </label>
+
+    <button type="submit">Guardar</button>
+  </form>
+</div>

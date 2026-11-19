@@ -10,10 +10,8 @@ import pe.edu.upeu.lms.mapper.CategoriaCursoMapper;
 import pe.edu.upeu.lms.repository.CategoriaCursoRepository;
 
 import java.util.List;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class CategoriaCursoService {
 

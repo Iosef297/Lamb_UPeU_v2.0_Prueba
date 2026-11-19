@@ -1,0 +1,210 @@
+<div class="ac-page">
+  <div class="ac-head">
+    <div>
+      <h2>Actas de Notas</h2>
+      <p class="sub">Actas por grupo: notas finales ponderadas, estadística y cierre</p>
+    </div>
+    <div class="acciones">
+      <button type="button" class="ac-btn-out" (click)="cargar()">⟳ Actualizar</button>
+      <button type="button" class="ac-btn-y" (click)="registrarNotas(actas()[0])">Registrar notas</button>
+    </div>
+  </div>
+
+  @if (aviso()) {
+    <div class="ac-alerta ok ac-toast">{{ aviso() }}</div>
+  }
+  @if (error()) {
+    <div class="ac-alerta error">{{ error() }} <button type="button" class="cerrar" (click)="error.set(null)">✕</button></div>
+  }
+
+  <div class="ac-stats">
+    @for (t of resumen(); track t.etiqueta) {
+      <div class="ac-stat">
+        
+        <div>
+          <p class="val" [style.color]="t.color">{{ t.valor }}</p>
+          <p class="lbl">{{ t.etiqueta }}</p>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="ac-card">
+    <div class="ac-card-head">
+      <h3>Actas registradas</h3>
+      <div style="display: flex; gap: 12px; align-items: center">
+        <label class="ac-check" style="font-size: 0.75rem; padding: 0">
+          <input type="checkbox" [ngModel]="soloPeriodo()" (ngModelChange)="soloPeriodo.set($event)" /> Periodo {{ api.periodo() || '—' }}
+        </label>
+        <div class="ac-search"><input type="search" placeholder="Buscar acta…" [ngModel]="busqueda()" (ngModelChange)="busqueda.set($event)" /></div>
+      </div>
+    </div>
+
+    @if (cargando()) {
+      <div class="ac-cargando"><span class="ac-spin"></span> Cargando actas…</div>
+    } @else if (visibles().length === 0) {
+      <div class="ac-vacio">
+        
+        No hay actas{{ soloPeriodo() && api.periodo() ? ' en el periodo ' + api.periodo() : '' }}. Se crean solas al abrir un grupo en planificación.
+      </div>
+    } @else {
+      <div class="ac-table-wrap">
+        <table class="ac-table">
+          <thead>
+            <tr>
+              <th>N°</th><th>CÓDIGO</th><th>CURSO</th><th>PROGRAMA</th><th>GRUPO</th><th>PERIODO</th><th>DOCENTE</th><th>CRÉDITOS</th><th>FECHA DE CIERRE</th><th>ESTADO</th><th>ACCIONES</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (a of visibles(); track a.id; let i = $index) {
+              <tr>
+                <td class="n">{{ i + 1 }}</td>
+                <td class="cod">ACT-{{ a.periodo }}-{{ a.id }}</td>
+                <td class="fuerte">{{ a.codigoCurso }}</td>
+                <td [title]="programa(a.idGrupo)">{{ programa(a.idGrupo) }}</td>
+                <td>#{{ a.idGrupo }}</td>
+                <td>{{ a.periodo }}</td>
+                <td>{{ a.idDocente ? '#' + a.idDocente : '—' }}</td>
+                <td>{{ a.creditos }}</td>
+                <td>{{ texto(a.fechaCierre) }}</td>
+                <td><span class="ac-badge" [style.background]="insignia(a.estado).bg" [style.color]="insignia(a.estado).color">{{ texto(a.estado) }}</span></td>
+                <td>
+                  <div class="acc">
+                    <button type="button" class="ac-btn-ligero" (click)="abrir(a)">Ver detalle</button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>
+
+@if (detalle(); as d) {
+  <div class="ac-modal-back" (click)="detalle.set(null)">
+    <div class="ac-modal" style="max-width: 960px" (click)="$event.stopPropagation()">
+      <div class="ac-modal-head">
+        <h3>Acta #{{ d.acta.id }} · {{ d.acta.codigoCurso }} · Grupo #{{ d.acta.idGrupo }}</h3>
+        <button type="button" class="x" (click)="detalle.set(null)">✕</button>
+      </div>
+      <div class="ac-modal-body">
+        <div class="ac-kv" style="margin-bottom: 20px">
+          <div><p class="k">Estado</p><span class="ac-badge" [style.background]="insignia(d.acta.estado).bg" [style.color]="insignia(d.acta.estado).color">{{ texto(d.acta.estado) }}</span></div>
+          <div><p class="k">Periodo</p><p class="v">{{ d.acta.periodo }}</p></div>
+          <div><p class="k">Escala</p><p class="v">{{ d.escala ?? '—' }}</p></div>
+          <div><p class="k">Créditos</p><p class="v">{{ d.acta.creditos }}</p></div>
+        </div>
+        <div class="ac-alerta aviso" style="align-items: center">
+          <span>
+            Modo de evaluación: <b>{{ d.acta.modoEvaluacion === 'COMPETENCIA' ? 'Por competencias (ES / EP / ECG)' : 'Promedio ponderado por componente' }}</b>
+            @if (d.acta.modoEvaluacion === 'COMPETENCIA') {
+              · si EP &lt; 12.5, la nota final es EP
+            }
+          </span>
+          @if (d.acta.estado === 'ABIERTA' && puedeCerrar()) {
+            <button type="button" class="ac-btn-ligero" style="margin-left: auto" (click)="cambiarModo(d.acta, d.acta.modoEvaluacion === 'COMPETENCIA' ? 'PONDERADO' : 'COMPETENCIA')">
+              Cambiar a {{ d.acta.modoEvaluacion === 'COMPETENCIA' ? 'ponderado' : 'competencias' }}
+            </button>
+          }
+        </div>
+        @if (d.acta.motivo) {
+          <div class="ac-alerta aviso">{{ d.acta.motivo }}</div>
+        }
+
+        @if (cargandoDetalle()) {
+          <div class="ac-cargando"><span class="ac-spin"></span> Calculando notas…</div>
+        } @else {
+          @if (d.estadistica; as e) {
+            <div class="ac-stats" style="margin-bottom: 16px">
+              <div class="ac-stat"><div><p class="val" style="color: #1e3a8a">{{ e['estudiantes'] }}</p><p class="lbl">Estudiantes</p></div></div>
+              <div class="ac-stat"><div><p class="val" style="color: #7c3aed">{{ numero(e['promedio']) }}</p><p class="lbl">Promedio</p></div></div>
+              <div class="ac-stat"><div><p class="val" style="color: #16a34a">{{ e['aprobados'] }}</p><p class="lbl">Aprobados</p></div></div>
+              <div class="ac-stat"><div><p class="val" style="color: #dc2626">{{ e['desaprobados'] }}</p><p class="lbl">Desaprobados</p></div></div>
+            </div>
+            <div style="margin-bottom: 20px">
+              <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #64748b; margin-bottom: 4px">
+                <span>Porcentaje de aprobados</span><span>{{ numero(e['porcentajeAprobados']) }} %</span>
+              </div>
+              <div class="ac-barra"><div [style.width.%]="porcentaje(e['porcentajeAprobados'])"></div></div>
+            </div>
+          }
+
+          @if (d.competencias.length) {
+            <div class="ac-card" style="margin-bottom: 20px">
+              <div class="ac-card-head"><h3>Resumen de evaluaciones (Modo competencia)</h3><span style="font-size: 0.75rem; color: #94a3b8">ES 20 % · EP 70 % · ECG 10 %</span></div>
+              <table class="ac-table">
+                <thead><tr><th>ESTUDIANTE</th><th>ES</th><th>EP</th><th>ECG</th><th>NOTA FINAL</th><th>FÓRMULA APLICADA</th></tr></thead>
+                <tbody>
+                  @for (c of d.competencias; track c.idPersona) {
+                    <tr>
+                      <td class="fuerte">Persona #{{ c.idPersona }}</td>
+                      <td>{{ numero(c.es) }}</td>
+                      <td><span class="ac-nota" [class.ok]="c.ep >= 12.5" [class.mal]="c.ep < 12.5">{{ numero(c.ep) }}</span></td>
+                      <td>{{ c.ecg === null ? '—' : numero(c.ecg) }}</td>
+                      <td><span class="ac-nota" [class.ok]="c.aprobado" [class.mal]="!c.aprobado">{{ numero(c.notaFinal) }}</span></td>
+                      <td style="font-size: 0.75rem">{{ c.formula }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+
+          <div class="ac-card">
+            <div class="ac-card-head"><h3>Notas finales</h3><span style="font-size: 0.75rem; color: #94a3b8">Promedio ponderado por componente</span></div>
+            @if (d.notas.length === 0) {
+              <div class="ac-vacio">Aún no hay notas registradas en el grupo.</div>
+            } @else {
+              <table class="ac-table">
+                <thead><tr><th>N°</th><th>ESTUDIANTE</th><th>NOTA FINAL</th><th>CONDICIÓN</th></tr></thead>
+                <tbody>
+                  @for (n of d.notas; track n.idPersona; let i = $index) {
+                    <tr>
+                      <td class="n">{{ i + 1 }}</td>
+                      <td class="fuerte">Persona #{{ n.idPersona }}</td>
+                      <td><span class="ac-nota" [class.ok]="n.aprobado" [class.mal]="!n.aprobado">{{ numero(n.notaFinal) }}</span></td>
+                      <td><span class="ac-badge" [style.background]="n.aprobado ? '#DCFCE7' : '#FEE2E2'" [style.color]="n.aprobado ? '#16A34A' : '#DC2626'">{{ n.aprobado ? 'Aprobado' : 'Desaprobado' }}</span></td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            }
+          </div>
+
+          @if (d.historial.length) {
+            <div class="ac-card">
+              <div class="ac-card-head"><h3>Historial del acta</h3></div>
+              <table class="ac-table compacta">
+                <thead><tr><th>FECHA</th><th>ESTADO</th><th>DETALLE</th></tr></thead>
+                <tbody>
+                  @for (h of d.historial; track $index) {
+                    <tr>
+                      <td>{{ texto(h['fecha']) }}</td>
+                      <td><span class="ac-badge" [style.background]="insignia(h['estado']).bg" [style.color]="insignia(h['estado']).color">{{ texto(h['estado']) }}</span></td>
+                      <td style="white-space: normal">{{ texto(h['detalle']) }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        }
+
+        <div class="ac-form-actions">
+          <button type="button" class="ac-btn-out" (click)="detalle.set(null)">Cerrar ventana</button>
+          @if (d.acta.estado === 'ABIERTA' && puedeCerrar()) {
+            @if (confirmarCierre()) {
+              <span style="font-size: 0.8rem; color: #b45309; align-self: center">El cierre es definitivo. ¿Continuar?</span>
+              <button type="button" class="ac-btn-out" (click)="confirmarCierre.set(false)">No</button>
+              <button type="button" class="ac-btn-navy" (click)="cerrar(d.acta)">Sí, cerrar acta</button>
+            } @else {
+              <button type="button" class="ac-btn-y" (click)="confirmarCierre.set(true)">Cerrar acta</button>
+            }
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+}

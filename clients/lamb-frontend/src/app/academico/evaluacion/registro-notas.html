@@ -1,0 +1,150 @@
+<div class="ac-page">
+  <div class="ac-head">
+    <div>
+      <h2>Registro de Notas</h2>
+      <p class="sub">Elige el grupo y escribe las notas: cada celda se guarda al salir de ella</p>
+    </div>
+    <div class="acciones">
+      <select class="ac-input" style="width: auto; min-width: 320px; background-color: #fff" (change)="elegir($any($event.target).value)">
+        <option value="">— Elige un grupo —</option>
+        @for (a of actasDelContexto(); track a.id) {
+          <option [value]="a.idGrupo" [selected]="a.idGrupo === idGrupo()">{{ etiquetaActa(a) }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="ac-alerta error">{{ error() }} <button type="button" class="cerrar" (click)="error.set(null)">✕</button></div>
+  }
+
+  @if (!idGrupo()) {
+    <div class="ac-card">
+      <div class="ac-vacio">
+        
+        Elige un grupo del periodo {{ api.periodo() || '' }} para registrar sus notas.
+        <p style="margin-top: 8px; font-size: 0.75rem">¿Cómo usar? 1) Elige el grupo · 2) Escribe la nota en la celda · 3) Sal de la celda para guardar · 4) La nota final se recalcula sola.</p>
+      </div>
+    </div>
+  } @else if (cargando()) {
+    <div class="ac-cargando"><span class="ac-spin"></span> Cargando estudiantes y evaluaciones…</div>
+  } @else {
+    @if (acta(); as a) {
+      @if (a.estado !== 'ABIERTA') {
+        <div class="ac-alerta aviso">El acta está {{ a.estado | sinGuion }}: las notas son de solo lectura.</div>
+      } @else if (mis.soloDocente() && miPermiso(); as p) {
+        @if (!p.gestionaNota) {
+          <div class="ac-alerta aviso">Tu asignación en este grupo ({{ p.rol | sinGuion }}) no gestiona notas: solo lectura.</div>
+        } @else if (!p.notasHabilitadas) {
+          <div class="ac-alerta aviso">El coordinador cerró el registro de notas de este grupo: solo lectura.</div>
+        }
+      }
+      <div class="ac-stats">
+        <div class="ac-stat"><div><p class="val" style="color: #1e3a8a">{{ resumen().estudiantes }}</p><p class="lbl">Estudiantes</p></div></div>
+        <div class="ac-stat"><div><p class="val" style="color: #16a34a">{{ resumen().aprobados }}</p><p class="lbl">Aprobados (≥ {{ aprobatoria() }})</p></div></div>
+        <div class="ac-stat"><div><p class="val" style="color: #dc2626">{{ resumen().desaprobados }}</p><p class="lbl">Desaprobados</p></div></div>
+        <div class="ac-stat"><div><p class="val" style="color: #b45309">{{ resumen().pendientes }}</p><p class="lbl">Celdas sin nota</p></div></div>
+      </div>
+
+      <div class="ac-card">
+        <div class="ac-card-head">
+          <h3>{{ a.codigoCurso }} · grupo #{{ a.idGrupo }} · {{ a.modoEvaluacion === 'COMPETENCIA' ? 'Modo competencia (ES / EP / ECG)' : 'Promedio ponderado' }}</h3>
+          <span style="font-size: 0.75rem; color: #94a3b8">Escala {{ min() }}–{{ max() }} · aprueba con {{ aprobatoria() }}</span>
+        </div>
+        @if (columnas().length === 0) {
+          <div class="ac-vacio">El grupo no tiene evaluaciones programadas ni componentes. Prográmalas en Registro de notas › Evaluaciones programadas.</div>
+        } @else {
+          <div class="ac-table-wrap">
+            <table class="ac-table compacta">
+              <thead>
+                <tr>
+                  <th>N°</th>
+                  <th>ESTUDIANTE</th>
+                  @for (c of columnas(); track c.clave) {
+                    <th style="text-align: center; min-width: 84px" [style.color]="colores[c.bloque]" [title]="c.sub">
+                      {{ c.titulo }}<br /><span style="font-weight: 500; color: #94a3b8">{{ c.sub }}</span>
+                    </th>
+                  }
+                  @if (a.modoEvaluacion === 'COMPETENCIA') {
+                    <th style="text-align: center">ES</th><th style="text-align: center">EP</th><th style="text-align: center">ECG</th>
+                  }
+                  <th style="text-align: center">NOTA FINAL</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (e of estudiantes(); track e.idPersona; let i = $index) {
+                  <tr>
+                    <td class="n">{{ i + 1 }}</td>
+                    <td class="fuerte" [title]="e.origen === 'MATRICULA' ? 'Matriculado' : e.origen === 'MANUAL' ? 'Agregado a mano' : 'Tiene registros en el grupo'">
+                      {{ e.nombre }}
+                      @if (e.origen !== 'MATRICULA') {
+                        <span class="ac-badge" style="padding: 1px 6px; background: #f1f5f9; color: #64748b">{{ e.origen === 'MANUAL' ? 'nuevo' : 'sin matrícula' }}</span>
+                      }
+                    </td>
+                    @for (c of columnas(); track c.clave) {
+                      <td style="text-align: center; padding: 4px 6px">
+                        <input
+                          class="ac-input"
+                          style="width: 70px; text-align: center; padding: 4px 6px"
+                          type="number"
+                          step="0.5"
+                          [min]="min()"
+                          [max]="max()"
+                          [value]="celda(e, c).valor"
+                          [disabled]="!editable()"
+                          [style.border-color]="celda(e, c).estado === 'error' ? '#ef4444' : celda(e, c).estado === 'ok' ? '#22c55e' : null"
+                          [style.color]="celda(e, c).valor !== '' && +celda(e, c).valor < aprobatoria() ? '#dc2626' : null"
+                          [title]="celda(e, c).error ?? ''"
+                          (change)="guardar(e, c, $any($event.target).value)"
+                        />
+                        @if (celda(e, c).estado === 'guardando') {
+                          <div style="font-size: 0.65rem; color: #94a3b8">guardando…</div>
+                        } @else if (celda(e, c).estado === 'error') {
+                          <div style="font-size: 0.65rem; color: #dc2626; max-width: 120px; white-space: normal">{{ celda(e, c).error }}</div>
+                        }
+                      </td>
+                    }
+                    @if (a.modoEvaluacion === 'COMPETENCIA') {
+                      <td style="text-align: center">{{ num(finales().get(e.idPersona)?.es) }}</td>
+                      <td style="text-align: center">
+                        <span class="ac-nota" [class.ok]="(finales().get(e.idPersona)?.ep ?? 0) >= 12.5" [class.mal]="(finales().get(e.idPersona)?.ep ?? 0) < 12.5">{{ num(finales().get(e.idPersona)?.ep) }}</span>
+                      </td>
+                      <td style="text-align: center">{{ num(finales().get(e.idPersona)?.ecg) }}</td>
+                    }
+                    <td style="text-align: center">
+                      @if (finales().get(e.idPersona); as f) {
+                        <span class="ac-nota" [class.ok]="f.aprobado" [class.mal]="!f.aprobado">{{ num(f.notaFinal) }}</span>
+                      } @else {
+                        <span style="color: #cbd5e1">—</span>
+                      }
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr><td [attr.colspan]="columnas().length + 3"><div class="ac-vacio">Sin estudiantes: no hay matrículas en este grupo (o matrícula no responde). Agrega uno abajo.</div></td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          @if (editable()) {
+            <div class="ac-filtros" style="border-top: 1px solid #e2e8f0; border-bottom: none">
+              <div class="ac-field" style="min-width: 320px">
+                <label>Agregar estudiante a la grilla</label>
+                @if (personas().length) {
+                  <select class="ac-input" [(ngModel)]="nuevoEstudiante">
+                    <option value="">— Persona —</option>
+                    @for (p of personas(); track p.valor) {
+                      <option [value]="p.valor">{{ p.etiqueta }}</option>
+                    }
+                  </select>
+                } @else {
+                  <input class="ac-input" type="number" placeholder="Id de la persona" [(ngModel)]="nuevoEstudiante" />
+                }
+              </div>
+              <button type="button" class="ac-btn-ligero" (click)="agregarEstudiante()">+ Agregar</button>
+            </div>
+          }
+        }
+      </div>
+    }
+  }
+</div>

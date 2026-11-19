@@ -53,6 +53,7 @@ public class HorarioGrupoService {
                 .idPeriodo(grupo.getPeriodo().getId())
                 .activo(true)
                 .build();
+        asignarVigencia(horario, request);
         programar(horario, request.getIdAmbiente(), request.getDiaSemana(), request.getHoraInicio(), request.getHoraFin());
         grupo.getHorarios().add(horario);
         return horarioGrupoMapper.toResponse(horarioGrupoRepository.saveAndFlush(horario));
@@ -64,6 +65,7 @@ public class HorarioGrupoService {
         if (!horario.getGrupo().getId().equals(request.getIdGrupo())) {
             throw new BusinessRuleException("Un horario no se mueve a otro grupo: eliminalo y crealo en el grupo destino");
         }
+        asignarVigencia(horario, request);
         reprogramar(horario, request.getIdAmbiente(), request.getDiaSemana(), request.getHoraInicio(), request.getHoraFin());
         return horarioGrupoMapper.toResponse(horario);
     }
@@ -91,6 +93,26 @@ public class HorarioGrupoService {
         horarioGrupoRepository.saveAndFlush(horario);
     }
 
+    // Tipo, subgrupo, docente que dicta, modulo y fechas del bloque (las fechas salen del modulo si no se envian)
+    private void asignarVigencia(HorarioGrupo horario, HorarioGrupoRequest request) {
+        Grupo grupo = horario.getGrupo();
+        pe.edu.upeu.lamb.planificacion.entity.ModuloPeriodo modulo = reglas.modulo(request.getIdModulo(), horario.getIdPeriodo());
+        java.time.LocalDate inicio = request.getFechaInicio() != null ? request.getFechaInicio() : modulo == null ? null : modulo.getFechaInicio();
+        java.time.LocalDate fin = request.getFechaFin() != null ? request.getFechaFin() : modulo == null ? null : modulo.getFechaFin();
+        reglas.validarFechas(inicio, fin);
+        AsignacionDocente dicta = null;
+        if (request.getIdAsignacionDocente() != null) {
+            dicta = grupo.getDocentes().stream().filter(a -> request.getIdAsignacionDocente().equals(a.getId())).findFirst()
+                    .orElseThrow(() -> new BusinessRuleException("La asignacion docente " + request.getIdAsignacionDocente() + " no es del grupo " + grupo.getId()));
+        }
+        horario.setModulo(modulo);
+        horario.setFechaInicio(inicio);
+        horario.setFechaFin(fin);
+        horario.setTipoHorario(request.getTipoHorario() == null ? "TEORIA" : request.getTipoHorario());
+        horario.setNumeroSubgrupo(request.getNumeroSubgrupo());
+        horario.setAsignacionDocente(dicta);
+    }
+
     HorarioGrupo buscarOFallar(Long id) {
         return horarioGrupoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Horario de grupo no encontrado: " + id));
@@ -100,13 +122,22 @@ public class HorarioGrupoService {
         Grupo grupo = horario.getGrupo();
         Long idExcluido = horario.getId() == null ? ReglasGrupoService.SIN_ID : horario.getId();
         reglas.validarRango(horaInicio, horaFin);
-        Ambiente ambiente = reglas.reservarAmbiente(idAmbiente, grupo.getCupoMaximo());
-        grupo.getDocentes().stream().map(AsignacionDocente::getIdDocente).sorted().forEach(reglas::bloquearDocente);
+        // Sin ambiente = "Por confirmar"
+        Ambiente ambiente = idAmbiente == null ? null : reglas.reservarAmbiente(idAmbiente, grupo.getCupoMaximo());
+        List<AsignacionDocente> dictan = horario.getAsignacionDocente() != null ? List.of(horario.getAsignacionDocente()) : grupo.getDocentes();
+        dictan.stream().map(AsignacionDocente::getIdDocente).sorted().forEach(reglas::bloquearDocente);
 
-        reglas.validarSinCruceEnGrupo(grupo, dia, horaInicio, horaFin, idExcluido);
-        reglas.validarAmbienteLibre(ambiente, horario.getIdPeriodo(), dia, horaInicio, horaFin, idExcluido);
-        for (AsignacionDocente docente : grupo.getDocentes()) {
-            reglas.validarDocenteLibre(docente.getIdDocente(), horario.getIdPeriodo(), grupo.getId(), dia, horaInicio, horaFin);
+        HorarioGrupo propuesto = HorarioGrupo.builder()
+                .diaSemana(dia).horaInicio(horaInicio).horaFin(horaFin)
+                .fechaInicio(horario.getFechaInicio()).fechaFin(horario.getFechaFin())
+                .asignacionDocente(horario.getAsignacionDocente())
+                .build();
+        reglas.validarSinCruceEnGrupo(grupo, propuesto, idExcluido);
+        reglas.validarAmbienteLibre(ambiente, horario.getIdPeriodo(), dia, horaInicio, horaFin,
+                horario.getFechaInicio(), horario.getFechaFin(), idExcluido);
+        for (AsignacionDocente docente : dictan) {
+            reglas.validarDocenteLibre(docente.getIdDocente(), horario.getIdPeriodo(), grupo.getId(), dia, horaInicio, horaFin,
+                    horario.getFechaInicio(), horario.getFechaFin());
         }
         horario.setAmbiente(ambiente);
         horario.setDiaSemana(dia);

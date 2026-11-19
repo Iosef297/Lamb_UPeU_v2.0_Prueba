@@ -3,8 +3,10 @@ import { Component, inject, signal } from '@angular/core';
 import { AuthService } from '../../core/auth/auth-service';
 import { ActaService } from './acta-service';
 import { Acta } from './acta.model';
+import { SinGuion } from '../../core/sin-guion.pipe';
 
 @Component({
+  imports: [SinGuion],
   selector: 'app-acta-list',
   templateUrl: './acta-list.html',
 })

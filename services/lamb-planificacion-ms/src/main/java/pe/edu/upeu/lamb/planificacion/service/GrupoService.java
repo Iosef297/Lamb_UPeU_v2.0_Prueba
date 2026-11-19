@@ -83,6 +83,9 @@ public class GrupoService {
         }
         Grupo grupo = grupoMapper.toEntity(request);
         grupo.setOferta(oferta);
+        if (grupo.getCiclo() == null) {
+            grupo.setCiclo(oferta.getCiclo());
+        }
         if (grupoRepository.existsByOfertaIdAndCodigo(oferta.getId(), grupo.getCodigo())) {
             throw new BusinessRuleException("Ya existe el grupo " + grupo.getCodigo() + " en la oferta " + oferta.getId());
         }
@@ -96,40 +99,67 @@ public class GrupoService {
 
         // Candados siempre en el mismo orden (ambientes y luego docentes, por id) para no provocar deadlocks
         Map<Long, Ambiente> ambientes = new TreeMap<>();
-        request.getHorarios().stream().map(HorarioDetalleRequest::getIdAmbiente).sorted().distinct()
+        request.getHorarios().stream().map(HorarioDetalleRequest::getIdAmbiente).filter(java.util.Objects::nonNull).sorted().distinct()
                 .forEach(idAmbiente -> ambientes.put(idAmbiente, reglas.reservarAmbiente(idAmbiente, grupo.getCupoMaximo())));
         request.getDocentes().stream().map(DocenteDetalleRequest::getIdDocente).sorted()
                 .forEach(reglas::bloquearDocente);
 
         Long idPeriodo = oferta.getPeriodo().getId();
-        for (HorarioDetalleRequest h : request.getHorarios()) {
-            reglas.validarRango(h.getHoraInicio(), h.getHoraFin());
-            reglas.validarSinCruceEnGrupo(grupo, h.getDiaSemana(), h.getHoraInicio(), h.getHoraFin(), ReglasGrupoService.SIN_ID);
-            Ambiente ambiente = ambientes.get(h.getIdAmbiente());
-            reglas.validarAmbienteLibre(ambiente, idPeriodo, h.getDiaSemana(), h.getHoraInicio(), h.getHoraFin(), ReglasGrupoService.SIN_ID);
-            grupo.getHorarios().add(HorarioGrupo.builder()
-                    .grupo(grupo)
-                    .ambiente(ambiente)
-                    .idPeriodo(idPeriodo)
-                    .diaSemana(h.getDiaSemana())
-                    .horaInicio(h.getHoraInicio())
-                    .horaFin(h.getHoraFin())
-                    .activo(true)
-                    .build());
-        }
-
+        // Docentes primero: cada bloque de horario puede indicar cual de ellos lo dicta
+        Map<Long, AsignacionDocente> porDocente = new java.util.HashMap<>();
         for (DocenteDetalleRequest d : request.getDocentes()) {
-            for (HorarioDetalleRequest h : request.getHorarios()) {
-                reglas.validarDocenteLibre(d.getIdDocente(), idPeriodo, ReglasGrupoService.SIN_ID,
-                        h.getDiaSemana(), h.getHoraInicio(), h.getHoraFin());
-            }
             reglas.validarCargaLectiva(d.getIdDocente(), idPeriodo, d.getHorasSemanales(), ReglasGrupoService.SIN_ID);
-            grupo.getDocentes().add(AsignacionDocente.builder()
+            AsignacionDocente asignacion = AsignacionDocente.builder()
                     .grupo(grupo)
                     .idDocente(d.getIdDocente())
                     .rol(d.getRol())
                     .horasSemanales(d.getHorasSemanales())
-                    .build());
+                    .gestionaNota(ReglasGrupoService.permiso(d.getGestionaNota(), d.getRol() != RolDocente.PRACTICA))
+                    .gestionaAsistencia(ReglasGrupoService.permiso(d.getGestionaAsistencia(), true))
+                    .verHorario(ReglasGrupoService.permiso(d.getVerHorario(), true))
+                    .muestraPortal(ReglasGrupoService.permiso(d.getMuestraPortal(), true))
+                    .build();
+            grupo.getDocentes().add(asignacion);
+            porDocente.put(d.getIdDocente(), asignacion);
+        }
+
+        for (HorarioDetalleRequest h : request.getHorarios()) {
+            reglas.validarRango(h.getHoraInicio(), h.getHoraFin());
+            pe.edu.upeu.lamb.planificacion.entity.ModuloPeriodo modulo = reglas.modulo(h.getIdModulo(), idPeriodo);
+            java.time.LocalDate inicio = h.getFechaInicio() != null ? h.getFechaInicio() : modulo == null ? null : modulo.getFechaInicio();
+            java.time.LocalDate fin = h.getFechaFin() != null ? h.getFechaFin() : modulo == null ? null : modulo.getFechaFin();
+            reglas.validarFechas(inicio, fin);
+            AsignacionDocente dicta = null;
+            if (h.getIdDocente() != null) {
+                dicta = porDocente.get(h.getIdDocente());
+                if (dicta == null) {
+                    throw new BusinessRuleException("El docente " + h.getIdDocente() + " del bloque " + h.getDiaSemana() + " no esta entre los docentes del grupo");
+                }
+            }
+            HorarioGrupo bloque = HorarioGrupo.builder()
+                    .grupo(grupo)
+                    .ambiente(h.getIdAmbiente() == null ? null : ambientes.get(h.getIdAmbiente()))
+                    .idPeriodo(idPeriodo)
+                    .diaSemana(h.getDiaSemana())
+                    .horaInicio(h.getHoraInicio())
+                    .horaFin(h.getHoraFin())
+                    .fechaInicio(inicio)
+                    .fechaFin(fin)
+                    .tipoHorario(h.getTipoHorario() == null ? "TEORIA" : h.getTipoHorario())
+                    .numeroSubgrupo(h.getNumeroSubgrupo())
+                    .asignacionDocente(dicta)
+                    .modulo(modulo)
+                    .activo(true)
+                    .build();
+            reglas.validarSinCruceEnGrupo(grupo, bloque, ReglasGrupoService.SIN_ID);
+            reglas.validarAmbienteLibre(bloque.getAmbiente(), idPeriodo, h.getDiaSemana(), h.getHoraInicio(), h.getHoraFin(),
+                    inicio, fin, ReglasGrupoService.SIN_ID);
+            // El choque de docente se valida contra quien dicta el bloque (todos si el bloque no tiene docente)
+            for (AsignacionDocente a : dicta != null ? List.of(dicta) : grupo.getDocentes()) {
+                reglas.validarDocenteLibre(a.getIdDocente(), idPeriodo, ReglasGrupoService.SIN_ID,
+                        h.getDiaSemana(), h.getHoraInicio(), h.getHoraFin(), inicio, fin);
+            }
+            grupo.getHorarios().add(bloque);
         }
 
         if (vigencia == null) {
@@ -240,6 +270,9 @@ public class GrupoService {
         }
         grupo.setCodigo(codigo);
         grupo.setCupoMaximo(cupo);
+        if (request.getCiclo() != null) {
+            grupo.setCiclo(request.getCiclo());
+        }
         return grupoMapper.toResponse(grupoRepository.saveAndFlush(grupo));
     }
 
@@ -257,6 +290,22 @@ public class GrupoService {
     Grupo buscarOFallar(Long id) {
         return grupoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Grupo no encontrado: " + id));
+    }
+
+    @Transactional
+    public GrupoResponse cambiarPermisos(Long id, boolean puedeEditarSilabo, Long idDelegado) {
+        Grupo grupo = buscarOFallar(id);
+        validarNoAnulado(grupo);
+        grupo.setPuedeEditarSilabo(puedeEditarSilabo);
+        grupo.setIdDelegado(idDelegado);
+        return grupoMapper.toResponse(grupoRepository.save(grupo));
+    }
+
+    /** El docente no edita silabo ni sesiones si el admin cerro el permiso del grupo. */
+    void validarEdicionSilabo(Grupo grupo) {
+        if (!Boolean.TRUE.equals(grupo.getPuedeEditarSilabo()) && !pe.edu.upeu.lamb.planificacion.config.JwtClaims.esGestion()) {
+            throw new BusinessRuleException("La edicion del silabo del grupo " + grupo.getCodigo() + " esta cerrada; pide al coordinador que la habilite");
+        }
     }
 
     void validarNoAnulado(Grupo grupo) {

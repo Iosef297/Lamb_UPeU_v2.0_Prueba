@@ -3,6 +3,7 @@ package pe.edu.upeu.lamb.curriculo.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +37,11 @@ public class PlanEstudio {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_modalidad")
     private Modalidad modalidad;
+
+    // Nota minima para aprobar los cursos del plan (LAMB: plan_programa.nota_aprobatoria)
+    @Column(name = "nota_aprobatoria", nullable = false, precision = 4, scale = 2)
+    @Builder.Default
+    private BigDecimal notaAprobatoria = new BigDecimal("13");
 
     @Column(name = "fecha_registro", nullable = false)
     private Instant fechaRegistro;

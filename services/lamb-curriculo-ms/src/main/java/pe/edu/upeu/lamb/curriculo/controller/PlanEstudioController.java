@@ -1,5 +1,7 @@
 package pe.edu.upeu.lamb.curriculo.controller;
 
+import pe.edu.upeu.lamb.curriculo.dto.ClonarPlanRequest;
+import pe.edu.upeu.lamb.curriculo.dto.PlanCursoActualizarRequest;
 import pe.edu.upeu.lamb.curriculo.dto.PlanCursoRequest;
 import pe.edu.upeu.lamb.curriculo.dto.PlanEstudioRequest;
 import pe.edu.upeu.lamb.curriculo.dto.PlanEstudioResponse;
@@ -35,6 +37,11 @@ public class PlanEstudioController {
     @GetMapping("/programa/{idPrograma}/vigente")
     public PlanEstudioResponse obtenerVigente(@PathVariable Long idPrograma) {
         return planEstudioService.obtenerVigente(idPrograma);
+    }
+
+    @GetMapping("/programa/{idPrograma}/cohorte/{cohorte}")
+    public PlanEstudioResponse obtenerPorCohorte(@PathVariable Long idPrograma, @PathVariable String cohorte) {
+        return planEstudioService.obtenerPorCohorte(idPrograma, cohorte);
     }
 
     @GetMapping("/cursos/{codigoCurso}/vigencia")
@@ -83,6 +90,23 @@ public class PlanEstudioController {
                                                      @PathVariable Long idPlanCurso,
                                                      @PathVariable Long idPlanCursoRequisito) {
         return planEstudioService.eliminarPrerrequisito(id, idPlanCurso, idPlanCursoRequisito);
+    }
+
+    @PostMapping("/{id}/clonar")
+    @ResponseStatus(HttpStatus.CREATED)
+    public PlanEstudioResponse clonar(@PathVariable Long id, @Valid @RequestBody ClonarPlanRequest request) {
+        return planEstudioService.clonar(id, request);
+    }
+
+    @PutMapping("/{id}/cursos/{idPlanCurso}")
+    public PlanEstudioResponse actualizarCurso(@PathVariable Long id, @PathVariable Long idPlanCurso,
+                                               @Valid @RequestBody PlanCursoActualizarRequest request) {
+        return planEstudioService.actualizarCurso(id, idPlanCurso, request);
+    }
+
+    @PostMapping("/{id}/derogar")
+    public PlanEstudioResponse derogar(@PathVariable Long id) {
+        return planEstudioService.derogar(id);
     }
 
     @PostMapping("/{id}/publicar")

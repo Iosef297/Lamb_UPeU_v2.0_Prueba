@@ -16,7 +16,7 @@ public class GrupoElectivoMapper {
         return GrupoElectivo.builder()
                 .nombre(request.getNombre().trim())
                 .cantidadElegir(request.getCantidadElegir())
-                .idPlanCursos(new ArrayList<>(request.getIdPlanCursos()))
+                .idCursosCatalogo(new ArrayList<>(new java.util.LinkedHashSet<>(request.getIdCursosCatalogo())))
                 .build();
     }
 
@@ -27,7 +27,9 @@ public class GrupoElectivoMapper {
                 .versionPlan(grupoElectivo.getPlan().getVersion())
                 .nombre(grupoElectivo.getNombre())
                 .cantidadElegir(grupoElectivo.getCantidadElegir())
+                .idCursosCatalogo(List.copyOf(grupoElectivo.getIdCursosCatalogo()))
                 .idPlanCursos(List.copyOf(grupoElectivo.getIdPlanCursos()))
+                .enMalla(!grupoElectivo.getIdPlanCursos().isEmpty())
                 .build();
     }
 }

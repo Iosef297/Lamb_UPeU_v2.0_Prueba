@@ -30,7 +30,7 @@
     <select id="idComponente" formControlName="idComponente">
       <option [ngValue]="null" disabled>Selecciona un componente</option>
       @for (c of componentes(); track c.id) {
-        <option [ngValue]="c.id">{{ c.codigo }} - {{ c.nombre }} ({{ c.tipo }})</option>
+        <option [ngValue]="c.id">{{ c.codigo }} - {{ c.nombre }} ({{ c.tipo | sinGuion }})</option>
       }
     </select>
     <small class="ayuda">

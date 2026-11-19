@@ -1,0 +1,32 @@
+<div class="pagina">
+  <h2>detalles-cobro</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label>
+      ID Persona
+      <input type="number" formControlName="idPersona" />
+    </label>
+    <label>
+      ID Concepto
+      <input type="number" formControlName="idConceptoPago" />
+    </label>
+    <label>
+      Monto
+      <input type="number" formControlName="monto" step="0.01" />
+    </label>
+    <label>
+      Fecha vencimiento
+      <input type="date" formControlName="fechaVencimiento" />
+    </label>
+    <label>
+      ID Estado cobro
+      <input type="number" formControlName="idEstadoCobro" />
+    </label>
+
+    <button type="submit">Guardar</button>
+  </form>
+</div>

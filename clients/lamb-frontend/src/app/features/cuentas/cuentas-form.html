@@ -1,0 +1,24 @@
+<div class="pagina">
+  <h2>cuentas</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label>
+      ID Persona
+      <input type="number" formControlName="idPersona" />
+    </label>
+    <label>
+      Saldo
+      <input type="number" formControlName="saldo" step="0.01" />
+    </label>
+    <label>
+      Estado
+      <input type="text" formControlName="estado" />
+    </label>
+
+    <button type="submit">Guardar</button>
+  </form>
+</div>

@@ -1,0 +1,32 @@
+<div class="pagina">
+  <h2>solicitudes-devolucion</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label>
+      ID Persona
+      <input type="number" formControlName="idPersona" />
+    </label>
+    <label>
+      Motivo
+      <input type="text" formControlName="motivo" />
+    </label>
+    <label>
+      Monto solicitado
+      <input type="number" formControlName="montoSolicitado" step="0.01" />
+    </label>
+    <label>
+      Estado
+      <input type="text" formControlName="estado" />
+    </label>
+    <label>
+      Fecha solicitud
+      <input type="datetime-local" formControlName="fechaSolicitud" />
+    </label>
+
+    <button type="submit">Guardar</button>
+  </form>
+</div>

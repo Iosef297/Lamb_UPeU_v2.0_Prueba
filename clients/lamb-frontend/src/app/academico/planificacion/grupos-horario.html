@@ -1,0 +1,340 @@
+<div class="ac-split">
+  <!-- Lista de grupos -->
+  <div class="ac-split-list">
+    <div class="cab">
+      <div class="fila">
+        <h3 class="ac-outfit">Grupos</h3>
+        @if (puedeEscribir()) {
+          <button type="button" class="ac-btn-y" style="padding: 4px 10px; font-size: 0.75rem" [disabled]="!api.contextoListo()" [title]="api.contextoListo() ? '' : api.avisoContexto" (click)="abrirNuevo()">+ Nuevo grupo</button>
+        }
+      </div>
+      <p>Grupos, horarios y docentes del periodo</p>
+      <div class="ac-aviso-y">
+        <span></span>
+        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
+          {{ soloPeriodo() && api.periodo() ? 'Periodo ' + api.periodo() : 'Todos los periodos' }}{{ api.programa() ? ' · ' + programa(+api.programa()) : '' }}
+        </span>
+        <span class="cnt">{{ visibles().length }}</span>
+      </div>
+      <label class="ac-check" style="font-size: 0.75rem; padding: 8px 0 0">
+        <input type="checkbox" [ngModel]="soloPeriodo()" (ngModelChange)="soloPeriodo.set($event)" /> Solo el periodo elegido
+      </label>
+      <div style="display: grid; gap: 6px; margin-top: 8px">
+        <select class="ac-input" style="font-size: 0.8rem; width: 100%" [value]="filtroCiclo()" (change)="elegirCiclo($any($event.target).value)">
+          <option value="">Todos los ciclos</option>
+          @for (c of ciclosDisponibles(); track c) {
+            <option [value]="c">Ciclo {{ romano(c) }}</option>
+          }
+        </select>
+        <select class="ac-input" style="font-size: 0.8rem; width: 100%" [value]="filtroGrupo()" (change)="filtroGrupo.set($any($event.target).value)">
+          <option value="">Todos los grupos</option>
+          @for (g of gruposDisponibles(); track g) {
+            <option [value]="g" [selected]="g === filtroGrupo()">Grupo {{ g }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="items">
+      @if (cargando()) {
+        <div class="ac-cargando"><span class="ac-spin"></span> Cargando…</div>
+      }
+      @for (g of visibles(); track g.id) {
+        <div
+          class="ac-gcard"
+          [style.border-left-color]="paleta(g).color"
+          [style.background]="seleccion() === g.id ? paleta(g).light : '#FAFAFA'"
+          [style.border-color]="seleccion() === g.id ? paleta(g).border : null"
+          (click)="alternar(g)"
+        >
+          <p class="t">{{ g.curso?.nombre ?? 'Curso' }} · {{ g.codigo }} · Ciclo {{ romano(g.ciclo) }}</p>
+          <p class="h" [style.color]="paleta(g).border">{{ resumenHorario(g) }}</p>
+          <p class="d">{{ g.curso?.codigo }} · {{ g.curso?.creditos ?? '—' }} créditos · HT {{ g.curso?.horasTeoria ?? 0 }} · HP {{ g.curso?.horasPractica ?? 0 }} · cupo {{ g.cupoMaximo }}</p>
+          <p class="d" style="color: #1e3a8a">{{ programa(g.idPrograma) }}</p>
+          <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px" (click)="$event.stopPropagation()">
+            <span class="ac-badge" style="padding: 2px 8px" [style.background]="insignia(g.estado).bg" [style.color]="insignia(g.estado).color">{{ texto(g.estado) }}</span>
+            <button type="button" class="ac-chip" style="padding: 2px 8px" (click)="ver(g)">Detalle</button>
+            @if (puedeEscribir()) {
+              <button type="button" class="ac-chip" style="padding: 2px 8px" (click)="editar(g)">Editar</button>
+              @if (g.estado === 'PENDIENTE_VALIDACION') {
+                <button type="button" class="ac-chip" style="padding: 2px 8px" (click)="revalidar(g)">Revalidar</button>
+              }
+              @if (porEliminar() === g.id) {
+                <button type="button" class="ac-chip" style="padding: 2px 8px; color: #dc2626 !important" (click)="eliminar(g)">¿Eliminar?</button>
+                <button type="button" class="ac-chip" style="padding: 2px 8px" (click)="porEliminar.set(null)">No</button>
+              } @else {
+                <button type="button" class="ac-chip" style="padding: 2px 8px" (click)="porEliminar.set(g.id)">Eliminar</button>
+              }
+            }
+          </div>
+          @if (g.motivo) {
+            <p class="d" style="color: #dc2626">{{ g.motivo }}</p>
+          }
+          <div class="pie">
+            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ titular(g) }}</span>
+            <span class="ac-pill-navy">Horario</span>
+          </div>
+        </div>
+      } @empty {
+        @if (!cargando()) {
+          <div class="ac-vacio">Sin grupos en el periodo.</div>
+        }
+      }
+    </div>
+  </div>
+
+  <!-- Horario semanal -->
+  <div class="ac-split-main">
+    <div class="ac-cal-bar">
+      <span class="tit">Horario {{ api.periodo() ? '· ' + api.periodo() : '' }}</span>
+      <div class="der">
+        <div style="display: flex; align-items: center; gap: 4px; background: rgba(255,255,255,0.1); border-radius: 12px; padding: 4px 8px">
+          <button type="button" style="color: rgba(255,255,255,0.8); width: 26px" (click)="moverSemana(-1)">←</button>
+          <button type="button" class="ac-mini-btn y" style="padding: 3px 10px" (click)="moverSemana(0)">Hoy</button>
+          <button type="button" style="color: rgba(255,255,255,0.8); width: 26px" (click)="moverSemana(1)">→</button>
+        </div>
+        <span style="color: #fff; font-size: 0.75rem; font-weight: 600">{{ rangoSemana() }}</span>
+        <select class="ac-select-chip" style="background-color: rgba(255,255,255,0.95)" [value]="filtroAmbiente()" (change)="filtroAmbiente.set($any($event.target).value)">
+          <option value="">Todos los ambientes</option>
+          @for (a of ambientes(); track a['id']) {
+            <option [value]="a['id']">{{ a['codigo'] }} · {{ a['nombre'] }}</option>
+          }
+        </select>
+        <span style="color: #fff; font-size: 0.75rem; font-weight: 600">{{ totalBloques() }} bloque(s)</span>
+        <div class="ac-seg">
+          @for (v of ['Semana', 'Lista']; track v) {
+            <button type="button" [class.on]="vista() === v" (click)="vista.set($any(v))">{{ v }}</button>
+          }
+        </div>
+      </div>
+    </div>
+
+    @if (aviso()) {
+      <div class="ac-alerta ok ac-toast">{{ aviso() }}</div>
+    }
+    @if (error()) {
+      <div class="ac-alerta error" style="margin: 12px 12px 0">{{ error() }} <button type="button" class="cerrar" (click)="error.set(null)">✕</button></div>
+    }
+
+    @if (vista() === 'Semana') {
+      <div class="ac-week-head">
+        <div class="gut"></div>
+        @for (d of dias; track d) {
+          <div class="dia" [class.hoy]="d === hoy">
+            <span class="d">{{ diaLargo(d) }}</span>
+            <span style="font-size: 0.7rem; color: #64748b; font-weight: 700">{{ fechasSemana()[$index].slice(8) }}/{{ fechasSemana()[$index].slice(5, 7) }}</span>
+            @if (d === hoy) {
+              <span class="c">•</span>
+            }
+          </div>
+        }
+      </div>
+      <div class="ac-week-body">
+        <div class="ac-week-grid" [style.min-height.px]="horas.length * alto">
+          <div class="ac-week-hours">
+            @for (h of horas; track h; let i = $index) {
+              <span [style.top.px]="i * alto">{{ h <= 12 ? h : h - 12 }} {{ h < 12 ? 'a.m.' : 'p.m.' }}</span>
+            }
+          </div>
+          @for (d of dias; track d) {
+            <div class="ac-week-col" [class.hoy]="d === hoy">
+              @for (h of horas; track h; let i = $index) {
+                <div class="ac-week-line" [class.first]="i === 0" [style.top.px]="i * alto"></div>
+              }
+              @for (b of bloques()[d] ?? []; track b.grupo.id + '-' + b.h.horaInicio + b.h.idAmbiente) {
+                <div
+                  class="ac-evt"
+                  [class.sel]="seleccion() === b.grupo.id"
+                  [style.top.px]="b.top"
+                  [style.height.px]="b.alto"
+                  [style.background]="b.paleta.light"
+                  [style.border-left]="(b.h.tipoHorario === 'PRACTICA' ? '3px dashed ' : '3px solid ') + b.paleta.color"
+                  [style.opacity]="seleccion() && seleccion() !== b.grupo.id ? 0.45 : 1"
+                  [title]="(b.grupo.curso?.nombre ?? '') + ' · Ciclo ' + romano(b.grupo.ciclo) + ' · ' + b.grupo.codigo + ' · ' + (b.h.codigoAmbiente ?? '') + ' · ' + b.h.horaInicio.slice(0, 5) + '–' + b.h.horaFin.slice(0, 5)"
+                  (click)="alternar(b.grupo)"
+                >
+                  <p class="t" [style.color]="b.paleta.border">{{ b.grupo.curso?.nombre ?? b.grupo.codigo }}</p>
+                  @if (b.alto > 44) {
+                    <p class="s">Ciclo {{ romano(b.grupo.ciclo) }} · {{ b.h.codigoTipo ?? 'T' }} · {{ b.grupo.codigo }} · {{ b.h.codigoAmbiente ?? 'Por confirmar' }}</p>
+                  }
+                  @if (b.alto > 80) {
+                    <p class="s">{{ b.h.horaInicio.slice(0, 5) }}–{{ b.h.horaFin.slice(0, 5) }}</p>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    } @else {
+      <div class="ac-page" style="padding: 16px">
+        <div class="ac-card">
+          <div class="ac-table-wrap">
+            <table class="ac-table">
+              <thead>
+                <tr><th>CICLO</th><th>GRUPO</th><th>CURSO</th><th>DÍA</th><th>HORA</th><th>AMBIENTE</th><th>ESTADO</th></tr>
+              </thead>
+              <tbody>
+                @for (d of diasTodos; track d) {
+                  @for (b of bloques()[d] ?? []; track b.grupo.id + '-' + b.h.horaInicio + b.h.idAmbiente) {
+                    <tr (click)="alternar(b.grupo)" style="cursor: pointer">
+                      <td>{{ romano(b.grupo.ciclo) }}</td>
+                      <td class="cod">{{ b.grupo.codigo }}</td>
+                      <td class="fuerte">{{ b.grupo.curso?.nombre }}</td>
+                      <td>{{ diaLargo(d) }}</td>
+                      <td>{{ b.h.horaInicio.slice(0, 5) }}–{{ b.h.horaFin.slice(0, 5) }}</td>
+                      <td>{{ b.h.codigoAmbiente ?? '#' + b.h.idAmbiente }}</td>
+                      <td><span class="ac-badge" [style.background]="insignia(b.grupo.estado).bg" [style.color]="insignia(b.grupo.estado).color">{{ texto(b.grupo.estado) }}</span></td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+            @if (totalBloques() === 0) {
+              <div class="ac-vacio">Sin bloques de horario para el filtro elegido.</div>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Apertura de grupo: cabecera + detalle (horarios, docentes) en una sola transaccion -->
+@if (creando()) {
+  <div class="ac-modal-back" (click)="creando.set(false)">
+    <div class="ac-modal" style="max-width: 1180px" (click)="$event.stopPropagation()">
+      <div class="ac-modal-head">
+        <h3>Apertura de grupo</h3>
+        <button type="button" class="x" (click)="creando.set(false)">✕</button>
+      </div>
+      <form class="ac-modal-body" (ngSubmit)="guardarNuevo()">
+        <p class="ac-form-title">Datos generales</p>
+        <p class="ac-form-sub">El grupo, su horario y sus docentes se registran en una sola transacción; si hay cruce de ambiente o de docente no se guarda nada.</p>
+
+        @if (errorForm()) {
+          <div class="ac-alerta error">{{ errorForm() }}</div>
+        }
+
+        <div class="ac-form-grid">
+          <div class="ac-field ancho">
+            <label>Oferta académica<span class="req">*</span></label>
+            <select class="ac-input" name="idOferta" [(ngModel)]="nuevo.idOferta">
+              <option value="">— Seleccione —</option>
+              @for (o of ofertasDelPeriodo(); track o['id']) {
+                <option [value]="o['id']">{{ etiquetaOferta(o) }}</option>
+              }
+            </select>
+          </div>
+          <div class="ac-field">
+            <label>Código del grupo<span class="req">*</span></label>
+            <input class="ac-input" name="codigo" maxlength="20" placeholder="Ej. G1" [(ngModel)]="nuevo.codigo" />
+          </div>
+          <div class="ac-field">
+            <label>Cupo máximo<span class="req">*</span></label>
+            <input class="ac-input" name="cupo" type="number" min="1" [(ngModel)]="nuevo.cupoMaximo" />
+          </div>
+        </div>
+
+        <div class="ac-seccion-tit">
+          <h4>Horario</h4>
+          <div style="display: flex; gap: 6px">
+            <button type="button" class="ac-btn-ligero" (click)="verFranjas.set(!verFranjas())">{{ verFranjas() ? 'Ocultar franjas' : '▦ Elegir franjas' }}</button>
+            <button type="button" class="ac-btn-ligero" (click)="agregarHorario()">+ Agregar bloque</button>
+          </div>
+        </div>
+        @if (verFranjas()) {
+          <ac-selector-franjas (aplicar)="agregarFranjas($event)" />
+        }
+        <div class="ac-filas">
+          <div class="fila cab" style="grid-template-columns: 1.6fr 1fr 0.9fr 0.6fr 0.8fr 0.8fr 1fr 1.2fr 32px">
+            <span>AMBIENTE</span><span>DÍA</span><span>TIPO</span><span>SUBGR.</span><span>INICIO</span><span>FIN</span><span>LO DICTA</span><span>MÓDULO</span><span></span>
+          </div>
+          @for (h of nuevo.horarios; track $index; let i = $index) {
+            <div class="fila" style="grid-template-columns: 1.6fr 1fr 0.9fr 0.6fr 0.8fr 0.8fr 1fr 1.2fr 32px">
+              <select class="ac-input" [name]="'amb' + i" [(ngModel)]="h.idAmbiente">
+                <option value="">Por confirmar</option>
+                @for (a of ambientes(); track a['id']) {
+                  <option [value]="a['id']">{{ etiquetaAmbiente(a) }}</option>
+                }
+              </select>
+              <select class="ac-input" [name]="'dia' + i" [(ngModel)]="h.diaSemana">
+                @for (d of diasTodos; track d) {
+                  <option [value]="d">{{ diaLargo(d) }}</option>
+                }
+              </select>
+              <select class="ac-input" [name]="'tipo' + i" [(ngModel)]="h.tipoHorario">
+                <option value="TEORIA">Teoría</option>
+                <option value="PRACTICA">Práctica</option>
+              </select>
+              <input class="ac-input" type="number" min="1" max="20" placeholder="—" [name]="'sub' + i" [(ngModel)]="h.numeroSubgrupo" />
+              <input class="ac-input" type="time" [name]="'hi' + i" [(ngModel)]="h.horaInicio" />
+              <input class="ac-input" type="time" [name]="'hf' + i" [(ngModel)]="h.horaFin" />
+              <select class="ac-input" [name]="'dicta' + i" [(ngModel)]="h.idDocente" title="Docente del grupo que dicta este bloque">
+                <option value="">Todos</option>
+                @for (d of docentesDelPedido(); track d) {
+                  <option [value]="d">#{{ d }}</option>
+                }
+              </select>
+              <select class="ac-input" [name]="'mod' + i" [(ngModel)]="h.idModulo" title="Las fechas del bloque salen del módulo">
+                <option value="">Todo el periodo</option>
+                @for (m of modulosDeOferta(); track m['id']) {
+                  <option [value]="m['id']">{{ m['nombre'] }}</option>
+                }
+              </select>
+              <button type="button" class="ac-circ" style="background: #fee2e2 !important; color: #dc2626 !important" [disabled]="nuevo.horarios.length === 1" (click)="nuevo.horarios.splice(i, 1)">✕</button>
+            </div>
+          }
+        </div>
+
+        <div class="ac-seccion-tit">
+          <h4>Docentes</h4>
+          <button type="button" class="ac-btn-ligero" (click)="agregarDocente()">+ Agregar docente</button>
+        </div>
+        <div class="ac-filas">
+          <div class="fila cab" style="grid-template-columns: 1.3fr 1.1fr 0.8fr 0.8fr 0.9fr 32px">
+            <span>ID DOCENTE (PERSONAS)</span><span>ROL</span><span>HORAS / SEM.</span><span>NOTAS</span><span>ASISTENCIA</span><span></span>
+          </div>
+          @for (d of nuevo.docentes; track $index; let i = $index) {
+            <div class="fila" style="grid-template-columns: 1.3fr 1.1fr 0.8fr 0.8fr 0.9fr 32px">
+              <input class="ac-input" type="number" min="1" placeholder="Id docente" [name]="'doc' + i" [(ngModel)]="d.idDocente" />
+              <select class="ac-input" [name]="'rol' + i" [(ngModel)]="d.rol" (ngModelChange)="cambioRol(d)">
+                @for (r of roles; track r) {
+                  <option [value]="r">{{ r }}</option>
+                }
+              </select>
+              <input class="ac-input" type="number" min="0" [name]="'hs' + i" [(ngModel)]="d.horasSemanales" />
+              <label class="ac-check" style="padding: 0"><input type="checkbox" [name]="'gn' + i" [(ngModel)]="d.gestionaNota" /> Gestiona</label>
+              <label class="ac-check" style="padding: 0"><input type="checkbox" [name]="'ga' + i" [(ngModel)]="d.gestionaAsistencia" /> Gestiona</label>
+              <button type="button" class="ac-circ" style="background: #fee2e2 !important; color: #dc2626 !important" (click)="nuevo.docentes.splice(i, 1)">✕</button>
+            </div>
+          } @empty {
+            <div class="fila" style="font-size: 0.8rem; color: #94a3b8">Sin docentes: el grupo queda pendiente de validación.</div>
+          }
+        </div>
+
+        <div class="ac-form-actions">
+          <button type="button" class="ac-btn-out" (click)="creando.set(false)">Cancelar</button>
+          <button type="submit" class="ac-btn-navy" [disabled]="guardando()">{{ guardando() ? 'Registrando…' : 'Abrir grupo' }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (edicion(); as e) {
+  <ac-formulario-modal
+    modulo="planificacion"
+    [campos]="e.campos"
+    [titulo]="e.titulo"
+    icono=""
+    textoBoton="Guardar cambios"
+    [inicial]="e.inicial"
+    [accion]="e.accion"
+    (guardado)="edicionGuardada()"
+    (cerrar)="edicion.set(null)"
+  />
+}
+@if (detalle(); as d) {
+  <ac-grupo-detalle [grupo]="d" [programa]="programa($any(d)['idPrograma'])" (cerrar)="detalle.set(null); cargar()" />
+}

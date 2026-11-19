@@ -12,7 +12,7 @@ import java.time.LocalTime;
 @Setter
 public class HorarioDetalleRequest {
 
-    @NotNull
+    // Opcional: sin ambiente = "Por confirmar"
     private Long idAmbiente;
 
     @NotNull
@@ -23,4 +23,23 @@ public class HorarioDetalleRequest {
 
     @NotNull
     private LocalTime horaFin;
+
+    // Rango de fechas en que rige el horario (modulo del LAMB real) y tipo de sesion; opcionales
+    private java.time.LocalDate fechaInicio;
+
+    private java.time.LocalDate fechaFin;
+
+    // Tipo del LAMB: TEORIA / PRACTICA + numero de subgrupo (T, T1, P1)
+    @jakarta.validation.constraints.Pattern(regexp = "TEORIA|PRACTICA", message = "debe ser TEORIA o PRACTICA")
+    private String tipoHorario;
+
+    @jakarta.validation.constraints.Min(1)
+    @jakarta.validation.constraints.Max(20)
+    private Integer numeroSubgrupo;
+
+    // Docente del pedido que dicta el bloque (debe estar en docentes[])
+    private Long idDocente;
+
+    // Modulo del periodo: si no se envian fechas, el bloque toma las del modulo
+    private Long idModulo;
 }

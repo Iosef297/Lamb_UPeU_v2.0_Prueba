@@ -1,0 +1,54 @@
+<div class="pagina">
+  <h2>situaciones-academicas-estudiante</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+  @if (errorAccion()) {
+    <div class="error">{{ errorAccion() }}</div>
+  }
+  @if (exito()) {
+    <div class="exito">{{ exito() }}</div>
+  }
+
+  <div class="barra">
+    @if (auth.tieneRol('ADMIN')) {
+      <a [routerLink]="['/situaciones-academicas-estudiante/nueva']">Nuevo</a>
+    }
+    <button type="button" (click)="cargar()">Actualizar</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+          <th>ID</th>
+          <th>ID Persona</th>
+          <th>Periodo</th>
+          <th>Situación</th>
+          <th>Fecha registro</th>
+        @if (auth.tieneRol('ADMIN')) {
+          <th>Acciones</th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (item of items(); track item.id) {
+        <tr>
+            <td>{{ item.id }}</td>
+            <td>{{ item.idPersona }}</td>
+            <td>{{ item.periodo }}</td>
+            <td>{{ item.situacion }}</td>
+            <td>{{ item.fechaRegistro }}</td>
+          @if (auth.tieneRol('ADMIN')) {
+            <td>
+              <a [routerLink]="['/situaciones-academicas-estudiante', item.id, 'editar']">Editar</a>
+
+            </td>
+          }
+        </tr>
+      } @empty {
+        <tr><td colspan="6">Sin registros.</td></tr>
+      }
+    </tbody>
+  </table>
+</div>

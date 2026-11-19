@@ -37,4 +37,14 @@ public class RegistroAsistencia {
     @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false, length = 30)
     private EstadoAsistencia estado;
+
+    // Teoria o Practica: cada bloque de la sesion tiene su propia marcacion (y su docente)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_horario", nullable = false, length = 10)
+    @Builder.Default
+    private TipoHorarioAsistencia tipoHorario = TipoHorarioAsistencia.TEORIA;
+
+    // Desde aqui corre el plazo para justificar
+    @Column(name = "fecha_registro", nullable = false)
+    private java.time.LocalDateTime fechaRegistro;
 }

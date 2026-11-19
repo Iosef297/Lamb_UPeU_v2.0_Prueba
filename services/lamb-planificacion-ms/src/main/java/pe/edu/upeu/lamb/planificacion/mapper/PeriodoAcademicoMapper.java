@@ -26,6 +26,7 @@ public class PeriodoAcademicoMapper {
                 .nombre(periodoAcademico.getNombre())
                 .idTipoPeriodo(periodoAcademico.getTipoPeriodo().getId())
                 .codigoTipoPeriodo(periodoAcademico.getTipoPeriodo().getCodigo())
+                .nombreTipoPeriodo(periodoAcademico.getTipoPeriodo().getNombre())
                 .fechaInicio(periodoAcademico.getFechaInicio())
                 .fechaFin(periodoAcademico.getFechaFin())
                 .estado(periodoAcademico.getEstado())

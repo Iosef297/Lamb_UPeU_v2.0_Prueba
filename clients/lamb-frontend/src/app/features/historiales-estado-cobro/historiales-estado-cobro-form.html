@@ -1,0 +1,28 @@
+<div class="pagina">
+  <h2>historiales-estado-cobro</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label>
+      ID Detalle cobro
+      <input type="number" formControlName="idDetalleCobro" />
+    </label>
+    <label>
+      Estado anterior
+      <input type="text" formControlName="estadoAnterior" />
+    </label>
+    <label>
+      Estado nuevo
+      <input type="text" formControlName="estadoNuevo" />
+    </label>
+    <label>
+      Fecha cambio
+      <input type="datetime-local" formControlName="fechaCambio" />
+    </label>
+
+    <button type="submit">Guardar</button>
+  </form>
+</div>

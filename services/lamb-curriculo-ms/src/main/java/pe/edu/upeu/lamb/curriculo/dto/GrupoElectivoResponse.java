@@ -19,5 +19,9 @@ public class GrupoElectivoResponse {
     private String versionPlan;
     private String nombre;
     private Integer cantidadElegir;
+    // Cursos del catalogo (bolsa de opciones)
+    private List<Long> idCursosCatalogo;
+    // Cursos del plan (vacio mientras el grupo no esta en la malla)
     private List<Long> idPlanCursos;
+    private Boolean enMalla;
 }

@@ -1,0 +1,28 @@
+<div class="pagina">
+  <h2>saldos-periodo</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label>
+      ID Persona
+      <input type="number" formControlName="idPersona" />
+    </label>
+    <label>
+      Periodo
+      <input type="text" formControlName="periodo" />
+    </label>
+    <label>
+      Saldo inicial
+      <input type="number" formControlName="saldoInicial" step="0.01" />
+    </label>
+    <label>
+      Saldo final
+      <input type="number" formControlName="saldoFinal" step="0.01" />
+    </label>
+
+    <button type="submit">Guardar</button>
+  </form>
+</div>

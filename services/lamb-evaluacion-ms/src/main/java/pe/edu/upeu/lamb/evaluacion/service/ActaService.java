@@ -1,5 +1,6 @@
 package pe.edu.upeu.lamb.evaluacion.service;
 
+import pe.edu.upeu.lamb.evaluacion.entity.ModoEvaluacion;
 import pe.edu.upeu.lamb.evaluacion.entity.Acta;
 import pe.edu.upeu.lamb.evaluacion.entity.EscalaCalificacion;
 import pe.edu.upeu.lamb.evaluacion.entity.EstadoActa;
@@ -35,6 +36,10 @@ public class ActaService {
     private final ActaRepository actaRepository;
     private final EvaluacionEventosProducer producer;
     private final CalculoNotasService calculoNotasService;
+
+    // Modo con el que nacen las actas nuevas (el LAMB real evalua por competencias)
+    @Value("${app.evaluacion.modo-por-defecto:COMPETENCIA}")
+    private ModoEvaluacion modoPorDefecto;
 
     @Value("${spring.application.name}")
     private String nombreServicio;
@@ -84,6 +89,7 @@ public class ActaService {
                     .estado(estadoResultante)
                     .motivo(rechazada ? MOTIVO_SIN_DOCENTE : null)
                     .fechaRegistro(LocalDateTime.now())
+                    .modoEvaluacion(modoPorDefecto)
                     .build());
         } catch (DataIntegrityViolationException ex) {
             log.warn("component=processor grupoId={} status=ignored motivo=\"acta ya procesada (condicion de carrera)\"",
@@ -109,12 +115,36 @@ public class ActaService {
      * Cierre del acta: nota final de cada estudiante segun CalculoNotasService.
      * Publica acta.cerrada con los resultados; lo consume trayectoria para armar el historial.
      */
+    // El modo se elige mientras el acta esta ABIERTA; cambia como se calcula la nota final
+    @Transactional
+    public Acta cambiarModo(Long id, ModoEvaluacion modo) {
+        Acta acta = obtener(id);
+        if (acta.getEstado() != EstadoActa.ABIERTA) {
+            throw new BusinessRuleException("El acta " + id + " esta " + acta.getEstado() + "; el modo de evaluacion solo se cambia con el acta ABIERTA");
+        }
+        acta.setModoEvaluacion(modo);
+        return actaRepository.save(acta);
+    }
+
+    @Transactional
+    public Acta cambiarPermisos(Long id, Boolean notas, Boolean asistencia) {
+        Acta acta = obtener(id);
+        if (notas != null) {
+            acta.setNotasHabilitadas(notas);
+        }
+        if (asistencia != null) {
+            acta.setAsistenciaHabilitada(asistencia);
+        }
+        return actaRepository.save(acta);
+    }
+
     @Transactional
     public Acta cerrar(Long id) {
         Acta acta = obtener(id);
         if (acta.getEstado() != EstadoActa.ABIERTA) {
             throw new BusinessRuleException("El acta " + id + " esta " + acta.getEstado() + "; solo se cierra un acta ABIERTA");
         }
+        calculoNotasService.validarPesosCompletos(acta.getIdGrupo());
         Map<Long, BigDecimal> finales = calculoNotasService.notasFinales(acta.getIdGrupo());
         if (finales.isEmpty()) {
             throw new BusinessRuleException("El grupo " + acta.getIdGrupo() + " no tiene notas registradas");

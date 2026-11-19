@@ -111,7 +111,7 @@ public class SolicitudCambioHorarioService {
     private void aplicarAprobacion(SolicitudCambioHorario solicitudCambioHorario) {
         // Misma validacion de cruces y candados que la apertura del grupo
         HorarioGrupo horario = solicitudCambioHorario.getHorario();
-        horarioGrupoService.reprogramar(horario, horario.getAmbiente().getId(), solicitudCambioHorario.getDiaSemana(),
+        horarioGrupoService.reprogramar(horario, horario.getAmbiente() == null ? null : horario.getAmbiente().getId(), solicitudCambioHorario.getDiaSemana(),
                 solicitudCambioHorario.getHoraInicio(), solicitudCambioHorario.getHoraFin());
     }
 }

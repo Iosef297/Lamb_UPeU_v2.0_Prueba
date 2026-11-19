@@ -35,7 +35,7 @@
         <td>{{ plan.idPrograma }}</td>
         <td>{{ plan.version }}</td>
         <td>{{ plan.nombre }}</td>
-        <td><span class="estado" [class]="plan.estado">{{ plan.estado }}</span></td>
+        <td><span class="estado" [class]="plan.estado">{{ plan.estado | sinGuion }}</span></td>
         <td>{{ plan.cursos.length }}</td>
         <td>{{ plan.totalCreditos }}</td>
         <td>

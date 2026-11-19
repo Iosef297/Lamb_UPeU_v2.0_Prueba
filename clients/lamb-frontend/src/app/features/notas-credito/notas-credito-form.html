@@ -1,0 +1,28 @@
+<div class="pagina">
+  <h2>notas-credito</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label>
+      ID Documento
+      <input type="number" formControlName="idDocumentoPago" />
+    </label>
+    <label>
+      Motivo
+      <input type="text" formControlName="motivo" />
+    </label>
+    <label>
+      Monto
+      <input type="number" formControlName="monto" step="0.01" />
+    </label>
+    <label>
+      Fecha emisión
+      <input type="datetime-local" formControlName="fechaEmision" />
+    </label>
+
+    <button type="submit">Guardar</button>
+  </form>
+</div>

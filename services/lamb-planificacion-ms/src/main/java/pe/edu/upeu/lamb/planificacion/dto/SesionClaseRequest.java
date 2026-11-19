@@ -33,4 +33,40 @@ public class SesionClaseRequest {
 
     @Size(max = 1000)
     private String actividades;
+
+    @jakarta.validation.constraints.Size(max = 20)
+    @jakarta.validation.constraints.Pattern(regexp = "TEORIA|PRACTICA", message = "debe ser TEORIA o PRACTICA")
+    private String tipoSesion;
+
+    private java.time.LocalDate fecha;
+
+    @jakarta.validation.constraints.Min(0)
+    private Integer horasTeoria;
+
+    @jakarta.validation.constraints.Min(0)
+    private Integer horasPractica;
+
+    @jakarta.validation.constraints.Min(0)
+    private Integer horasAutonomas;
+
+    @jakarta.validation.constraints.Size(max = 1000)
+    private String actividadPractica;
+
+    @jakarta.validation.constraints.Size(max = 1000)
+    private String actividadAutonoma;
+
+    @jakarta.validation.constraints.Size(max = 500)
+    private String evidencia;
+
+    @jakarta.validation.constraints.Size(max = 1000)
+    private String instrumentos;
+
+    @jakarta.validation.constraints.Size(max = 2000)
+    private String actividadSincrona;
+
+    @jakarta.validation.constraints.Size(max = 2000)
+    private String actividadAsincrona;
+
+    @jakarta.validation.constraints.Size(max = 500)
+    private String adjuntoUrl;
 }

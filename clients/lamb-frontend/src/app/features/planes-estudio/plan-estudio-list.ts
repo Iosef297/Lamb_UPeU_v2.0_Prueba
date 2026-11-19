@@ -4,10 +4,11 @@ import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth/auth-service';
 import { PlanEstudioService } from './plan-estudio-service';
 import { PlanEstudioResponse } from './plan-estudio.model';
+import { SinGuion } from '../../core/sin-guion.pipe';
 
 @Component({
   selector: 'app-plan-estudio-list',
-  imports: [RouterLink],
+  imports: [SinGuion, RouterLink],
   templateUrl: './plan-estudio-list.html',
 })
 export class PlanEstudioList {

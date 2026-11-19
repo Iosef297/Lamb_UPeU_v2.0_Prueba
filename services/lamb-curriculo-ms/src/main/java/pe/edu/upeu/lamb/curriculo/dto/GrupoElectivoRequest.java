@@ -11,6 +11,7 @@ import lombok.Setter;
 
 import java.util.List;
 
+/** Se define con cursos del catalogo; al ubicarlo en la malla recien se agregan al plan como Electivo. */
 @Getter
 @Setter
 public class GrupoElectivoRequest {
@@ -27,6 +28,7 @@ public class GrupoElectivoRequest {
     @Max(10)
     private Integer cantidadElegir;
 
+    // Cursos del catalogo que forman la bolsa de opciones
     @NotEmpty
-    private List<@NotNull Long> idPlanCursos;
+    private List<@NotNull Long> idCursosCatalogo;
 }

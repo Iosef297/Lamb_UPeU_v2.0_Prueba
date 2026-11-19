@@ -14,6 +14,10 @@ public class SolicitudAperturaGrupoRequest {
     @NotNull
     private Long idOferta;
 
+    // EXTRAPROGRAMATICO (SE) o DIRIGIDO (SD)
+    @NotNull
+    private pe.edu.upeu.lamb.planificacion.entity.TipoSolicitudApertura tipo;
+
     @NotNull
     @Min(1)
     private Integer cupoPropuesto;

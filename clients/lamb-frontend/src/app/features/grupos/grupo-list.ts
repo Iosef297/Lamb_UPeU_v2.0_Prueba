@@ -4,10 +4,11 @@ import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth/auth-service';
 import { GrupoService } from './grupo-service';
 import { GrupoResponse } from './grupo.model';
+import { SinGuion } from '../../core/sin-guion.pipe';
 
 @Component({
   selector: 'app-grupo-list',
-  imports: [RouterLink],
+  imports: [SinGuion, RouterLink],
   templateUrl: './grupo-list.html',
 })
 export class GrupoList {

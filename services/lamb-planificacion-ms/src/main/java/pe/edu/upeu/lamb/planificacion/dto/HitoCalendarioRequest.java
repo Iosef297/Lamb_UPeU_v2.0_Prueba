@@ -28,4 +28,15 @@ public class HitoCalendarioRequest {
 
     @NotNull
     private LocalDate fechaFin;
+
+    @Size(max = 500)
+    private String descripcion;
+
+    private pe.edu.upeu.lamb.planificacion.entity.AreaResponsable areaResponsable;
+
+    private Long idPrograma;
+
+    private pe.edu.upeu.lamb.planificacion.entity.EstadoHito estado;
+
+    private Boolean visibleAlumno;
 }

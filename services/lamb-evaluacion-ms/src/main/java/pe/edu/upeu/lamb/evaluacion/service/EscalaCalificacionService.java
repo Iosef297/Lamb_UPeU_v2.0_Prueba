@@ -51,6 +51,10 @@ public class EscalaCalificacionService {
         escalaCalificacion.setDecimales(request.getDecimales());
         escalaCalificacion.setRedondeo(request.getRedondeo());
         escalaCalificacion.setVigente(request.getVigente());
+        escalaCalificacion.setUmbralProducto(EscalaCalificacionMapper.valor(request.getUmbralProducto(), "12.5"));
+        escalaCalificacion.setPesoSesiones(EscalaCalificacionMapper.valor(request.getPesoSesiones(), "20"));
+        escalaCalificacion.setPesoProducto(EscalaCalificacionMapper.valor(request.getPesoProducto(), "70"));
+        escalaCalificacion.setPesoCompetenciaGenerica(EscalaCalificacionMapper.valor(request.getPesoCompetenciaGenerica(), "10"));
         return escalaCalificacionMapper.toResponse(escalaCalificacionRepository.save(escalaCalificacion));
     }
 
@@ -74,6 +78,16 @@ public class EscalaCalificacionService {
         if (request.getNotaMinima().compareTo(request.getNotaAprobatoria()) >= 0
                 || request.getNotaAprobatoria().compareTo(request.getNotaMaxima()) > 0) {
             throw new BusinessRuleException("La escala debe cumplir: nota minima < nota aprobatoria <= nota maxima");
+        }
+        java.math.BigDecimal sumaPesos = EscalaCalificacionMapper.valor(request.getPesoSesiones(), "20")
+                .add(EscalaCalificacionMapper.valor(request.getPesoProducto(), "70"))
+                .add(EscalaCalificacionMapper.valor(request.getPesoCompetenciaGenerica(), "10"));
+        if (sumaPesos.compareTo(new java.math.BigDecimal("100")) != 0) {
+            throw new BusinessRuleException("Los pesos ES + EP + ECG deben sumar 100 (suman " + sumaPesos.stripTrailingZeros().toPlainString() + ")");
+        }
+        java.math.BigDecimal umbral = EscalaCalificacionMapper.valor(request.getUmbralProducto(), "12.5");
+        if (umbral.compareTo(request.getNotaMinima()) < 0 || umbral.compareTo(request.getNotaMaxima()) > 0) {
+            throw new BusinessRuleException("El umbral del producto debe estar entre la nota minima y la maxima de la escala");
         }
         if (Boolean.TRUE.equals(request.getVigente())
                 && escalaCalificacionRepository.existsByVigenteTrueAndIdNot(id == null ? 0L : id)) {

@@ -35,4 +35,18 @@ public class UnidadAprendizaje {
 
     @Column(name = "contenidos", nullable = true, length = 2000)
     private String contenidos;
+
+    // Resultado de aprendizaje de la unidad
+    @Column(name = "resultado_aprendizaje", length = 1000)
+    private String resultadoAprendizaje;
+
+    // Producto de la unidad y como se evalua
+    @Column(name = "producto", length = 255)
+    private String producto;
+
+    @Column(name = "descripcion_producto", length = 1000)
+    private String descripcionProducto;
+
+    @Column(name = "criterios_evaluacion", length = 2000)
+    private String criteriosEvaluacion;
 }

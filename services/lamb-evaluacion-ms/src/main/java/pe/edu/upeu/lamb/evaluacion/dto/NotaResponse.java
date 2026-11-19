@@ -21,4 +21,5 @@ public class NotaResponse {
     private String codigoComponente;
     private BigDecimal calificacion;
     private String periodo;
+    private Long idEvaluacionProgramada;
 }

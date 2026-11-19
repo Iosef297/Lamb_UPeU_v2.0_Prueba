@@ -1,0 +1,32 @@
+<div class="pagina">
+  <h2>cambios-situacion-academica</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label>
+      ID Situación académica
+      <input type="number" formControlName="idSituacionAcademica" />
+    </label>
+    <label>
+      Situación anterior
+      <input type="text" formControlName="situacionAnterior" />
+    </label>
+    <label>
+      Situación nueva
+      <input type="text" formControlName="situacionNueva" />
+    </label>
+    <label>
+      Resolución
+      <input type="text" formControlName="resolucion" />
+    </label>
+    <label>
+      Fecha cambio
+      <input type="datetime-local" formControlName="fechaCambio" />
+    </label>
+
+    <button type="submit">Guardar</button>
+  </form>
+</div>

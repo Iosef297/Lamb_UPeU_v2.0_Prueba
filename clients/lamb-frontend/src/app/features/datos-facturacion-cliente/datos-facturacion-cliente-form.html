@@ -1,0 +1,28 @@
+<div class="pagina">
+  <h2>datos-facturacion-cliente</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label>
+      ID Persona
+      <input type="number" formControlName="idPersona" />
+    </label>
+    <label>
+      Razón social
+      <input type="text" formControlName="razonSocial" />
+    </label>
+    <label>
+      N° documento
+      <input type="text" formControlName="numeroDocumento" />
+    </label>
+    <label>
+      Dirección
+      <input type="text" formControlName="direccion" />
+    </label>
+
+    <button type="submit">Guardar</button>
+  </form>
+</div>

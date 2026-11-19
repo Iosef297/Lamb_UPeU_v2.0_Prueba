@@ -10,6 +10,12 @@ public interface RegistroAsistenciaRepository extends JpaRepository<RegistroAsis
 
     List<RegistroAsistencia> findByIdGrupo(Long idGrupo);
 
+    boolean existsByIdGrupoAndIdPersonaAndIdSesionClaseAndTipoHorario(Long idGrupo, Long idPersona, Long idSesionClase,
+            pe.edu.upeu.lamb.evaluacion.entity.TipoHorarioAsistencia tipoHorario);
+
+    boolean existsByIdGrupoAndIdPersonaAndIdSesionClaseAndTipoHorarioAndIdNot(Long idGrupo, Long idPersona, Long idSesionClase,
+            pe.edu.upeu.lamb.evaluacion.entity.TipoHorarioAsistencia tipoHorario, Long id);
+
     long countByIdGrupoAndIdPersona(Long idGrupo, Long idPersona);
 
     long countByIdGrupoAndIdPersonaAndEstado(Long idGrupo, Long idPersona, EstadoAsistencia estado);

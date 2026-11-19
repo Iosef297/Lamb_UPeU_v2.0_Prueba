@@ -1,0 +1,28 @@
+<div class="pagina">
+  <h2>vouchers</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label>
+      ID Pago
+      <input type="number" formControlName="idPago" />
+    </label>
+    <label>
+      N° voucher
+      <input type="text" formControlName="numeroVoucher" />
+    </label>
+    <label>
+      Entidad financiera
+      <input type="text" formControlName="entidadFinanciera" />
+    </label>
+    <label>
+      Fecha registro
+      <input type="datetime-local" formControlName="fechaRegistro" />
+    </label>
+
+    <button type="submit">Guardar</button>
+  </form>
+</div>

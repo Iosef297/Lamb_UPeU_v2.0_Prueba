@@ -16,4 +16,7 @@ public class CursoResponse {
     private String codigo;
     private String nombre;
     private Integer creditos;
+    private Integer horasTeoria;
+    private Integer horasPractica;
+    private Integer horasNoPresenciales;
 }

@@ -1,0 +1,522 @@
+<div class="ac-page">
+  <div class="ac-head">
+    <div>
+      <h2>Plan de Estudios</h2>
+      <p class="sub">
+        @if (plan(); as p) {
+          Plan {{ p.version }} · {{ p.nombre }} · {{ programa(p.idPrograma) }} · {{ modalidad(p.idModalidad) }}
+        } @else {
+          Cursos por ciclo, créditos y prerrequisitos
+        }
+      </p>
+      @if (plan()) {
+        <small class="ac-origen">Programa {{ textoOrigen(origenPrograma) }}</small>
+        <small class="ac-origen">Modalidad {{ textoOrigen(origenModalidad) }}</small>
+      }
+    </div>
+    <div class="acciones">
+      @if (planesVisibles().length > 0) {
+        <select class="ac-input" style="width: auto; min-width: 280px; background-color: #fff" [value]="plan()?.id" (change)="elegir($any($event.target).value)">
+          @for (p of planesVisibles(); track p.id) {
+            <option [value]="p.id" [selected]="p.id === plan()?.id">{{ p.version }} · {{ p.nombre }} ({{ p.estado | sinGuion }})</option>
+          }
+        </select>
+      }
+      @if (puedeEscribir()) {
+        <button type="button" class="ac-btn-y" [disabled]="!api.contextoListo()" [title]="api.contextoListo() ? '' : api.avisoContexto" (click)="nuevoPlan()">+ Nuevo plan</button>
+      }
+    </div>
+  </div>
+
+  @if (aviso()) {
+    <div class="ac-alerta ok ac-toast">{{ aviso() }}</div>
+  }
+  @if (error()) {
+    <div class="ac-alerta error">{{ error() }} <button type="button" class="cerrar" (click)="error.set(null)">✕</button></div>
+  }
+
+  @if (cargando()) {
+    <div class="ac-cargando"><span class="ac-spin"></span> Cargando planes de estudio…</div>
+  } @else if (plan(); as p) {
+    <div class="ac-stats">
+      <div class="ac-stat">
+        <div>
+          <span class="ac-badge" [style.background]="insigniaPlan().bg" [style.color]="insigniaPlan().color">{{ p.estado | sinGuion }}</span>
+          <p class="lbl" style="margin-top: 4px">{{ p.fechaPublicacion ? 'Publicado ' + texto(p.fechaPublicacion) : 'Sin publicar' }}</p>
+        </div>
+      </div>
+      <div class="ac-stat">
+        <div><p class="val" style="color: #1e3a8a">{{ creditosPlan() }}</p><p class="lbl">Créditos a cursar</p></div>
+      </div>
+      <div class="ac-stat">
+        <div>
+          <p class="val" style="color: #7c3aed">{{ p.totalHoras }}</p>
+          <p class="lbl">Horas TH (HT {{ p.totalHorasTeoria }} · HP {{ p.totalHorasPractica }} · HNP {{ p.totalHorasNoPresenciales }})</p>
+        </div>
+      </div>
+      <div class="ac-stat">
+        <div><p class="val" style="color: #0f766e">{{ p.notaAprobatoria }}</p><p class="lbl">Nota aprobatoria</p></div>
+      </div>
+      <div class="ac-stat">
+        <div><p class="val" style="color: #16a34a">{{ p.cursos.length }}</p><p class="lbl">Cursos en el plan</p></div>
+      </div>
+      <div class="ac-stat">
+        <div><p class="val" style="color: #b45309">{{ ciclos().length }}</p><p class="lbl">Ciclos</p></div>
+      </div>
+      <div class="ac-stat">
+        <div>
+          <p class="val" style="color: #0369a1; font-size: 0.95rem">{{ cohortesPlan() }}</p>
+          <p class="lbl">Cohortes de ingreso que lo siguen</p>
+        </div>
+      </div>
+
+    </div>
+
+    @if (puedeEscribir()) {
+      <div style="display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap">
+        @if (editablePlan()) {
+          <button type="button" class="ac-btn-navy" [disabled]="!api.contextoListo()" [title]="api.contextoListo() ? '' : api.avisoContexto" (click)="agregarCurso()">+ Agregar curso</button>
+          <button type="button" class="ac-btn-navy" style="background: #7c3aed" [disabled]="!api.contextoListo()" [title]="api.contextoListo() ? 'Toma cursos libres del catálogo y los agrupa como Electivo I, II…' : api.avisoContexto" (click)="agregarElectivo()">Añadir electivo</button>
+          <button type="button" class="ac-btn-out" (click)="editarPlan()">Editar datos del plan</button>
+        }
+        @if (p.estado === 'BORRADOR') {
+          <button type="button" class="ac-btn-y" title="Queda VIGENTE para los nuevos ingresantes; el plan vigente actual pasa a EN EXTINCIÓN (no se deroga)" (click)="publicar()">Publicar plan</button>
+        }
+        @if (p.estado === 'EN_EXTINCION') {
+          @if (porDerogar()) {
+            <span class="ac-alerta error" style="margin: 0; padding: 6px 12px">
+              ¿Cierre definitivo del plan {{ p.version }}?
+              Solo si ya no quedan estudiantes con este plan.
+              <button type="button" class="ac-btn-ligero rojo" (click)="derogar()">Sí, derogar</button>
+              <button type="button" class="ac-btn-ligero" (click)="porDerogar.set(false)">No</button>
+            </span>
+          } @else {
+            <button type="button" class="ac-btn-out" title="Solo cuando ya no queden estudiantes con este plan" (click)="porDerogar.set(true)">Cierre definitivo (derogar)</button>
+          }
+        }
+        <button type="button" class="ac-btn-out" (click)="clonar()">Nueva versión (clonar)</button>
+        @if (p.estado === 'BORRADOR') {
+          @if (porEliminarPlan()) {
+            <span class="ac-alerta error" style="margin: 0; padding: 6px 12px">
+              ¿Eliminar el borrador {{ p.version }} con toda su malla y datos? No se puede deshacer.
+              <button type="button" class="ac-btn-ligero rojo" (click)="eliminarBorrador()">Sí, eliminar</button>
+              <button type="button" class="ac-btn-ligero" (click)="porEliminarPlan.set(false)">No</button>
+            </span>
+          } @else {
+            <button type="button" class="ac-btn-out" style="color: #dc2626; border-color: #fca5a5" (click)="porEliminarPlan.set(true)">Eliminar borrador</button>
+          }
+        }
+      </div>
+    }
+    @if (p.estado === 'VIGENTE') {
+      <div class="ac-alerta aviso">Plan VIGENTE (abierto a nuevo ingreso): la malla es de solo lectura, porque cada estudiante termina con el plan con el que ingresó. Para cambiarla crea una nueva versión con “Clonar”: aplicará solo a los ingresantes que lo sigan.</div>
+    } @else if (p.estado === 'EN_EXTINCION') {
+      <div class="ac-alerta aviso">Plan EN EXTINCIÓN: ya no recibe ingresantes, pero lo siguen las cohortes que ingresaron con él ({{ cohortesPlan() }}). Sus cursos se siguen dictando hasta que termine la última cohorte.</div>
+    } @else if (p.estado === 'DEROGADO') {
+      <div class="ac-alerta aviso">Plan DEROGADO (cierre definitivo): ya no quedan estudiantes con este plan. Solo lectura.</div>
+    }
+
+    <div class="ac-chips">
+      @for (t of pestanas; track t.clave) {
+        <button type="button" class="ac-chip" [class.on]="t.clave === pestana().clave" (click)="pestana.set(t); t.clave === 'malla' ? cargar(plan()?.id) : null">{{ t.etiqueta }}</button>
+      }
+    </div>
+
+    @if (pestana().clave === 'ciclos') {
+      <div class="ac-card">
+        <div class="ac-card-head"><h3>Ciclos y límites de créditos</h3></div>
+        <p class="sub" style="padding: 0 16px 8px">
+          Los ciclos salen de la malla. Aquí defines el nombre de cada ciclo y cuántos créditos puede llevar como mínimo y como máximo.
+          Los créditos de la malla cuentan 1 curso por grupo de electivos.
+        </p>
+        @if (limitesCiclo().length === 0) {
+          <div class="ac-vacio">El plan aún no tiene cursos.</div>
+        } @else {
+          <div class="ac-table-wrap">
+            <table class="ac-table compacta">
+              <thead>
+                <tr><th>CICLO</th><th>NOMBRE</th><th>CRÉDITOS EN LA MALLA</th><th>MÍNIMO</th><th>MÁXIMO</th><th>ESTADO</th>@if (editablePlan()) {<th></th>}</tr>
+              </thead>
+              <tbody>
+                @for (l of limitesCiclo(); track l.num) {
+                  <tr>
+                    <td class="cod">{{ l.num }}</td>
+                    <td class="fuerte">{{ l.nombre }}</td>
+                    <td class="fuerte">{{ l.enMalla }}</td>
+                    <td>{{ l.minimo ?? '—' }}</td>
+                    <td>{{ l.maximo ?? '—' }}</td>
+                    <td>
+                      @switch (l.estado) {
+                        @case ('ok') { <span class="ac-nota ok">Dentro del límite</span> }
+                        @case ('bajo') { <span class="ac-nota" style="background: #fee2e2; color: #b91c1c">Por debajo del mínimo</span> }
+                        @case ('alto') { <span class="ac-nota" style="background: #fee2e2; color: #b91c1c">Sobre el máximo</span> }
+                        @default { <span class="ac-nota">Sin límites</span> }
+                      }
+                    </td>
+                    @if (editablePlan()) {
+                      <td><button type="button" class="ac-btn-ligero" (click)="definirLimites(l)">{{ l.minimo === null ? 'Definir límites' : 'Editar' }}</button></td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    } @else if (pestana().clave !== 'malla') {
+      @for (r of pestana().recursos; track r.ruta) {
+        <div style="margin-bottom: 20px">
+          <ac-tabla-recurso modulo="curriculo" [ruta]="r.ruta" [etiqueta]="r.etiqueta" [fijos]="fijos(r.campo)" [conResumen]="false" />
+        </div>
+      }
+    } @else {
+
+    <div class="ac-origenes" style="padding: 0 4px 10px">
+      <small class="ac-origen">Código, nombre y créditos {{ textoOrigen(origenCurso) }}</small>
+      <small class="ac-origen">Tipo {{ textoOrigen(origenTipo) }}</small>
+    </div>
+    @if (ciclos().length === 0) {
+      <div class="ac-card">
+        <div class="ac-vacio">El plan aún no tiene cursos.</div>
+      </div>
+    } @else {
+      <div class="ac-grid-2 ac-malla">
+        @for (c of ciclos(); track c.num) {
+          <div class="ac-card" style="margin-top: 0">
+            <div class="ac-ciclo-head">
+              <div class="izq">
+                <span class="ac-ciclo-num">{{ c.num }}</span>
+                <span class="tit">CICLO {{ c.num }}</span>
+              </div>
+              <span class="cnt">
+                {{ c.filas.length }} cursos · {{ c.creditos }} créditos
+                @if (limiteDe(c.num); as lim) {
+                  @if (lim.minimo !== null) {
+                    · límite {{ lim.minimo }} a {{ lim.maximo }}
+                    @if (lim.estado === 'bajo' || lim.estado === 'alto') {
+                      · <b style="color: #fca5a5">{{ lim.estado === 'bajo' ? 'por debajo del mínimo' : 'sobre el máximo' }}</b>
+                    }
+                  }
+                }
+              </span>
+            </div>
+            <div class="ac-table-wrap">
+              <table class="ac-table compacta">
+                <thead>
+                  <tr>
+                    <th>CÓDIGO</th>
+                    <th>NOMBRE</th>
+                    <th title="Créditos">CR</th>
+                    <th title="Horas de teoría">HT</th>
+                    <th title="Horas de práctica">HP</th>
+                    <th title="Total de horas (HT + HP)">TH</th>
+                    <th>TIPO</th>
+                    <th title="Prerrequisitos">PRERREQ.</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (f of c.filas; track f.curso?.id ?? f.grupo?.etiqueta) {
+                    @if (f.grupo; as g) {
+                      <tr class="fila-electivo">
+                        <td class="cod">ELEC.</td>
+                        <td class="fuerte">{{ g.etiqueta }} <span style="font-weight: 400; color: #64748b; font-size: 0.7rem">· elegir {{ g.elegir }} de {{ g.opciones.length }}</span></td>
+                        <td>{{ g.creditos }}</td>
+                        <td>{{ g.ht }}</td>
+                        <td>{{ g.hp }}</td>
+                        <td class="fuerte">{{ g.th }}</td>
+                        <td><span class="ac-nota">ELECTIVO</span></td>
+                        <td class="pre">—</td>
+                        <td>
+                          <div class="acc">
+                            <button type="button" class="ac-btn-ligero amarillo" [title]="'Ver los ' + g.opciones.length + ' cursos electivos'" (click)="gruposAbierto.set(g)">Ver</button>
+                            @if (editablePlan()) {
+                              @if (porQuitarGrupo() === g.etiqueta) {
+                                <button type="button" class="ac-btn-ligero rojo" (click)="quitarGrupo(g)">¿Quitar?</button>
+                                <button type="button" class="ac-btn-ligero" (click)="porQuitarGrupo.set(null)">No</button>
+                              } @else {
+                                <button type="button" class="ac-circ" style="background: #fee2e2 !important; color: #dc2626 !important" title="Quitar este electivo de la malla" (click)="porQuitarGrupo.set(g.etiqueta)">✕</button>
+                              }
+                            }
+                          </div>
+                        </td>
+                      </tr>
+                    } @else if (f.curso; as cu) {
+                    <tr>
+                      <td class="cod">{{ cu.codigoCurso }}</td>
+                      <td class="fuerte" [title]="cu.nombreCurso">{{ cu.nombreCurso }}</td>
+                      <td>{{ cu.creditos }}</td>
+                      <td>{{ cu.horasTeoria }}</td>
+                      <td>{{ cu.horasPractica }}</td>
+                      <td class="fuerte">{{ cu.horasTotales }}</td>
+                      <td><span class="ac-nota ok">{{ texto(cu.tipo) }}</span></td>
+                      <td class="pre">
+                        <button type="button" class="ac-btn-ligero" [title]="cu.prerrequisitos.length ? 'Ver prerrequisitos' : 'Sin prerrequisitos (ver relaciones)'" (click)="prerrequisitosDe.set(cu)">
+                          {{ cu.prerrequisitos.length || '—' }}
+                        </button>
+                      </td>
+                      <td>
+                        <div class="acc">
+                          <button type="button" class="ac-circ" title="Ver detalle" (click)="verCurso(cu)"></button>
+                          <button type="button" class="ac-circ y" title="Equivalencias" (click)="verEquivalencias(cu)">⇄</button>
+                          @if (editablePlan()) {
+                            <button type="button" class="ac-circ y" title="Agregar prerrequisito" (click)="agregarPrerrequisito(cu)"></button>
+                            <button type="button" class="ac-circ" title="Cambiar ciclo, tipo o área" (click)="editarCurso(cu)"></button>
+                            @if (porQuitar() === cu.id) {
+                              <button type="button" class="ac-btn-ligero rojo" (click)="quitarCurso(cu)">¿Quitar?</button>
+                              <button type="button" class="ac-btn-ligero" (click)="porQuitar.set(null)">No</button>
+                            } @else {
+                              <button type="button" class="ac-circ" style="background: #fee2e2 !important; color: #dc2626 !important" title="Quitar del plan" (click)="porQuitar.set(cu.id)">✕</button>
+                            }
+                          }
+                        </div>
+                      </td>
+                    </tr>
+                    }
+                  }
+                </tbody>
+              </table>
+            </div>
+            @if (editablePlan()) {
+              <div style="padding: 8px 12px; border-top: 1px solid #f1f5f9">
+                <button type="button" class="ac-btn-ligero" [disabled]="!api.contextoListo() || cicloLleno(c.num)" [title]="cicloLleno(c.num) ? 'El ciclo ya llegó a su máximo de créditos' : api.contextoListo() ? '' : api.avisoContexto" (click)="agregarCurso(c.num)">+ Curso en ciclo {{ c.num }}</button>
+                <button type="button" class="ac-btn-ligero amarillo" [disabled]="!api.contextoListo() || cicloLleno(c.num)" [title]="cicloLleno(c.num) ? 'El ciclo ya llegó a su máximo de créditos' : 'Añadir un grupo de electivos en este ciclo'" (click)="agregarElectivo(c.num)">Añadir electivo</button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+    }
+  } @else {
+    <div class="ac-card">
+      <div class="ac-vacio">
+        
+        @if (api.programa() && planes().length > 0) {
+          El programa elegido arriba no tiene planes de estudio. Elige "Todos los programas" para ver los demás.
+        } @else {
+          No hay planes de estudio registrados.
+        }
+        @if (puedeEscribir()) {
+          <div style="margin-top: 12px"><button type="button" class="ac-btn-y" [disabled]="!api.contextoListo()" [title]="api.contextoListo() ? '' : api.avisoContexto" (click)="nuevoPlan()">+ Registrar el primer plan</button></div>
+        }
+      </div>
+    </div>
+  }
+</div>
+
+@if (formulario(); as fm) {
+  <ac-formulario-modal
+    modulo="curriculo"
+    [campos]="fm.campos"
+    [titulo]="fm.titulo"
+    [icono]="fm.icono"
+    [textoBoton]="fm.boton"
+    [inicial]="fm.inicial"
+    [opcionesExtra]="fm.extra"
+    [ayudas]="ayudas"
+    [accion]="fm.accion"
+    (guardado)="guardado()"
+    (cerrar)="formulario.set(null)"
+  />
+}
+@if (prerrequisitosDe(); as pr) {
+  <div class="ac-modal-back" (click)="prerrequisitosDe.set(null)">
+    <div class="ac-modal" (click)="$event.stopPropagation()">
+      <div class="ac-modal-head">
+        <h3>Prerrequisitos · {{ pr.codigoCurso }} · {{ pr.nombreCurso }}</h3>
+        <button type="button" class="x" (click)="prerrequisitosDe.set(null)">✕</button>
+      </div>
+      <div class="ac-modal-body">
+        <p class="sub" style="margin-bottom: 8px"><b>Para llevar este curso (ciclo {{ pr.ciclo }}) se necesita aprobar:</b></p>
+        @if (requisitosDe(pr).length === 0) {
+          <div class="ac-vacio">No tiene prerrequisitos.</div>
+        } @else {
+          <div class="ac-table-wrap">
+            <table class="ac-table compacta">
+              <thead>
+                <tr><th>CÓDIGO</th><th>CURSO PRERREQUISITO</th><th>CICLO</th><th>CR</th><th>HT</th><th>HP</th><th>TH</th><th>TIPO</th>@if (editablePlan()) {<th></th>}</tr>
+              </thead>
+              <tbody>
+                @for (r of requisitosDe(pr); track r.id) {
+                  <tr>
+                    <td class="cod">{{ r.codigoCurso }}</td>
+                    <td class="fuerte">{{ r.nombreCurso }}</td>
+                    <td>{{ r.ciclo }}</td>
+                    <td class="fuerte">{{ r.creditos }}</td>
+                    <td>{{ r.horasTeoria }}</td>
+                    <td>{{ r.horasPractica }}</td>
+                    <td class="fuerte">{{ r.horasTotales }}</td>
+                    <td><span class="ac-nota ok">{{ texto(r.tipo) }}</span></td>
+                    @if (editablePlan()) {
+                      <td><button type="button" class="ac-circ" style="background: #fee2e2 !important; color: #dc2626 !important" title="Quitar prerrequisito" (click)="quitarPrerrequisito(pr, r.codigoCurso); prerrequisitosDe.set(null)">✕</button></td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+        <p class="sub" style="margin: 16px 0 8px"><b>Este curso es prerrequisito de:</b></p>
+        @if (requeridoPor(pr).length === 0) {
+          <div class="ac-vacio" style="padding: 12px">No es prerrequisito de ningún curso.</div>
+        } @else {
+          <div class="ac-table-wrap">
+            <table class="ac-table compacta">
+              <thead>
+                <tr><th>CÓDIGO</th><th>CURSO</th><th>CICLO</th><th>CR</th><th>HT</th><th>HP</th><th>TH</th><th>TIPO</th></tr>
+              </thead>
+              <tbody>
+                @for (r of requeridoPor(pr); track r.id) {
+                  <tr>
+                    <td class="cod">{{ r.codigoCurso }}</td>
+                    <td class="fuerte">{{ r.nombreCurso }}</td>
+                    <td>{{ r.ciclo }}</td>
+                    <td class="fuerte">{{ r.creditos }}</td>
+                    <td>{{ r.horasTeoria }}</td>
+                    <td>{{ r.horasPractica }}</td>
+                    <td class="fuerte">{{ r.horasTotales }}</td>
+                    <td><span class="ac-nota ok">{{ texto(r.tipo) }}</span></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+        <div class="ac-form-actions">
+          @if (editablePlan()) {
+            <button type="button" class="ac-btn-out" (click)="agregarPrerrequisito(pr); prerrequisitosDe.set(null)">Agregar prerrequisito</button>
+          }
+          <button type="button" class="ac-btn-navy" (click)="prerrequisitosDe.set(null)">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@if (gruposAbierto(); as g) {
+  <div class="ac-modal-back" (click)="gruposAbierto.set(null)">
+    <div class="ac-modal" (click)="$event.stopPropagation()">
+      <div class="ac-modal-head">
+        <h3>{{ g.etiqueta }} · {{ g.nombre }}</h3>
+        <button type="button" class="x" (click)="gruposAbierto.set(null)">✕</button>
+      </div>
+      <div class="ac-modal-body">
+        <p class="sub" style="margin-bottom: 8px">
+          El estudiante elige <b>{{ g.elegir }}</b> de los <b>{{ g.opciones.length }}</b> cursos siguientes (ciclo {{ g.opciones[0].ciclo }}).
+        </p>
+        <div class="ac-table-wrap">
+          <table class="ac-table compacta">
+            <thead>
+              <tr><th>CÓDIGO</th><th>CURSO</th><th>CR</th><th>HT</th><th>HP</th><th>HNP</th><th>TH</th><th>ÁREA</th><th>PRERREQ.</th><th></th></tr>
+            </thead>
+            <tbody>
+              @for (o of g.opciones; track o.id) {
+                <tr>
+                  <td class="cod">{{ o.codigoCurso }}</td>
+                  <td class="fuerte" style="white-space: normal">{{ o.nombreCurso }}</td>
+                  <td class="fuerte">{{ o.creditos }}</td>
+                  <td>{{ o.horasTeoria }}</td>
+                  <td>{{ o.horasPractica }}</td>
+                  <td>{{ o.horasNoPresenciales }}</td>
+                  <td class="fuerte">{{ o.horasTotales }}</td>
+                  <td>{{ texto(o.areaCurricular) }}</td>
+                  <td>
+                    @if (o.prerrequisitos.length) {
+                      <span title="Prerrequisitos">{{ o.prerrequisitos.join(', ') }}</span>
+                    } @else {
+                      —
+                    }
+                  </td>
+                  <td>
+                    <div class="acc">
+                      <button type="button" class="ac-circ" title="Ver detalle" (click)="gruposAbierto.set(null); verCurso(o)"></button>
+                      @if (editablePlan()) {
+                        @if (porQuitar() === o.id) {
+                          <button type="button" class="ac-btn-ligero rojo" (click)="quitarCurso(o)">¿Quitar?</button>
+                          <button type="button" class="ac-btn-ligero" (click)="porQuitar.set(null)">No</button>
+                        } @else {
+                          <button type="button" class="ac-circ" style="background: #fee2e2 !important; color: #dc2626 !important" title="Quitar este curso de la malla" (click)="porQuitar.set(o.id)">✕</button>
+                        }
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="ac-form-actions">
+          <button type="button" class="ac-btn-navy" (click)="gruposAbierto.set(null)">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@if (equivalencias(); as eq) {
+  <div class="ac-modal-back" (click)="equivalencias.set(null)">
+    <div class="ac-modal" (click)="$event.stopPropagation()">
+      <div class="ac-modal-head">
+        <h3>Equivalencias · {{ eq.curso.nombreCurso }}</h3>
+        <button type="button" class="x" (click)="equivalencias.set(null)">✕</button>
+      </div>
+      <div class="ac-modal-body">
+        @if (eq.filas === null) {
+          <div class="ac-cargando"><span class="ac-spin"></span> Cargando equivalencias…</div>
+        } @else if (eq.filas.length === 0) {
+          <div class="ac-vacio">El curso no tiene equivalencias registradas.</div>
+        } @else {
+          <div class="ac-table-wrap">
+            <table class="ac-table compacta">
+              <thead>
+                <tr>
+                  <th>CURSO EQUIVALENTE</th>
+                  <th>CARRERA</th>
+                  <th>PLAN</th>
+                  <th>CICLO</th>
+                  <th>CR</th>
+                  <th>HT</th>
+                  <th>HP</th>
+                  <th>TH</th>
+                  <th>TIPO</th>
+                  <th>DEPARTAMENTO ACADÉMICO</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (e of eq.filas; track e.id) {
+                  <tr>
+                    <td style="white-space: normal; min-width: 200px; max-width: 280px">
+                      <b class="fuerte">{{ e.nombreCursoDestino }}</b>
+                      <div style="font-size: 0.7rem; color: #64748b">{{ e.codigoCursoDestino }}@if (e.tipoCursoDestino) { · {{ e.tipoCursoDestino }} }</div>
+                      @if (e.observacion) {
+                        <div style="font-size: 0.7rem; color: #b45309; margin-top: 2px">{{ e.observacion }}</div>
+                      }
+                    </td>
+                    <td class="fuerte" style="white-space: normal; min-width: 130px">{{ programa(e.idProgramaDestino) }}</td>
+                    <td style="white-space: normal" [title]="e.nombrePlanDestino">{{ e.versionPlanDestino }}</td>
+                    <td>{{ e.cicloDestino }}</td>
+                    <td class="fuerte">{{ e.creditosDestino }}</td>
+                    <td>{{ e.horasTeoriaDestino }}</td>
+                    <td>{{ e.horasPracticaDestino }}</td>
+                    <td class="fuerte">{{ e.horasTotalesDestino }}</td>
+                    <td><span class="ac-nota" [class.ok]="e.tipo === 'TOTAL'">{{ e.tipo | sinGuion }}</span></td>
+                    <td style="white-space: normal">{{ departamento(e.idDepartamentoDestino) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          <small class="ac-origen">Departamento académico {{ textoOrigen(origenDepartamento) }}</small>
+        }
+        <div class="ac-form-actions">
+          <button type="button" class="ac-btn-navy" (click)="equivalencias.set(null)">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@if (detalle(); as d) {
+  <ac-detalle-modal [titulo]="'Curso del plan · ' + d['codigoCurso']" [fila]="d" (cerrar)="detalle.set(null)" />
+}

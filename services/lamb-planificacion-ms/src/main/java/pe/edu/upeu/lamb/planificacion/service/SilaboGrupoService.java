@@ -22,6 +22,7 @@ public class SilaboGrupoService {
     private final SilaboGrupoRepository silaboGrupoRepository;
     private final GrupoRepository grupoRepository;
     private final SilaboGrupoMapper silaboGrupoMapper;
+    private final GrupoService grupoService;
 
     @Transactional(readOnly = true)
     public List<SilaboGrupoResponse> listar(Long idGrupo) {
@@ -78,5 +79,6 @@ public class SilaboGrupoService {
     private void asignarRelaciones(SilaboGrupo silaboGrupo, SilaboGrupoRequest request) {
         silaboGrupo.setGrupo(grupoRepository.findById(request.getIdGrupo())
                 .orElseThrow(() -> new ResourceNotFoundException("Grupo no encontrado: " + request.getIdGrupo())));
+        grupoService.validarEdicionSilabo(silaboGrupo.getGrupo());
     }
 }

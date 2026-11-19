@@ -1,0 +1,56 @@
+<div class="pagina">
+  <h2>ajustes-manuales</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+  @if (errorAccion()) {
+    <div class="error">{{ errorAccion() }}</div>
+  }
+  @if (exito()) {
+    <div class="exito">{{ exito() }}</div>
+  }
+
+  <div class="barra">
+    @if (auth.tieneRol('ADMIN')) {
+      <a [routerLink]="['/ajustes-manuales/nueva']">Nuevo</a>
+    }
+    <button type="button" (click)="cargar()">Actualizar</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+          <th>ID</th>
+          <th>ID Cuenta</th>
+          <th>Monto</th>
+          <th>Motivo</th>
+          <th>Autorizado por</th>
+          <th>Fecha ajuste</th>
+        @if (auth.tieneRol('ADMIN')) {
+          <th>Acciones</th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (item of items(); track item.id) {
+        <tr>
+            <td>{{ item.id }}</td>
+            <td>{{ item.idCuenta }}</td>
+            <td>{{ item.monto }}</td>
+            <td>{{ item.motivo }}</td>
+            <td>{{ item.autorizadoPor }}</td>
+            <td>{{ item.fechaAjuste }}</td>
+          @if (auth.tieneRol('ADMIN')) {
+            <td>
+              <a [routerLink]="['/ajustes-manuales', item.id, 'editar']">Editar</a>
+
+            </td>
+          }
+        </tr>
+      } @empty {
+        <tr><td colspan="7">Sin registros.</td></tr>
+      }
+    </tbody>
+  </table>
+</div>

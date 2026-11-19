@@ -16,6 +16,18 @@ public class SesionClaseMapper {
                 .tema(request.getTema().trim())
                 .idUnidadAprendizaje(request.getIdUnidadAprendizaje())
                 .actividades(request.getActividades())
+                .tipoSesion(request.getTipoSesion())
+                .fecha(request.getFecha())
+                .horasTeoria(request.getHorasTeoria())
+                .horasPractica(request.getHorasPractica())
+                .horasAutonomas(request.getHorasAutonomas())
+                .actividadPractica(request.getActividadPractica())
+                .actividadAutonoma(request.getActividadAutonoma())
+                .evidencia(request.getEvidencia())
+                .instrumentos(request.getInstrumentos())
+                .actividadSincrona(request.getActividadSincrona())
+                .actividadAsincrona(request.getActividadAsincrona())
+                .adjuntoUrl(request.getAdjuntoUrl())
                 .build();
     }
 
@@ -28,6 +40,18 @@ public class SesionClaseMapper {
                 .tema(sesionClase.getTema())
                 .idUnidadAprendizaje(sesionClase.getIdUnidadAprendizaje())
                 .actividades(sesionClase.getActividades())
+                .tipoSesion(sesionClase.getTipoSesion())
+                .fecha(sesionClase.getFecha())
+                .horasTeoria(sesionClase.getHorasTeoria())
+                .horasPractica(sesionClase.getHorasPractica())
+                .horasAutonomas(sesionClase.getHorasAutonomas())
+                .actividadPractica(sesionClase.getActividadPractica())
+                .actividadAutonoma(sesionClase.getActividadAutonoma())
+                .evidencia(sesionClase.getEvidencia())
+                .instrumentos(sesionClase.getInstrumentos())
+                .actividadSincrona(sesionClase.getActividadSincrona())
+                .actividadAsincrona(sesionClase.getActividadAsincrona())
+                .adjuntoUrl(sesionClase.getAdjuntoUrl())
                 .build();
     }
 }

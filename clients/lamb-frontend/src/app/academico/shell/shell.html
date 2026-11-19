@@ -1,0 +1,108 @@
+<div class="ac-root">
+  @if (modulo(); as m) {
+    <div class="ac-shell">
+      <!-- Sidebar -->
+      <aside class="ac-sidebar" [class.cerrado]="!sidebarAbierto()">
+        <a class="ac-side-brand" routerLink="/academico" style="text-decoration: none" title="Volver al portal">
+          <div class="ac-brand-box">A</div>
+          <div class="ac-brand-text"><span class="a">A</span><span class="sep">|</span><span class="u">UPeU</span></div>
+        </a>
+
+        <div class="ac-side-modulo">MÓDULO · {{ m.titulo }}</div>
+        <nav class="ac-nav">
+          <a [routerLink]="['/academico', m.clave]" routerLinkActive="activo" [routerLinkActiveOptions]="{ exact: true }">
+            <span class="txt">Inicio</span>
+          </a>
+          @for (s of m.secciones; track s.clave) {
+            <a [routerLink]="enlace(s)" routerLinkActive="activo" [title]="s.descripcion">
+              <span class="txt">{{ s.etiqueta }}</span>
+            </a>
+          }
+
+          <div class="ac-side-modulo" style="padding-left: 8px; margin-top: 12px">OTROS MÓDULOS</div>
+          @for (o of modulos; track o.clave) {
+            @if (o.clave !== m.clave) {
+              <a [routerLink]="['/academico', o.clave]">
+                <span class="txt">{{ o.nombre }}</span>
+              </a>
+            }
+          }
+        </nav>
+
+        <div class="ac-side-user">
+          <div class="ac-avatar-y" style="cursor: default">{{ sesion.iniciales() }}</div>
+          <div style="min-width: 0">
+            <p class="n">{{ sesion.nombre() }}</p>
+            <p class="r">{{ sesion.rol() | sinGuion }}</p>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Principal -->
+      <div class="ac-main">
+        <header class="ac-topbar">
+          <div class="izq">
+            <button type="button" class="ac-icon-btn" title="Mostrar u ocultar menú" (click)="sidebarAbierto.set(!sidebarAbierto())">☰</button>
+            <div style="min-width: 0">
+              <h1>{{ m.nombre }}{{ seccionActiva() ? ' · ' + seccionActiva()!.etiqueta : '' }}</h1>
+              <p class="sub">Módulo 02 · Admisión a trayectoria · Lamb UPeU 2.0</p>
+            </div>
+          </div>
+          <div class="der">
+            <button type="button" class="ac-icon-btn" title="Notificaciones"></button>
+            <button type="button" class="ac-avatar-n" [title]="'Cerrar sesión de ' + sesion.nombre()" (click)="sesion.auth.cerrarSesion()">
+              {{ sesion.iniciales() }}
+            </button>
+          </div>
+        </header>
+
+        <div class="ac-content">
+          @if (!enInicio()) {
+          <div class="ac-contexto" [class.pendiente]="!api.contextoListo()">
+            <div class="ac-ctx-titulo">
+              <span class="ico">🎓</span>
+              <div>
+                <b>Contexto de trabajo</b>
+                <small>{{ api.contextoListo() ? 'Todo el módulo se muestra según esta selección' : (api.requierePeriodo() ? 'Elige programa y periodo para continuar' : 'Elige un programa para continuar') }}</small>
+              </div>
+            </div>
+            <label>Programa
+              <select class="ac-select-chip" (change)="cambiarPrograma($any($event.target).value)">
+                <option value="" [selected]="!api.programa()">— Elige un programa —</option>
+                @for (p of programas(); track p.valor) {
+                  <option [value]="p.valor" [selected]="'' + p.valor === api.programa()">{{ p.etiqueta }}</option>
+                }
+              </select>
+            </label>
+            @if (api.requierePeriodo()) {
+            <label>Periodo
+              <select class="ac-select-chip" (change)="cambiarPeriodo($any($event.target).value)">
+                <option value="" [selected]="!api.periodo()">— Elige un periodo —</option>
+                @for (p of periodos(); track p['id']) {
+                  <option [value]="p['codigo']" [selected]="p['codigo'] === api.periodo()">{{ etiquetaPeriodo(p) }}</option>
+                }
+              </select>
+            </label>
+            }
+          </div>
+          }
+          @if (enInicio() || api.contextoListo()) {
+            <router-outlet />
+          } @else {
+            <div class="ac-vacio">
+              
+              {{ api.requierePeriodo() ? 'Elige un programa y un periodo arriba para cargar el módulo.' : 'Elige un programa arriba para cargar el módulo.' }}
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="ac-page">
+      <div class="ac-vacio">
+        
+        Módulo no encontrado. <a routerLink="/academico">Volver al portal</a>
+      </div>
+    </div>
+  }
+</div>

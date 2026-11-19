@@ -6,28 +6,21 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import pe.edu.upeu.lamb.finanzas.dto.AjusteManualSaldoRequest;
-import pe.edu.upeu.lamb.finanzas.dto.AjusteManualSaldoResponse;
 import pe.edu.upeu.lamb.finanzas.dto.CuentaEstudianteRequest;
 import pe.edu.upeu.lamb.finanzas.dto.CuentaEstudianteResponse;
 import pe.edu.upeu.lamb.finanzas.dto.MovimientoCuentaRequest;
 import pe.edu.upeu.lamb.finanzas.dto.MovimientoCuentaResponse;
 import pe.edu.upeu.lamb.finanzas.dto.ReservaSaldoDevolucionRequest;
 import pe.edu.upeu.lamb.finanzas.dto.ReservaSaldoDevolucionResponse;
-import pe.edu.upeu.lamb.finanzas.dto.SaldoPeriodoRequest;
-import pe.edu.upeu.lamb.finanzas.dto.SaldoPeriodoResponse;
-import pe.edu.upeu.lamb.finanzas.service.AjusteManualSaldoService;
 import pe.edu.upeu.lamb.finanzas.service.CuentaEstudianteService;
 import pe.edu.upeu.lamb.finanzas.service.MovimientoCuentaService;
 import pe.edu.upeu.lamb.finanzas.service.ReservaSaldoDevolucionService;
-import pe.edu.upeu.lamb.finanzas.service.SaldoPeriodoService;
 
 import java.util.List;
 
 /**
  * Dominio "Saldo del Estudiante" (CRUD unificado). Subrecursos: cuenta del
- * estudiante, movimientos de cuenta, saldo por periodo, ajuste manual de
- * saldo, reserva de saldo para devolucion.
+ * estudiante, movimientos de cuenta, reserva de saldo para devolucion.
  */
 @RestController
 @RequestMapping("/api/v1/saldo-estudiante")
@@ -37,8 +30,6 @@ public class SaldoEstudianteController {
 
     private final CuentaEstudianteService cuentaEstudianteService;
     private final MovimientoCuentaService movimientoCuentaService;
-    private final SaldoPeriodoService saldoPeriodoService;
-    private final AjusteManualSaldoService ajusteManualSaldoService;
     private final ReservaSaldoDevolucionService reservaSaldoDevolucionService;
 
     // --- Cuenta del estudiante (item 64) ---
@@ -62,17 +53,6 @@ public class SaldoEstudianteController {
         return cuentaEstudianteService.crear(request);
     }
 
-    @PutMapping("/cuentas/{id}")
-    public CuentaEstudianteResponse actualizarCuenta(@PathVariable Long id, @Valid @RequestBody CuentaEstudianteRequest request) {
-        return cuentaEstudianteService.actualizar(id, request);
-    }
-
-    @DeleteMapping("/cuentas/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminarCuenta(@PathVariable Long id) {
-        cuentaEstudianteService.eliminar(id);
-    }
-
     // --- Movimiento de cuenta (item 65) ---
 
     @GetMapping("/movimientos")
@@ -94,81 +74,6 @@ public class SaldoEstudianteController {
         return movimientoCuentaService.crear(request);
     }
 
-    @PutMapping("/movimientos/{id}")
-    public MovimientoCuentaResponse actualizarMovimiento(@PathVariable Long id, @Valid @RequestBody MovimientoCuentaRequest request) {
-        return movimientoCuentaService.actualizar(id, request);
-    }
-
-    @DeleteMapping("/movimientos/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminarMovimiento(@PathVariable Long id) {
-        movimientoCuentaService.eliminar(id);
-    }
-
-    // --- Saldo por periodo (item 66) ---
-
-    @GetMapping("/saldos-periodo")
-    @Operation(summary = "Listar saldos por periodo")
-    public List<SaldoPeriodoResponse> listarSaldosPeriodo() {
-        return saldoPeriodoService.listar();
-    }
-
-    @GetMapping("/saldos-periodo/{id}")
-    @Operation(summary = "Obtener un saldo por periodo")
-    public SaldoPeriodoResponse obtenerSaldoPeriodo(@PathVariable Long id) {
-        return saldoPeriodoService.obtener(id);
-    }
-
-    @PostMapping("/saldos-periodo")
-    @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Crear un saldo por periodo")
-    public SaldoPeriodoResponse crearSaldoPeriodo(@Valid @RequestBody SaldoPeriodoRequest request) {
-        return saldoPeriodoService.crear(request);
-    }
-
-    @PutMapping("/saldos-periodo/{id}")
-    public SaldoPeriodoResponse actualizarSaldoPeriodo(@PathVariable Long id, @Valid @RequestBody SaldoPeriodoRequest request) {
-        return saldoPeriodoService.actualizar(id, request);
-    }
-
-    @DeleteMapping("/saldos-periodo/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminarSaldoPeriodo(@PathVariable Long id) {
-        saldoPeriodoService.eliminar(id);
-    }
-
-    // --- Ajuste manual de saldo (item 67, requiere autorizacion) ---
-
-    @GetMapping("/ajustes-manuales")
-    @Operation(summary = "Listar ajustes manuales de saldo")
-    public List<AjusteManualSaldoResponse> listarAjustesManuales() {
-        return ajusteManualSaldoService.listar();
-    }
-
-    @GetMapping("/ajustes-manuales/{id}")
-    @Operation(summary = "Obtener un ajuste manual de saldo")
-    public AjusteManualSaldoResponse obtenerAjusteManual(@PathVariable Long id) {
-        return ajusteManualSaldoService.obtener(id);
-    }
-
-    @PostMapping("/ajustes-manuales")
-    @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Crear un ajuste manual de saldo")
-    public AjusteManualSaldoResponse crearAjusteManual(@Valid @RequestBody AjusteManualSaldoRequest request) {
-        return ajusteManualSaldoService.crear(request);
-    }
-
-    @PutMapping("/ajustes-manuales/{id}")
-    public AjusteManualSaldoResponse actualizarAjusteManual(@PathVariable Long id, @Valid @RequestBody AjusteManualSaldoRequest request) {
-        return ajusteManualSaldoService.actualizar(id, request);
-    }
-
-    @DeleteMapping("/ajustes-manuales/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminarAjusteManual(@PathVariable Long id) {
-        ajusteManualSaldoService.eliminar(id);
-    }
-
     // --- Reserva de saldo para devolucion (item 69, opcional) ---
 
     @GetMapping("/reservas-devolucion")
@@ -188,16 +93,5 @@ public class SaldoEstudianteController {
     @Operation(summary = "Crear una reserva de saldo para devolucion")
     public ReservaSaldoDevolucionResponse crearReservaDevolucion(@Valid @RequestBody ReservaSaldoDevolucionRequest request) {
         return reservaSaldoDevolucionService.crear(request);
-    }
-
-    @PutMapping("/reservas-devolucion/{id}")
-    public ReservaSaldoDevolucionResponse actualizarReservaDevolucion(@PathVariable Long id, @Valid @RequestBody ReservaSaldoDevolucionRequest request) {
-        return reservaSaldoDevolucionService.actualizar(id, request);
-    }
-
-    @DeleteMapping("/reservas-devolucion/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminarReservaDevolucion(@PathVariable Long id) {
-        reservaSaldoDevolucionService.eliminar(id);
     }
 }

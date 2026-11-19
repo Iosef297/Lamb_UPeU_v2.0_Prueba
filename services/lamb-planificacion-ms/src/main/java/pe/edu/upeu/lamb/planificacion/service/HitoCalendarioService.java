@@ -40,6 +40,7 @@ public class HitoCalendarioService {
     public HitoCalendarioResponse crear(HitoCalendarioRequest request) {
         validar(request, null);
         HitoCalendario hitoCalendario = hitoCalendarioMapper.toEntity(request);
+        hitoCalendarioMapper.aplicarDetalle(hitoCalendario, request);
         asignarRelaciones(hitoCalendario, request);
         return hitoCalendarioMapper.toResponse(hitoCalendarioRepository.save(hitoCalendario));
     }
@@ -52,6 +53,7 @@ public class HitoCalendarioService {
         hitoCalendario.setNombre(request.getNombre().trim());
         hitoCalendario.setFechaInicio(request.getFechaInicio());
         hitoCalendario.setFechaFin(request.getFechaFin());
+        hitoCalendarioMapper.aplicarDetalle(hitoCalendario, request);
         asignarRelaciones(hitoCalendario, request);
         return hitoCalendarioMapper.toResponse(hitoCalendarioRepository.save(hitoCalendario));
     }

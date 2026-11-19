@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Tag(name = "Periodo academico", description = "CRUD 1 · Periodo academico (2026-I, 2026-II, verano)")
+@Tag(name = "Periodo academico", description = "CRUD 1 · Periodo academico (2026-1, 2026-2: solo semestres)")
 @RestController
 @RequestMapping("/api/v1/periodos-academicos")
 @RequiredArgsConstructor

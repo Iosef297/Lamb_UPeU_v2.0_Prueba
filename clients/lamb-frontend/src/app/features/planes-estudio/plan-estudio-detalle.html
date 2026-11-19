@@ -1,5 +1,5 @@
 @if (plan(); as p) {
-  <h2>{{ p.nombre }} <span class="estado" [class]="p.estado">{{ p.estado }}</span></h2>
+  <h2>{{ p.nombre }} <span class="estado" [class]="p.estado">{{ p.estado | sinGuion }}</span></h2>
   <p>Programa {{ p.idPrograma }} · version {{ p.version }} · <strong>{{ p.totalCreditos }}</strong> creditos</p>
 
   @if (error()) {
@@ -39,7 +39,7 @@
           <td>{{ c.codigoCurso }}</td>
           <td>{{ c.nombreCurso }}</td>
           <td>{{ c.creditos }}</td>
-          <td>{{ c.tipo }}</td>
+          <td>{{ c.tipo | sinGuion }}</td>
           <td>{{ c.areaCurricular ?? '-' }}</td>
           @if (editable) {
             <td><button type="button" class="peligro" (click)="quitarCurso(c)">Quitar</button></td>

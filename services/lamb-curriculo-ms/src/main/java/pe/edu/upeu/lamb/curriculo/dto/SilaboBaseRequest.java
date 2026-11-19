@@ -32,4 +32,33 @@ public class SilaboBaseRequest {
 
     @NotNull
     private EstadoSilabo estado;
+
+    private Long idCompetenciaEspecifica;
+
+    private Long idCompetenciaGeneral;
+
+    @jakarta.validation.constraints.Size(max = 1000)
+    private String resultadoAprendizaje;
+
+    @jakarta.validation.constraints.Size(max = 255)
+    private String productoAcademico;
+
+    @jakarta.validation.constraints.Size(max = 1000)
+    private String descripcionProducto;
+
+    @jakarta.validation.constraints.Size(max = 2000)
+    private String recursos;
+
+    @jakarta.validation.constraints.Size(max = 2000)
+    private String referenciasBasicas;
+
+    @jakarta.validation.constraints.Size(max = 2000)
+    private String referenciasComplementarias;
+
+    @jakarta.validation.constraints.Size(max = 2000)
+    private String enlacesInternet;
+
+    @jakarta.validation.constraints.DecimalMin("0.0")
+    @jakarta.validation.constraints.DecimalMax("20.0")
+    private java.math.BigDecimal notaMinimaAprobatoria;
 }

@@ -1,0 +1,28 @@
+<div class="pagina">
+  <h2>sobrecargas-creditos-autorizadas</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label>
+      ID Matrícula
+      <input type="number" formControlName="idMatricula" />
+    </label>
+    <label>
+      Créditos autorizados
+      <input type="number" formControlName="creditosAutorizados" />
+    </label>
+    <label>
+      Motivo
+      <input type="text" formControlName="motivo" />
+    </label>
+    <label>
+      Fecha autorización
+      <input type="datetime-local" formControlName="fechaAutorizacion" />
+    </label>
+
+    <button type="submit">Guardar</button>
+  </form>
+</div>

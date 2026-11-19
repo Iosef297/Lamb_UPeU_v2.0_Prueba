@@ -1,0 +1,171 @@
+@if (aviso()) {
+  <div class="ac-alerta ok ac-toast">{{ aviso() }}</div>
+}
+@if (error()) {
+  <div class="ac-alerta error">{{ error() }} <button type="button" class="cerrar" (click)="error.set(null)">✕</button></div>
+}
+
+<!-- Resumen -->
+@if (conResumen()) {
+<div class="ac-stats">
+  @for (t of resumen(); track t.etiqueta) {
+    <div class="ac-stat">
+      <div>
+        <p class="val" [style.color]="t.color">{{ t.valor }}</p>
+        <p class="lbl">{{ t.etiqueta }}</p>
+      </div>
+    </div>
+  }
+</div>
+
+}
+
+<!-- Tabla -->
+<div class="ac-card">
+  <div class="ac-card-head">
+    <h3>{{ etiqueta() }}</h3>
+    <div style="display: flex; gap: 8px; align-items: center">
+    <div class="ac-search">
+      <input type="search" placeholder="Buscar…" [ngModel]="busqueda()" (ngModelChange)="busqueda.set($event)" />
+    </div>
+      <button type="button" class="ac-btn-ligero" (click)="cargar()" title="Volver a consultar">⟳</button>
+      @if (recurso()?.crear && puedeEscribir()) {
+        <button type="button" class="ac-btn-y" style="padding: 5px 12px; font-size: 0.8rem" [disabled]="!api.contextoListo()" [title]="api.contextoListo() ? '' : api.avisoContexto" (click)="nuevo()">+ Nuevo</button>
+      }
+    </div>
+  </div>
+
+  @if (params().length) {
+    <div class="ac-filtros">
+      @for (p of params(); track p.nombre) {
+        <div class="ac-field" style="min-width: 220px">
+          <label>Filtrar por {{ etiquetaFiltro(p).toLowerCase() }}</label>
+          @if (opcionesVisibles()[p.nombre]; as ops) {
+            <select class="ac-input" [value]="filtros()[p.nombre] ?? ''" (change)="filtrar(p.nombre, $any($event.target).value)">
+              <option value="">Todos</option>
+              @for (o of ops; track o.valor) {
+                <option [value]="o.valor">{{ o.etiqueta }}</option>
+              }
+            </select>
+          } @else {
+            <input class="ac-input" [type]="p.tipo === 'number' ? 'number' : 'text'" placeholder="Todos" (change)="filtrar(p.nombre, $any($event.target).value)" />
+          }
+        </div>
+      }
+    </div>
+  }
+
+  @if (cargando()) {
+    <div class="ac-cargando"><span class="ac-spin"></span> Cargando…</div>
+  } @else if (filtroFaltante(); as campo) {
+    <div class="ac-vacio">
+      Elige {{ campo === 'idPregunta' ? 'una pregunta' : 'un grupo' }} en el filtro de arriba para ver los registros.
+      <p style="font-size: 0.75rem; margin-top: 6px">Esta tabla tiene miles de filas: se carga solo la parte que eliges.</p>
+    </div>
+  } @else if (filtradas().length === 0) {
+    <div class="ac-vacio">
+      
+      {{ busqueda() ? 'Sin coincidencias para la búsqueda.' : 'Aún no hay registros.' }}
+      @if (!busqueda() && recurso()?.crear && puedeEscribir()) {
+        <div style="margin-top: 12px"><button type="button" class="ac-btn-y" [disabled]="!api.contextoListo()" [title]="api.contextoListo() ? '' : api.avisoContexto" (click)="nuevo()">+ Registrar el primero</button></div>
+      }
+    </div>
+  } @else {
+    <div class="ac-table-wrap desplazable">
+      <table class="ac-table">
+        <thead>
+          <tr>
+            @for (c of columnas(); track c.clave) {
+              @if (origenCol(c.clave); as o) {
+                <th [title]="textoOrigen(o)">{{ c.titulo }} <span class="ac-origen-th">#</span></th>
+              } @else {
+                <th>{{ c.titulo }}</th>
+              }
+            }
+            <th>ACCIONES</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (f of visibles(); track f['id'] ?? $index) {
+            <tr>
+              @for (c of columnas(); track c.clave) {
+                @switch (c.tipo) {
+                  @case ('estado') {
+                    <td>
+                      @if (f[c.clave] !== null && f[c.clave] !== undefined) {
+                        <span class="ac-badge" [style.background]="insignia(f[c.clave]).bg" [style.color]="insignia(f[c.clave]).color">{{ texto(f[c.clave]) }}</span>
+                      } @else {
+                        —
+                      }
+                    </td>
+                  }
+                  @default {
+                    <td [class]="c.tipo" [title]="texto(f[c.clave])">{{ texto(f[c.clave]) }}</td>
+                  }
+                }
+              }
+              <td>
+                <div class="acc">
+                  <button type="button" class="ac-btn-ligero" (click)="detalle.set(f)">Ver detalle</button>
+                  @if (puedeEscribir()) {
+                    @if (recurso()?.actualizar) {
+                      <button type="button" class="ac-btn-ligero amarillo" (click)="editar(f)">Editar</button>
+                    }
+                    @for (op of recurso()?.acciones ?? []; track op.ruta) {
+                      @if (op.vars.length === 1 && op.metodo !== 'DELETE') {
+                        <button type="button" class="ac-btn-ligero verde" (click)="ejecutar(op, f)">{{ op.etiqueta }}</button>
+                      }
+                    }
+                    @if (recurso()?.eliminar) {
+                      @if (porEliminar() === f['id']) {
+                        <button type="button" class="ac-btn-ligero rojo" (click)="confirmarEliminar(f)">¿Confirmar?</button>
+                        <button type="button" class="ac-btn-ligero" (click)="porEliminar.set(null)">No</button>
+                      } @else {
+                        <button type="button" class="ac-btn-ligero rojo" (click)="porEliminar.set(f['id'])">Eliminar</button>
+                      }
+                    }
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      @if (filtradas().length > limite()) {
+        <div style="text-align: center; padding: 10px">
+          <button type="button" class="ac-btn-ligero" (click)="limite.set(limite() + 200)">
+            Ver más ({{ filtradas().length - limite() }} restantes de {{ filtradas().length }})
+          </button>
+        </div>
+      }
+    </div>
+  }
+  @if (origenesTabla().length > 0) {
+    <div class="ac-origenes">
+      @for (o of origenesTabla(); track o.campo) {
+        <small class="ac-origen">{{ o.titulo }} {{ textoOrigen(o.origen) }}</small>
+      }
+    </div>
+  }
+</div>
+
+@if (formulario(); as fm) {
+  <ac-formulario-modal
+    [modulo]="modulo()"
+    [campos]="fm.campos"
+    [titulo]="fm.titulo"
+    [icono]="fm.icono"
+    [textoBoton]="fm.boton"
+    [inicial]="fm.inicial"
+    [ocultos]="fm.ocultos ?? {}"
+    [contexto]="fm.contexto ?? ''"
+    [opcionesExtra]="fm.opcionesExtra ?? {}"
+    [ayudas]="ayudas()"
+    [accion]="fm.accion"
+    (guardado)="guardado()"
+    (cerrar)="formulario.set(null)"
+  />
+}
+@if (detalle(); as d) {
+  <ac-detalle-modal [titulo]="etiqueta() + ' #' + d['id']" [fila]="d" (cerrar)="detalle.set(null)" />
+}

@@ -49,7 +49,7 @@ public class RequisitoExtracurricularService {
         RequisitoExtracurricular requisitoExtracurricular = buscarOFallar(id);
         validar(request, id);
         requisitoExtracurricular.setTipo(request.getTipo());
-        requisitoExtracurricular.setCreditosExigidos(request.getCreditosExigidos());
+        requisitoExtracurricular.setHorasExigidas(request.getHorasExigidas());
         asignarRelaciones(requisitoExtracurricular, request);
         return requisitoExtracurricularMapper.toResponse(requisitoExtracurricularRepository.save(requisitoExtracurricular));
     }

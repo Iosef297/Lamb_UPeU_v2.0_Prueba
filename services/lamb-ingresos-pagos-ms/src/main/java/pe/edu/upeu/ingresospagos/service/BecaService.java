@@ -10,10 +10,8 @@ import pe.edu.upeu.ingresospagos.mapper.BecaMapper;
 import pe.edu.upeu.ingresospagos.repository.BecaRepository;
 
 import java.util.List;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class BecaService {
 

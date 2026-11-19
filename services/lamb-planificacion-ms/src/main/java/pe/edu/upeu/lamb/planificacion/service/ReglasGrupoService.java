@@ -35,6 +35,7 @@ public class ReglasGrupoService {
     private final HorarioGrupoRepository horarioGrupoRepository;
     private final AsignacionDocenteRepository asignacionDocenteRepository;
     private final CargaLectivaRepository cargaLectivaRepository;
+    private final pe.edu.upeu.lamb.planificacion.repository.ModuloPeriodoRepository moduloPeriodoRepository;
 
     /**
      * Bloquea la fila del ambiente (SELECT ... FOR UPDATE): otra transaccion que quiera reservar
@@ -64,10 +65,46 @@ public class ReglasGrupoService {
         }
     }
 
-    public void validarAmbienteLibre(Ambiente ambiente, Long idPeriodo, DiaSemana dia,
-                                     LocalTime horaInicio, LocalTime horaFin, Long idHorarioExcluido) {
-        List<HorarioGrupo> cruces = horarioGrupoRepository.findCrucesDeAmbiente(
-                ambiente.getId(), idPeriodo, dia, horaInicio, horaFin, idHorarioExcluido);
+    /** Modulo del bloque: debe ser del mismo periodo que el grupo. */
+    public pe.edu.upeu.lamb.planificacion.entity.ModuloPeriodo modulo(Long idModulo, Long idPeriodo) {
+        if (idModulo == null) {
+            return null;
+        }
+        pe.edu.upeu.lamb.planificacion.entity.ModuloPeriodo m = moduloPeriodoRepository.findById(idModulo)
+                .orElseThrow(() -> new pe.edu.upeu.lamb.planificacion.exception.ResourceNotFoundException("Modulo del periodo no encontrado: " + idModulo));
+        if (!m.getPeriodo().getId().equals(idPeriodo)) {
+            throw new BusinessRuleException("El modulo " + m.getNombre() + " es de otro periodo");
+        }
+        return m;
+    }
+
+    /** Por defecto como el LAMB: el jefe de practica toma asistencia pero no pone notas. */
+    public static boolean permiso(Boolean pedido, boolean porDefecto) {
+        return pedido == null ? porDefecto : pedido;
+    }
+
+    public void validarFechas(java.time.LocalDate inicio, java.time.LocalDate fin) {
+        if (inicio != null && fin != null && fin.isBefore(inicio)) {
+            throw new BusinessRuleException("La fecha de fin del horario (" + fin + ") no puede ser anterior a la de inicio (" + inicio + ")");
+        }
+    }
+
+    // Rango abierto cuando el bloque no tiene fechas (rige todo el periodo)
+    public static final java.time.LocalDate MINIMO = java.time.LocalDate.of(1900, 1, 1);
+    public static final java.time.LocalDate MAXIMO = java.time.LocalDate.of(9999, 12, 31);
+
+    // Dos bloques con fechas que no se superponen (ej. modulos distintos) no chocan aunque compartan dia y hora
+    static boolean fechasSeCruzan(java.time.LocalDate i1, java.time.LocalDate f1, java.time.LocalDate i2, java.time.LocalDate f2) {
+        return !(f1 == null ? MAXIMO : f1).isBefore(i2 == null ? MINIMO : i2) && !(f2 == null ? MAXIMO : f2).isBefore(i1 == null ? MINIMO : i1);
+    }
+
+    public void validarAmbienteLibre(Ambiente ambiente, Long idPeriodo, DiaSemana dia, LocalTime horaInicio, LocalTime horaFin,
+                                     java.time.LocalDate fechaInicio, java.time.LocalDate fechaFin, Long idHorarioExcluido) {
+        if (ambiente == null) {
+            return; // "Por confirmar": no hay aula que validar
+        }
+        List<HorarioGrupo> cruces = horarioGrupoRepository.findCrucesDeAmbiente(ambiente.getId(), idPeriodo, dia, horaInicio, horaFin,
+                fechaInicio == null ? MINIMO : fechaInicio, fechaFin == null ? MAXIMO : fechaFin, MINIMO, MAXIMO, idHorarioExcluido);
         if (!cruces.isEmpty()) {
             HorarioGrupo cruce = cruces.get(0);
             throw new BusinessRuleException("El ambiente " + ambiente.getCodigo() + " ya esta ocupado el " + dia + " de "
@@ -76,19 +113,27 @@ public class ReglasGrupoService {
     }
 
     // Dentro del mismo grupo tampoco puede haber dos horarios que se pisen (el docente estaria en dos aulas)
-    public void validarSinCruceEnGrupo(Grupo grupo, DiaSemana dia, LocalTime horaInicio, LocalTime horaFin, Long idHorarioExcluido) {
+    // Subgrupos con docentes distintos (ej. Practica 1 y Practica 2 en dos laboratorios) si pueden coincidir
+    public void validarSinCruceEnGrupo(Grupo grupo, HorarioGrupo nuevo, Long idHorarioExcluido) {
         boolean cruza = grupo.getHorarios().stream()
-                .filter(h -> Boolean.TRUE.equals(h.getActivo()) && !idHorarioExcluido.equals(h.getId()))
-                .anyMatch(h -> h.getDiaSemana() == dia && h.getHoraInicio().isBefore(horaFin) && h.getHoraFin().isAfter(horaInicio));
+                .filter(h -> Boolean.TRUE.equals(h.getActivo()) && !idHorarioExcluido.equals(h.getId()) && h != nuevo)
+                .filter(h -> h.getAsignacionDocente() == null || nuevo.getAsignacionDocente() == null
+                        || h.getAsignacionDocente() == nuevo.getAsignacionDocente())
+                .anyMatch(h -> h.getDiaSemana() == nuevo.getDiaSemana() && h.getHoraInicio().isBefore(nuevo.getHoraFin())
+                        && h.getHoraFin().isAfter(nuevo.getHoraInicio())
+                        && fechasSeCruzan(h.getFechaInicio(), h.getFechaFin(), nuevo.getFechaInicio(), nuevo.getFechaFin()));
+        DiaSemana dia = nuevo.getDiaSemana();
+        LocalTime horaInicio = nuevo.getHoraInicio();
+        LocalTime horaFin = nuevo.getHoraFin();
         if (cruza) {
             throw new BusinessRuleException("El grupo ya tiene otro horario el " + dia + " que se cruza con " + horaInicio + "-" + horaFin);
         }
     }
 
-    public void validarDocenteLibre(Long idDocente, Long idPeriodo, Long idGrupo, DiaSemana dia,
-                                    LocalTime horaInicio, LocalTime horaFin) {
-        List<HorarioGrupo> cruces = horarioGrupoRepository.findCrucesDeDocente(
-                idDocente, idPeriodo, dia, horaInicio, horaFin, idGrupo);
+    public void validarDocenteLibre(Long idDocente, Long idPeriodo, Long idGrupo, DiaSemana dia, LocalTime horaInicio, LocalTime horaFin,
+                                    java.time.LocalDate fechaInicio, java.time.LocalDate fechaFin) {
+        List<HorarioGrupo> cruces = horarioGrupoRepository.findCrucesDeDocente(idDocente, idPeriodo, dia, horaInicio, horaFin,
+                fechaInicio == null ? MINIMO : fechaInicio, fechaFin == null ? MAXIMO : fechaFin, MINIMO, MAXIMO, idGrupo);
         if (!cruces.isEmpty()) {
             HorarioGrupo cruce = cruces.get(0);
             throw new BusinessRuleException("El docente " + idDocente + " ya dicta el " + dia + " de " + cruce.getHoraInicio()

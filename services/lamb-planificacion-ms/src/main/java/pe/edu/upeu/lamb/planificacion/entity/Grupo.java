@@ -35,6 +35,10 @@ public class Grupo {
     @Column(name = "cupo_maximo", nullable = false)
     private Integer cupoMaximo;
 
+    // Ciclo de la cohorte que lleva este grupo (si falta, vale el de la oferta)
+    @Column(name = "ciclo")
+    private Integer ciclo;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false, length = 30)
     private EstadoGrupo estado;
@@ -64,4 +68,13 @@ public class Grupo {
     public PeriodoAcademico getPeriodo() {
         return oferta.getPeriodo();
     }
+
+    // Permiso por grupo (LAMB: puede_editar_silabo): el admin lo abre y lo cierra; solo restringe al docente
+    @Column(name = "puede_editar_silabo", nullable = false)
+    @Builder.Default
+    private Boolean puedeEditarSilabo = true;
+
+    // Delegado del grupo (idPersona de un estudiante; LAMB: id_delegado)
+    @Column(name = "id_delegado")
+    private Long idDelegado;
 }

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Tag(name = "Tipo de periodo", description = "CRUD 2 · Tipo de periodo (regular, verano, nivelacion)")
+@Tag(name = "Tipo de periodo", description = "CRUD 2 · Tipo de periodo (regular)")
 @RestController
 @RequestMapping("/api/v1/tipos-periodo")
 @RequiredArgsConstructor

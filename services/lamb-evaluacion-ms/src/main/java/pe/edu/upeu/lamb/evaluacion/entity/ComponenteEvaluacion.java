@@ -24,7 +24,7 @@ public class ComponenteEvaluacion {
     private String nombre;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "tipo", nullable = false, length = 30)
+    @Column(name = "tipo", nullable = false, length = 40)
     private TipoComponente tipo;
 
     @Column(name = "descripcion", nullable = true, length = 255)

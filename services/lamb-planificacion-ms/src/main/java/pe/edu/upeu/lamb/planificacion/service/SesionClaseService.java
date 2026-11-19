@@ -22,6 +22,7 @@ public class SesionClaseService {
     private final SesionClaseRepository sesionClaseRepository;
     private final SilaboGrupoRepository silaboGrupoRepository;
     private final SesionClaseMapper sesionClaseMapper;
+    private final GrupoService grupoService;
 
     @Transactional(readOnly = true)
     public List<SesionClaseResponse> listar(Long idSilabo) {
@@ -54,6 +55,18 @@ public class SesionClaseService {
         sesionClase.setIdUnidadAprendizaje(request.getIdUnidadAprendizaje());
         sesionClase.setActividades(request.getActividades());
         asignarRelaciones(sesionClase, request);
+        sesionClase.setTipoSesion(request.getTipoSesion());
+        sesionClase.setFecha(request.getFecha());
+        sesionClase.setHorasTeoria(request.getHorasTeoria());
+        sesionClase.setHorasPractica(request.getHorasPractica());
+        sesionClase.setHorasAutonomas(request.getHorasAutonomas());
+        sesionClase.setActividadPractica(request.getActividadPractica());
+        sesionClase.setActividadAutonoma(request.getActividadAutonoma());
+        sesionClase.setEvidencia(request.getEvidencia());
+        sesionClase.setInstrumentos(request.getInstrumentos());
+        sesionClase.setActividadSincrona(request.getActividadSincrona());
+        sesionClase.setActividadAsincrona(request.getActividadAsincrona());
+        sesionClase.setAdjuntoUrl(request.getAdjuntoUrl());
         return sesionClaseMapper.toResponse(sesionClaseRepository.save(sesionClase));
     }
 
@@ -79,5 +92,6 @@ public class SesionClaseService {
     private void asignarRelaciones(SesionClase sesionClase, SesionClaseRequest request) {
         sesionClase.setSilabo(silaboGrupoRepository.findById(request.getIdSilabo())
                 .orElseThrow(() -> new ResourceNotFoundException("Silabo de grupo no encontrado: " + request.getIdSilabo())));
+        grupoService.validarEdicionSilabo(sesionClase.getSilabo().getGrupo());
     }
 }

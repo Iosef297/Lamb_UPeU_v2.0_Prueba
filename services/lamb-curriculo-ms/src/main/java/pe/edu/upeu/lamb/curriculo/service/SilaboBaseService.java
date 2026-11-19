@@ -55,6 +55,16 @@ public class SilaboBaseService {
         silaboBase.setBibliografia(request.getBibliografia());
         silaboBase.setEstado(request.getEstado());
         asignarRelaciones(silaboBase, request);
+        silaboBase.setIdCompetenciaEspecifica(request.getIdCompetenciaEspecifica());
+        silaboBase.setIdCompetenciaGeneral(request.getIdCompetenciaGeneral());
+        silaboBase.setResultadoAprendizaje(request.getResultadoAprendizaje());
+        silaboBase.setProductoAcademico(request.getProductoAcademico());
+        silaboBase.setDescripcionProducto(request.getDescripcionProducto());
+        silaboBase.setRecursos(request.getRecursos());
+        silaboBase.setReferenciasBasicas(request.getReferenciasBasicas());
+        silaboBase.setReferenciasComplementarias(request.getReferenciasComplementarias());
+        silaboBase.setEnlacesInternet(request.getEnlacesInternet());
+        silaboBase.setNotaMinimaAprobatoria(request.getNotaMinimaAprobatoria());
         return silaboBaseMapper.toResponse(silaboBaseRepository.save(silaboBase));
     }
 

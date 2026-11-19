@@ -1,0 +1,56 @@
+<div class="pagina">
+  <h2>reservas-vacante</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+  @if (errorAccion()) {
+    <div class="error">{{ errorAccion() }}</div>
+  }
+  @if (exito()) {
+    <div class="exito">{{ exito() }}</div>
+  }
+
+  <div class="barra">
+    @if (auth.tieneRol('ADMIN')) {
+      <a [routerLink]="['/reservas-vacante/nueva']">Nuevo</a>
+    }
+    <button type="button" (click)="cargar()">Actualizar</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+          <th>ID</th>
+          <th>ID Sección</th>
+          <th>ID Persona</th>
+          <th>Fecha reserva</th>
+          <th>Vigencia hasta</th>
+          <th>Estado</th>
+        @if (auth.tieneRol('ADMIN')) {
+          <th>Acciones</th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (item of items(); track item.id) {
+        <tr>
+            <td>{{ item.id }}</td>
+            <td>{{ item.idSeccion }}</td>
+            <td>{{ item.idPersona }}</td>
+            <td>{{ item.fechaReserva }}</td>
+            <td>{{ item.vigenciaHasta }}</td>
+            <td>{{ item.estado }}</td>
+          @if (auth.tieneRol('ADMIN')) {
+            <td>
+              <a [routerLink]="['/reservas-vacante', item.id, 'editar']">Editar</a>
+
+            </td>
+          }
+        </tr>
+      } @empty {
+        <tr><td colspan="7">Sin registros.</td></tr>
+      }
+    </tbody>
+  </table>
+</div>

@@ -11,6 +11,7 @@ public class SolicitudAperturaGrupoMapper {
     // Las relaciones (ids de otras tablas) las resuelve el servicio
     public SolicitudAperturaGrupo toEntity(SolicitudAperturaGrupoRequest request) {
         return SolicitudAperturaGrupo.builder()
+                .tipo(request.getTipo())
                 .cupoPropuesto(request.getCupoPropuesto())
                 .justificacion(request.getJustificacion().trim())
                 .build();
@@ -20,6 +21,7 @@ public class SolicitudAperturaGrupoMapper {
         return SolicitudAperturaGrupoResponse.builder()
                 .id(solicitudAperturaGrupo.getId())
                 .idOferta(solicitudAperturaGrupo.getOferta().getId())
+                .tipo(solicitudAperturaGrupo.getTipo())
                 .cupoPropuesto(solicitudAperturaGrupo.getCupoPropuesto())
                 .justificacion(solicitudAperturaGrupo.getJustificacion())
                 .idSolicitante(solicitudAperturaGrupo.getIdSolicitante())

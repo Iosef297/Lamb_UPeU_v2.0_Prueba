@@ -1,0 +1,84 @@
+<div class="ac-page">
+  <div class="ac-head">
+    <div>
+      <h2>Mis cursos</h2>
+      <p class="sub">Grupos donde estás asignado{{ api.periodo() ? ' en ' + api.periodo() : '' }}. Tus permisos los define el coordinador.</p>
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="ac-alerta error">{{ error() }}</div>
+  }
+
+  <div class="ac-stats">
+    <div class="ac-stat"><div><p class="val" style="color: #1e3a8a">{{ visibles().length }}</p><p class="lbl">Grupos</p></div></div>
+    <div class="ac-stat"><div><p class="val" style="color: #1e3a8a">{{ horas() }}</p><p class="lbl">Horas semanales</p></div></div>
+    <div class="ac-stat"><div><p class="val" style="color: #16a34a">{{ conNotas() }}</p><p class="lbl">Con registro de notas abierto</p></div></div>
+    <div class="ac-stat"><div><p class="val" style="color: #b45309">{{ visibles().length - conNotas() }}</p><p class="lbl">Solo lectura en notas</p></div></div>
+  </div>
+
+  @if (cargando()) {
+    <div class="ac-cargando"><span class="ac-spin"></span> Cargando tus grupos…</div>
+  } @else if (visibles().length === 0) {
+    <div class="ac-card">
+      <div class="ac-vacio">
+        
+        No tienes grupos asignados{{ api.periodo() ? ' en ' + api.periodo() : '' }}.
+        <p style="margin-top: 8px; font-size: 0.75rem">El coordinador te asigna en Planificación › Grupos (tu idPersona es {{ idPersona() ?? '—' }}).</p>
+      </div>
+    </div>
+  } @else {
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px">
+      @for (c of visibles(); track c.grupo['id']) {
+        <div class="ac-card" style="padding: 18px; margin: 0">
+          <div style="display: flex; justify-content: space-between; gap: 8px; align-items: flex-start">
+            <div style="min-width: 0">
+              <p style="font-size: 0.7rem; font-weight: 700; color: #94a3b8; letter-spacing: 0.04em">
+                {{ curso(c)['codigo'] }} · GRUPO {{ c.grupo['codigo'] }} · {{ c.grupo['periodo'] }}
+              </p>
+              <h3 style="font-size: 1rem; font-weight: 700; color: #0f2557; margin: 2px 0 0">{{ curso(c)['nombre'] }}</h3>
+              <p style="font-size: 0.75rem; color: #1e3a8a; margin: 2px 0 0">{{ programa(c) }} · {{ curso(c)['creditos'] ?? '—' }} créditos</p>
+              <small class="ac-origen"># curso: réplica del plan publicado en lamb-curriculo-ms · programa: CRUD «Programas» · lamb-institucional-ms</small>
+            </div>
+            <span class="ac-badge" style="background: #eff6ff; color: #1e3a8a">{{ (c.asignacion?.['rol'] ?? c.acta?.rol) | sinGuion }}</span>
+          </div>
+
+          <p style="font-size: 0.8rem; color: #475569; margin: 10px 0 4px">
+            {{ c.asignacion?.['verHorario'] === false ? 'Horario no visible para tu asignación' : c.grupo['horarioResumen'] || 'Sin horario' }}
+          </p>
+          <p style="font-size: 0.8rem; color: #475569; margin: 0 0 10px">
+            {{ c.asignacion?.['horasSemanales'] ?? '—' }} h/sem · cupo {{ c.grupo['cupoMaximo'] }} · {{ c.grupo['estado'] | sinGuion }}
+          </p>
+
+          <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px">
+            @if (c.acta?.estado; as est) {
+              <span class="ac-badge" [style.background]="color(est) + '1A'" [style.color]="color(est)">Acta {{ est }}</span>
+            } @else {
+              <span class="ac-badge" style="background: #f1f5f9; color: #64748b">Sin acta</span>
+            }
+            <span
+              class="ac-badge"
+              [style.background]="c.acta?.puedeRegistrarNotas ? '#DCFCE7' : '#F1F5F9'"
+              [style.color]="c.acta?.puedeRegistrarNotas ? '#16A34A' : '#64748B'"
+              [title]="c.acta?.gestionaNota === false ? 'Tu asignación no gestiona notas' : ''"
+            >
+              {{ c.acta?.puedeRegistrarNotas ? 'Notas' : 'Notas' }}
+            </span>
+            <span
+              class="ac-badge"
+              [style.background]="c.acta?.puedeRegistrarAsistencia ? '#DCFCE7' : '#F1F5F9'"
+              [style.color]="c.acta?.puedeRegistrarAsistencia ? '#16A34A' : '#64748B'"
+            >
+              {{ c.acta?.puedeRegistrarAsistencia ? 'Asistencia' : 'Asistencia' }}
+            </span>
+          </div>
+
+          <div style="display: flex; gap: 8px">
+            <a class="ac-btn-navy" style="text-decoration: none; flex: 1; text-align: center" routerLink="/academico/docente/registro-notas" [queryParams]="{ grupo: c.grupo['id'] }">Notas</a>
+            <a class="ac-btn-out" style="text-decoration: none; flex: 1; text-align: center" routerLink="/academico/docente/control-asistencia" [queryParams]="{ grupo: c.grupo['id'] }">Asistencia</a>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

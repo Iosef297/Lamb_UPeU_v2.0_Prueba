@@ -5,7 +5,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 
-// CRUD 1 · Periodo academico (2026-I, 2026-II, verano)
+// CRUD 1 · Periodo academico (2026-1, 2026-2: solo semestres)
 @Entity
 @Table(name = "periodos_academicos")
 @Getter

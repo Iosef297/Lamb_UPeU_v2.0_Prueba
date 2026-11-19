@@ -1,0 +1,86 @@
+<div class="ac-root">
+  <div class="ac-portal">
+    <!-- Fondo: campus con capa azul -->
+    <div class="ac-portal-bg">
+      @if (fondoVisible()) {
+        <img [src]="fondo" alt="Campus UPeU" (error)="fondoVisible.set(false)" />
+      }
+    </div>
+
+    <div class="ac-portal-main">
+      <!-- Barra superior -->
+      <div class="ac-portal-top">
+        <a class="ac-brand" routerLink="/academico" style="text-decoration: none">
+          <div class="ac-brand-box">A</div>
+          <div class="ac-brand-text"><span class="a">A</span><span class="sep">|</span><span class="u">UPeU</span></div>
+        </a>
+
+        <div class="ac-portal-user">
+          <button
+            type="button"
+            class="ac-glass-btn"
+            [class.on]="verCalendario()"
+            [title]="verCalendario() ? 'Cerrar calendario' : 'Ver calendario académico'"
+            (click)="alternarCalendario()"
+          >
+            <ac-icono nombre="calendario" [tam]="20" />
+          </button>
+          <div class="ac-portal-name">
+            <p class="n">{{ saludo() }}</p>
+            <p class="f">{{ (sesion.auth.autenticado() ? sesion.rol() : 'Filial Juliaca') | sinGuion }}</p>
+          </div>
+          @if (sesion.auth.autenticado()) {
+            <button type="button" class="ac-avatar-y" (click)="menuUsuario.set(!menuUsuario())">{{ sesion.iniciales() }}</button>
+            <button type="button" class="ac-logout" title="Cerrar sesión" (click)="menuUsuario.set(!menuUsuario())">
+              <ac-icono nombre="salir" [tam]="20" />
+            </button>
+          } @else {
+            <button type="button" class="ac-btn-y" (click)="iniciarSesion()">Iniciar sesión</button>
+          }
+
+          @if (menuUsuario() && sesion.auth.autenticado()) {
+            <div class="ac-user-menu">
+              <div class="cab">
+                <p class="nom">{{ sesion.nombre() }}</p>
+                <p class="sub">UPeU · {{ sesion.rol() | sinGuion }}</p>
+              </div>
+              <div class="acc">
+                <button type="button" class="ac-btn-cerrar" (click)="cerrarSesion()">CERRAR SESIÓN</button>
+                <button type="button" class="ac-btn-sutil" (click)="menuUsuario.set(false)">Volver</button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Tiles de acceso -->
+      <div class="ac-tiles">
+        @for (t of tiles(); track t.etiqueta) {
+          <button type="button" class="ac-tile" [class.off]="!t.ruta" (click)="abrir(t)">
+            <div class="ac-tile-icon"><ac-icono [nombre]="t.icono" /></div>
+            <span class="ac-tile-label">{{ t.etiqueta }}</span>
+          </button>
+        }
+      </div>
+
+      <!-- Calendario académico (hitos, días no lectivos y periodos de planificación) -->
+      @if (verCalendario()) {
+        <div class="ac-portal-cal">
+          @if (!sesion.auth.autenticado()) {
+            <div class="ac-vacio">
+              
+              Inicia sesión para ver el calendario académico.
+            </div>
+          } @else {
+            <ac-calendario-mes [eventos]="eventos()" />
+          }
+        </div>
+      }
+
+      <div class="ac-portal-foot">
+        <span>versión 2.0</span>
+        <span><span class="ac-dot"></span>En línea</span>
+      </div>
+    </div>
+  </div>
+</div>

@@ -25,4 +25,17 @@ public class GrupoAbiertoEvento {
     private Integer creditos;
     private String origen;
     private Long timestamp;
+    // Docentes del grupo con sus permisos (grupo.abierto y grupo.docentes-actualizados)
+    private java.util.List<DocenteEvento> docentes;
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class DocenteEvento {
+        private Long idDocente;
+        private String rol;
+        private Boolean gestionaNota;
+        private Boolean gestionaAsistencia;
+    }
 }

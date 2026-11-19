@@ -1,0 +1,28 @@
+<div class="pagina">
+  <h2>compromisos-matricula</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label>
+      ID Matrícula
+      <input type="number" formControlName="idMatricula" />
+    </label>
+    <label>
+      Monto comprometido
+      <input type="number" formControlName="montoComprometido" step="0.01" />
+    </label>
+    <label>
+      Fecha firma
+      <input type="date" formControlName="fechaFirma" />
+    </label>
+    <label>
+      URL documento
+      <input type="text" formControlName="documentoUrl" />
+    </label>
+
+    <button type="submit">Guardar</button>
+  </form>
+</div>

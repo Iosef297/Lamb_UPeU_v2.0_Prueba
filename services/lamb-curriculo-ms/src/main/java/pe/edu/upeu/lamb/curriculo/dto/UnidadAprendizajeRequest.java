@@ -36,4 +36,16 @@ public class UnidadAprendizajeRequest {
 
     @Size(max = 2000)
     private String contenidos;
+
+    @jakarta.validation.constraints.Size(max = 1000)
+    private String resultadoAprendizaje;
+
+    @jakarta.validation.constraints.Size(max = 255)
+    private String producto;
+
+    @jakarta.validation.constraints.Size(max = 1000)
+    private String descripcionProducto;
+
+    @jakarta.validation.constraints.Size(max = 2000)
+    private String criteriosEvaluacion;
 }

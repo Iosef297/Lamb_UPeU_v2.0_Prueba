@@ -1,0 +1,32 @@
+<div class="pagina">
+  <h2>cruces-horario-autorizados</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label>
+      ID Matrícula
+      <input type="number" formControlName="idMatricula" />
+    </label>
+    <label>
+      ID Sección 1
+      <input type="number" formControlName="idSeccion1" />
+    </label>
+    <label>
+      ID Sección 2
+      <input type="number" formControlName="idSeccion2" />
+    </label>
+    <label>
+      Motivo
+      <input type="text" formControlName="motivo" />
+    </label>
+    <label>
+      Fecha autorización
+      <input type="datetime-local" formControlName="fechaAutorizacion" />
+    </label>
+
+    <button type="submit">Guardar</button>
+  </form>
+</div>

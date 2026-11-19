@@ -11,6 +11,12 @@ public interface AsignacionDocenteRepository extends JpaRepository<AsignacionDoc
 
     List<AsignacionDocente> findByGrupoId(Long idGrupo);
 
+    // Grupos del docente (vista docente): los anulados no se muestran
+    @Query("SELECT a FROM AsignacionDocente a WHERE a.idDocente = :idDocente "
+            + "AND a.grupo.estado <> pe.edu.upeu.lamb.planificacion.entity.EstadoGrupo.ANULADO "
+            + "AND (:idPeriodo IS NULL OR a.grupo.oferta.periodo.id = :idPeriodo)")
+    List<AsignacionDocente> findDelDocente(@Param("idDocente") Long idDocente, @Param("idPeriodo") Long idPeriodo);
+
     // Horas lectivas que el docente ya tiene en el periodo (los grupos anulados no cuentan)
     @Query("SELECT COALESCE(SUM(a.horasSemanales), 0) FROM AsignacionDocente a WHERE a.idDocente = :idDocente "
             + "AND a.grupo.oferta.periodo.id = :idPeriodo "

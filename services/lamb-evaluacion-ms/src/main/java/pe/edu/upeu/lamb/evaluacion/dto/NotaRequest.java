@@ -31,4 +31,7 @@ public class NotaRequest {
     @NotBlank
     @Size(max = 20)
     private String periodo;
+
+    // Opcional: evidencia programada (modo competencia). Si viene, el componente es el de la evidencia
+    private Long idEvaluacionProgramada;
 }

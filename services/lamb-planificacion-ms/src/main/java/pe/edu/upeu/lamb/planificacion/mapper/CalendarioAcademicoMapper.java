@@ -15,6 +15,9 @@ public class CalendarioAcademicoMapper {
                 .nombre(request.getNombre().trim())
                 .resolucion(request.getResolucion())
                 .estado(request.getEstado())
+                .urlDocumento(blancoANull(request.getUrlDocumento()))
+                .nombreArchivo(blancoANull(request.getNombreArchivo()))
+                .modoHorarioAlumno(request.getModoHorarioAlumno() == null ? "HMC" : request.getModoHorarioAlumno())
                 .build();
     }
 
@@ -27,6 +30,13 @@ public class CalendarioAcademicoMapper {
                 .nombre(calendarioAcademico.getNombre())
                 .resolucion(calendarioAcademico.getResolucion())
                 .estado(calendarioAcademico.getEstado())
+                .urlDocumento(calendarioAcademico.getUrlDocumento())
+                .nombreArchivo(calendarioAcademico.getNombreArchivo())
+                .modoHorarioAlumno(calendarioAcademico.getModoHorarioAlumno())
                 .build();
+    }
+
+    public static String blancoANull(String v) {
+        return v == null || v.isBlank() ? null : v.trim();
     }
 }

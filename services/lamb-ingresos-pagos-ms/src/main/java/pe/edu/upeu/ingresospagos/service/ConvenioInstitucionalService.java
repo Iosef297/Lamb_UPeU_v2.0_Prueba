@@ -10,10 +10,8 @@ import pe.edu.upeu.ingresospagos.mapper.ConvenioInstitucionalMapper;
 import pe.edu.upeu.ingresospagos.repository.ConvenioInstitucionalRepository;
 
 import java.util.List;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class ConvenioInstitucionalService {
 

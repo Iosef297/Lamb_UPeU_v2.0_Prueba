@@ -34,4 +34,16 @@ public class CalendarioAcademico {
     @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false, length = 30)
     private EstadoCalendario estado;
+
+    // "Actividades generales": documento oficial del calendario (PDF o Google Drive)
+    @Column(name = "url_documento", length = 500)
+    private String urlDocumento;
+
+    @Column(name = "nombre_archivo", length = 150)
+    private String nombreArchivo;
+
+    // Como ve el alumno su horario: HMC = en el calendario, HML = en lista
+    @Column(name = "modo_horario_alumno", nullable = false, length = 10)
+    @Builder.Default
+    private String modoHorarioAlumno = "HMC";
 }

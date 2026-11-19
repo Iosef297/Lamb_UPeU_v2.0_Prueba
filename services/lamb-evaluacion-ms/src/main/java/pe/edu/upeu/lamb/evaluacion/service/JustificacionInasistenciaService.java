@@ -27,6 +27,10 @@ public class JustificacionInasistenciaService {
     private final RegistroAsistenciaRepository registroAsistenciaRepository;
     private final JustificacionInasistenciaMapper justificacionInasistenciaMapper;
 
+    // Dias desde que el docente registro la asistencia para pedir la justificacion (LAMB real: 7)
+    @org.springframework.beans.factory.annotation.Value("${app.evaluacion.plazo-justificacion-dias:7}")
+    private int plazoJustificacionDias;
+
     @Transactional(readOnly = true)
     public List<JustificacionInasistenciaResponse> listar(Long idRegistro) {
         List<JustificacionInasistencia> lista = idRegistro == null
@@ -97,8 +101,14 @@ public class JustificacionInasistenciaService {
                 .orElseThrow(() -> new ResourceNotFoundException("Registro de asistencia no encontrado: " + request.getIdRegistro())));
         RegistroAsistencia registro = registroAsistenciaRepository.findById(request.getIdRegistro())
                 .orElseThrow(() -> new ResourceNotFoundException("Registro de asistencia no encontrado: " + request.getIdRegistro()));
-        if (registro.getEstado() != EstadoAsistencia.FALTA) {
-            throw new BusinessRuleException("Solo se justifica una FALTA; el registro " + registro.getId() + " esta " + registro.getEstado());
+        if (registro.getEstado() != EstadoAsistencia.FALTA && registro.getEstado() != EstadoAsistencia.TARDANZA) {
+            throw new BusinessRuleException("Solo se justifica una FALTA o TARDANZA; el registro " + registro.getId() + " esta " + registro.getEstado());
+        }
+        // El plazo se controla al presentar la solicitud, no al editarla despues
+        LocalDateTime limite = registro.getFechaRegistro().plusDays(plazoJustificacionDias);
+        if (justificacionInasistencia.getId() == null && LocalDateTime.now().isAfter(limite)) {
+            throw new BusinessRuleException("El plazo para justificar vencio: son " + plazoJustificacionDias
+                    + " dias desde que se registro la asistencia (" + registro.getFechaRegistro().toLocalDate() + ")");
         }
     }
 

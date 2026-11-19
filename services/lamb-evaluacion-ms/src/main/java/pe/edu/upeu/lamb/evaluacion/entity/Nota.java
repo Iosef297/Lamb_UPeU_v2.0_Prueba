@@ -34,4 +34,8 @@ public class Nota {
 
     @Column(name = "periodo", nullable = false, length = 20)
     private String periodo;
+
+    // Evidencia programada a la que corresponde la nota (modo competencia)
+    @Column(name = "id_evaluacion_programada")
+    private Long idEvaluacionProgramada;
 }

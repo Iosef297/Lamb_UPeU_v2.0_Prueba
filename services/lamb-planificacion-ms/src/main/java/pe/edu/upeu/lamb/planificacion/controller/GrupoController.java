@@ -38,6 +38,13 @@ public class GrupoController {
         return grupoService.crear(request);
     }
 
+    @Operation(summary = "Abre o cierra al docente la edicion del silabo del grupo")
+    @PutMapping("/{id}/permisos")
+    public GrupoResponse cambiarPermisos(@PathVariable Long id, @RequestParam boolean puedeEditarSilabo,
+                                         @RequestParam(required = false) Long idDelegado) {
+        return grupoService.cambiarPermisos(id, puedeEditarSilabo, idDelegado);
+    }
+
     @PostMapping("/{id}/revalidar")
     public GrupoResponse revalidar(@PathVariable Long id) {
         return grupoService.revalidar(id);

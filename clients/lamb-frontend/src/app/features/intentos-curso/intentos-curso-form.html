@@ -1,0 +1,32 @@
+<div class="pagina">
+  <h2>intentos-curso</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label>
+      ID Persona
+      <input type="number" formControlName="idPersona" />
+    </label>
+    <label>
+      ID Curso
+      <input type="number" formControlName="idCurso" />
+    </label>
+    <label>
+      N° intento
+      <input type="number" formControlName="numeroIntento" />
+    </label>
+    <label>
+      Periodo
+      <input type="text" formControlName="periodo" />
+    </label>
+    <label>
+      Fecha registro
+      <input type="datetime-local" formControlName="fechaRegistro" />
+    </label>
+
+    <button type="submit">Guardar</button>
+  </form>
+</div>

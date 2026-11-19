@@ -1,0 +1,106 @@
+<div class="ac-page">
+  <div class="ac-head">
+    <div>
+      <h2>Bandeja de Solicitudes</h2>
+      <p class="sub">{{ subtitulo() }}</p>
+    </div>
+    <div class="acciones">
+      <select class="ac-input" style="width: auto; background-color: #fff" [value]="estado()" (change)="estado.set($any($event.target).value)">
+        <option value="PENDIENTE">Pendientes</option>
+        <option value="APROBADA">Aprobadas</option>
+        <option value="RECHAZADA">Rechazadas</option>
+        <option value="">Todas</option>
+      </select>
+      <button type="button" class="ac-btn-out" (click)="cargar()">⟳ Actualizar</button>
+    </div>
+  </div>
+
+  @if (aviso()) {
+    <div class="ac-alerta ok ac-toast">{{ aviso() }}</div>
+  }
+  @if (error()) {
+    <div class="ac-alerta error">{{ error() }} <button type="button" class="cerrar" (click)="error.set(null)">✕</button></div>
+  }
+
+  <div class="ac-chips">
+    @for (t of tipos(); track t.ruta) {
+      <button type="button" class="ac-chip" [class.on]="t.ruta === activo()?.ruta" (click)="activo.set(t)">
+        {{ t.etiqueta }}
+        @if (pendientes(t)) {
+          <span class="cnt">{{ pendientes(t) }}</span>
+        }
+      </button>
+    }
+  </div>
+
+  <div class="ac-card">
+    <div class="ac-card-head"><h3>{{ activo()?.etiqueta }} · {{ estado() ? estado().toLowerCase() + 's' : 'todas' }}</h3></div>
+    @if (cargando()) {
+      <div class="ac-cargando"><span class="ac-spin"></span> Cargando…</div>
+    } @else if (filas().length === 0) {
+      <div class="ac-vacio">No hay solicitudes {{ estado() ? estado().toLowerCase() + 's' : '' }} de este tipo.</div>
+    } @else {
+      <div class="ac-table-wrap">
+        <table class="ac-table">
+          <thead>
+            <tr>
+              <th>N°</th>
+              @for (c of columnas(); track c) {
+                <th>{{ titulo(c) }}</th>
+              }
+              <th>ESTADO</th>
+              <th>ACCIONES</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (f of filas(); track f['id']) {
+              <tr>
+                <td class="cod">SOL-{{ f['id'] }}</td>
+                @for (c of columnas(); track c) {
+                  <td [title]="celda(f, c)">{{ celda(f, c) }}</td>
+                }
+                <td><span class="ac-badge" [style.background]="insignia(f['estado']).bg" [style.color]="insignia(f['estado']).color">{{ texto(f['estado']) }}</span></td>
+                <td>
+                  <div class="acc">
+                    <button type="button" class="ac-btn-ligero" (click)="detalle.set(f)">Ver detalle</button>
+                    @if (f['estado'] === 'PENDIENTE' && puedeResponder()) {
+                      <button type="button" class="ac-btn-ligero verde" (click)="abrirRespuesta(f, true)">Aprobar</button>
+                      <button type="button" class="ac-btn-ligero rojo" (click)="abrirRespuesta(f, false)">Rechazar</button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>
+
+@if (respondiendo(); as r) {
+  <div class="ac-modal-back" (click)="respondiendo.set(null)">
+    <div class="ac-modal chico" (click)="$event.stopPropagation()">
+      <div class="ac-modal-head">
+        <h3>{{ r.aprobada ? 'Aprobar' : 'Rechazar' }} solicitud SOL-{{ r.fila['id'] }}</h3>
+        <button type="button" class="x" (click)="respondiendo.set(null)">✕</button>
+      </div>
+      <div class="ac-modal-body">
+        <p style="font-size: 0.85rem; color: #475569; margin-bottom: 12px">
+          {{ r.aprobada ? textoAprobar() : 'La solicitud quedará rechazada y no se aplicará ningún cambio.' }}
+        </p>
+        <div class="ac-field">
+          <label>Observación (opcional)</label>
+          <textarea class="ac-input" [(ngModel)]="observacion" maxlength="255"></textarea>
+        </div>
+        <div class="ac-form-actions">
+          <button type="button" class="ac-btn-out" (click)="respondiendo.set(null)">Cancelar</button>
+          <button type="button" class="ac-btn-navy" (click)="responder()">{{ r.aprobada ? 'Aprobar' : 'Rechazar' }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+@if (detalle(); as d) {
+  <ac-detalle-modal [titulo]="'Solicitud SOL-' + d['id']" [fila]="d" (cerrar)="detalle.set(null)" />
+}

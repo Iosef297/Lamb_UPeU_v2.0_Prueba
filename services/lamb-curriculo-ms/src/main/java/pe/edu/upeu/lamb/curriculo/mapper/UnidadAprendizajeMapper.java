@@ -16,6 +16,10 @@ public class UnidadAprendizajeMapper {
                 .semanaInicio(request.getSemanaInicio())
                 .semanaFin(request.getSemanaFin())
                 .contenidos(request.getContenidos())
+                .resultadoAprendizaje(request.getResultadoAprendizaje())
+                .producto(request.getProducto())
+                .descripcionProducto(request.getDescripcionProducto())
+                .criteriosEvaluacion(request.getCriteriosEvaluacion())
                 .build();
     }
 
@@ -29,6 +33,10 @@ public class UnidadAprendizajeMapper {
                 .semanaInicio(unidadAprendizaje.getSemanaInicio())
                 .semanaFin(unidadAprendizaje.getSemanaFin())
                 .contenidos(unidadAprendizaje.getContenidos())
+                .resultadoAprendizaje(unidadAprendizaje.getResultadoAprendizaje())
+                .producto(unidadAprendizaje.getProducto())
+                .descripcionProducto(unidadAprendizaje.getDescripcionProducto())
+                .criteriosEvaluacion(unidadAprendizaje.getCriteriosEvaluacion())
                 .build();
     }
 }

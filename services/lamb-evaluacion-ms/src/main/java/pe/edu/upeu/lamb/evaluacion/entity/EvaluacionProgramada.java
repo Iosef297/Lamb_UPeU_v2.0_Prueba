@@ -27,9 +27,27 @@ public class EvaluacionProgramada {
     @JoinColumn(name = "id_componente", nullable = false)
     private ComponenteEvaluacion componente;
 
-    @Column(name = "fecha", nullable = false)
+    // ECG puede no tener fecha
+    @Column(name = "fecha")
     private LocalDate fecha;
 
     @Column(name = "descripcion", nullable = true, length = 255)
     private String descripcion;
+
+    // Unidad del silabo (UN1, UN2...) y producto academico evaluado
+    @Column(name = "unidad", length = 10)
+    private String unidad;
+
+    @Column(name = "producto", length = 150)
+    private String producto;
+
+    @Column(name = "nro_sesiones")
+    private Integer nroSesiones;
+
+    @Column(name = "orden")
+    private Integer orden;
+
+    // Peso de la evidencia en la nota final (la suma del grupo no pasa de 100)
+    @Column(name = "peso", precision = 5, scale = 2)
+    private java.math.BigDecimal peso;
 }

@@ -1,0 +1,54 @@
+<div class="pagina">
+  <h2>historiales-estado-cobro</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+  @if (errorAccion()) {
+    <div class="error">{{ errorAccion() }}</div>
+  }
+  @if (exito()) {
+    <div class="exito">{{ exito() }}</div>
+  }
+
+  <div class="barra">
+    @if (auth.tieneRol('ADMIN')) {
+      <a [routerLink]="['/historiales-estado-cobro/nueva']">Nuevo</a>
+    }
+    <button type="button" (click)="cargar()">Actualizar</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+          <th>ID</th>
+          <th>ID Detalle cobro</th>
+          <th>Estado anterior</th>
+          <th>Estado nuevo</th>
+          <th>Fecha cambio</th>
+        @if (auth.tieneRol('ADMIN')) {
+          <th>Acciones</th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (item of items(); track item.id) {
+        <tr>
+            <td>{{ item.id }}</td>
+            <td>{{ item.idDetalleCobro }}</td>
+            <td>{{ item.estadoAnterior }}</td>
+            <td>{{ item.estadoNuevo }}</td>
+            <td>{{ item.fechaCambio }}</td>
+          @if (auth.tieneRol('ADMIN')) {
+            <td>
+              <a [routerLink]="['/historiales-estado-cobro', item.id, 'editar']">Editar</a>
+
+            </td>
+          }
+        </tr>
+      } @empty {
+        <tr><td colspan="6">Sin registros.</td></tr>
+      }
+    </tbody>
+  </table>
+</div>

@@ -12,7 +12,7 @@ public class RequisitoExtracurricularMapper {
     public RequisitoExtracurricular toEntity(RequisitoExtracurricularRequest request) {
         return RequisitoExtracurricular.builder()
                 .tipo(request.getTipo())
-                .creditosExigidos(request.getCreditosExigidos())
+                .horasExigidas(request.getHorasExigidas())
                 .build();
     }
 
@@ -22,7 +22,7 @@ public class RequisitoExtracurricularMapper {
                 .idPlan(requisitoExtracurricular.getPlan().getId())
                 .versionPlan(requisitoExtracurricular.getPlan().getVersion())
                 .tipo(requisitoExtracurricular.getTipo())
-                .creditosExigidos(requisitoExtracurricular.getCreditosExigidos())
+                .horasExigidas(requisitoExtracurricular.getHorasExigidas())
                 .build();
     }
 }

@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 public class SolicitudAperturaGrupoResponse {
     private Long id;
     private Long idOferta;
+    private pe.edu.upeu.lamb.planificacion.entity.TipoSolicitudApertura tipo;
     private Integer cupoPropuesto;
     private String justificacion;
     private Long idSolicitante;

@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface CursoCatalogoRepository extends JpaRepository<CursoCatalogo, Long> {
 
-    List<CursoCatalogo> findByDepartamentoId(Long idDepartamento);
+    List<CursoCatalogo> findByIdDepartamento(Long idDepartamento);
 
     boolean existsByCodigo(String codigo);
 

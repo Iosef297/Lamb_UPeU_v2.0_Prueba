@@ -5,7 +5,7 @@ import { filter } from 'rxjs';
 import { AuthService } from '../core/auth/auth-service';
 import { CRUDS, CRUD_BY_SLUG } from '../features/cruds.catalog';
 
-type ModuleKey = 'Admisión' | 'Trayectoria' | 'Institucional' | 'Personas' | 'Currículo';
+type ModuleKey = 'Admisión' | 'Trayectoria' | 'Institucional' | 'Personas' | 'Currículo' | 'Finanzas';
 
 @Component({
   selector: 'app-shell',
@@ -49,12 +49,14 @@ export class ShellComponent {
   institucional = computed(() => CRUDS.filter(c => c.group === 'Institucional' && !c.hidden));
   personas      = computed(() => CRUDS.filter(c => c.group === 'Personas' && !c.hidden));
   curriculo     = computed(() => CRUDS.filter(c => c.group === 'Currículo' && !c.hidden));
+  finanzas      = computed(() => CRUDS.filter(c => c.group === 'Finanzas' && !c.hidden));
 
   showAdmision      = computed(() => this.activeModule() === 'Admisión');
   showTrayectoria   = computed(() => this.activeModule() === 'Trayectoria');
   showInstitucional = computed(() => this.activeModule() === 'Institucional');
   showPersonas      = computed(() => this.activeModule() === 'Personas');
   showCurriculo     = computed(() => this.activeModule() === 'Currículo');
+  showFinanzas      = computed(() => this.activeModule() === 'Finanzas');
 
   // Grupos grandes (Institucional/Personas) se dividen en subgrupos colapsables
   // para no mostrar 40+ links sueltos en el sidebar.
@@ -74,6 +76,7 @@ export class ShellComponent {
   institucionalGrouped = this.agrupar(this.institucional);
   personasGrouped      = this.agrupar(this.personas);
   curriculoGrouped     = this.agrupar(this.curriculo);
+  finanzasGrouped      = this.agrupar(this.finanzas);
 
   // undefined = sin override, usa el default (abierto si contiene el item activo)
   private subgroupOverrides = signal(new Map<string, boolean>());

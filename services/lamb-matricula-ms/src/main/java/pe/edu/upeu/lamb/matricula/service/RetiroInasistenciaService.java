@@ -12,12 +12,10 @@ import pe.edu.upeu.lamb.matricula.repository.RetiroInasistenciaRepository;
 
 import java.time.Instant;
 import java.util.List;
-import org.springframework.transaction.annotation.Transactional;
 
 /** CRUD opcional: depende de la universidad. */
 @Slf4j
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class RetiroInasistenciaService {
 
@@ -36,17 +34,6 @@ public class RetiroInasistenciaService {
         RetiroInasistencia entity = mapper.toEntity(request);
         entity.setFechaRetiro(Instant.now());
         return mapper.toResponse(repository.save(entity));
-    }
-
-    public RetiroInasistenciaResponse actualizar(Long id, RetiroInasistenciaRequest request) {
-        RetiroInasistencia existente = buscarOFallar(id);
-        RetiroInasistencia entity = mapper.toEntity(request);
-        entity.setFechaRetiro(Instant.now());
-        return mapper.toResponse(repository.save(Actualizacion.copiar(entity, existente)));
-    }
-
-    public void eliminar(Long id) {
-        repository.delete(buscarOFallar(id));
     }
 
     private RetiroInasistencia buscarOFallar(Long id) {

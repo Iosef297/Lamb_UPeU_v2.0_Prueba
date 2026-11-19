@@ -1,0 +1,28 @@
+<div class="pagina">
+  <h2>requisitos-por-tipo-matricula</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label>
+      ID Tipo matrícula
+      <input type="number" formControlName="idTipoMatricula" />
+    </label>
+    <label>
+      ID Requisito (currículo)
+      <input type="number" formControlName="idRequisitoCurriculo" />
+    </label>
+    <label>
+      Descripción
+      <input type="text" formControlName="descripcion" />
+    </label>
+    <label>
+      <input type="checkbox" formControlName="obligatorio" />
+      Obligatorio
+    </label>
+
+    <button type="submit">Guardar</button>
+  </form>
+</div>

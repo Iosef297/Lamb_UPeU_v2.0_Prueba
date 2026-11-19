@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import pe.edu.upeu.lamb.matricula.dto.AnulacionMatriculaRequest;
 import pe.edu.upeu.lamb.matricula.dto.AnulacionMatriculaResponse;
@@ -12,31 +14,23 @@ import pe.edu.upeu.lamb.matricula.dto.ConstanciaMatriculaRequest;
 import pe.edu.upeu.lamb.matricula.dto.ConstanciaMatriculaResponse;
 import pe.edu.upeu.lamb.matricula.dto.HistorialEstadoMatriculaRequest;
 import pe.edu.upeu.lamb.matricula.dto.HistorialEstadoMatriculaResponse;
-import pe.edu.upeu.lamb.matricula.dto.MatriculaCondicionalRequest;
-import pe.edu.upeu.lamb.matricula.dto.MatriculaCondicionalResponse;
 import pe.edu.upeu.lamb.matricula.dto.MatriculaRequest;
 import pe.edu.upeu.lamb.matricula.dto.MatriculaResponse;
-import pe.edu.upeu.lamb.matricula.dto.NotificacionMatriculaRequest;
-import pe.edu.upeu.lamb.matricula.dto.NotificacionMatriculaResponse;
-import pe.edu.upeu.lamb.matricula.dto.ObservacionMatriculaRequest;
-import pe.edu.upeu.lamb.matricula.dto.ObservacionMatriculaResponse;
 import pe.edu.upeu.lamb.matricula.entity.EstadoMatricula;
 import pe.edu.upeu.lamb.matricula.service.AnulacionMatriculaService;
 import pe.edu.upeu.lamb.matricula.service.ConstanciaMatriculaService;
 import pe.edu.upeu.lamb.matricula.service.HistorialEstadoMatriculaService;
-import pe.edu.upeu.lamb.matricula.service.MatriculaCondicionalService;
 import pe.edu.upeu.lamb.matricula.service.MatriculaService;
-import pe.edu.upeu.lamb.matricula.service.NotificacionMatriculaService;
-import pe.edu.upeu.lamb.matricula.service.ObservacionMatriculaService;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Dominio "Matricula" (CRUD unificado). Base /api/v1/matriculas: ruta de saga
  * ya probada (confirmar/anular/condiciones), no se modifica. Subrecursos:
- * estados (catalogo), historial de estados, matriculas condicionales,
- * anulaciones, observaciones, notificaciones, constancias.
+ * estados (catalogo), historial de estados, anulaciones, constancias.
  */
 @RestController
 @RequestMapping("/api/v1/matriculas")
@@ -46,24 +40,21 @@ public class MatriculaController {
 
     private final MatriculaService matriculaService;
     private final HistorialEstadoMatriculaService historialEstadoMatriculaService;
-    private final MatriculaCondicionalService matriculaCondicionalService;
     private final AnulacionMatriculaService anulacionMatriculaService;
-    private final ObservacionMatriculaService observacionMatriculaService;
-    private final NotificacionMatriculaService notificacionMatriculaService;
     private final ConstanciaMatriculaService constanciaMatriculaService;
 
     // --- Matricula (item 23) — rutas de saga, no modificar ---
 
     @GetMapping
-    @Operation(summary = "Listar matriculas")
-    public List<MatriculaResponse> listar() {
-        return matriculaService.listar();
+    @Operation(summary = "Listar matriculas (ESTUDIANTE solo ve las suyas)")
+    public List<MatriculaResponse> listar(@AuthenticationPrincipal Jwt jwt) {
+        return matriculaService.listar(idPersonaDe(jwt), esPrivilegiado(jwt));
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Obtener una matricula")
-    public MatriculaResponse obtener(@PathVariable Long id) {
-        return matriculaService.obtener(id);
+    @Operation(summary = "Obtener una matricula (ESTUDIANTE solo si es suya)")
+    public MatriculaResponse obtener(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+        return matriculaService.obtener(id, idPersonaDe(jwt), esPrivilegiado(jwt));
     }
 
     @PostMapping
@@ -71,17 +62,6 @@ public class MatriculaController {
     @Operation(summary = "Crear una matricula")
     public MatriculaResponse crear(@Valid @RequestBody MatriculaRequest request) {
         return matriculaService.crear(request);
-    }
-
-    @PutMapping("/{id}")
-    public MatriculaResponse actualizar(@PathVariable Long id, @Valid @RequestBody MatriculaRequest request) {
-        return matriculaService.actualizar(id, request);
-    }
-
-    @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminar(@PathVariable Long id) {
-        matriculaService.eliminar(id);
     }
 
     @PostMapping("/{id}/confirmar")
@@ -137,55 +117,6 @@ public class MatriculaController {
         return historialEstadoMatriculaService.crear(request);
     }
 
-    @PutMapping("/historial-estados/{id}")
-    public HistorialEstadoMatriculaResponse actualizarHistorialEstado(@PathVariable Long id, @Valid @RequestBody HistorialEstadoMatriculaRequest request) {
-        return historialEstadoMatriculaService.actualizar(id, request);
-    }
-
-    @DeleteMapping("/historial-estados/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminarHistorialEstado(@PathVariable Long id) {
-        historialEstadoMatriculaService.eliminar(id);
-    }
-
-    // --- Matricula condicional (item 27) ---
-
-    @GetMapping("/condicionales")
-    @Operation(summary = "Listar matriculas condicionales")
-    public List<MatriculaCondicionalResponse> listarCondicionales() {
-        return matriculaCondicionalService.listar();
-    }
-
-    @GetMapping("/condicionales/{id}")
-    @Operation(summary = "Obtener una matricula condicional")
-    public MatriculaCondicionalResponse obtenerCondicional(@PathVariable Long id) {
-        return matriculaCondicionalService.obtener(id);
-    }
-
-    @PostMapping("/condicionales")
-    @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Crear una matricula condicional")
-    public MatriculaCondicionalResponse crearCondicional(@Valid @RequestBody MatriculaCondicionalRequest request) {
-        return matriculaCondicionalService.crear(request);
-    }
-
-    @PutMapping("/condicionales/{id}")
-    public MatriculaCondicionalResponse actualizarCondicional(@PathVariable Long id, @Valid @RequestBody MatriculaCondicionalRequest request) {
-        return matriculaCondicionalService.actualizar(id, request);
-    }
-
-    @DeleteMapping("/condicionales/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminarCondicional(@PathVariable Long id) {
-        matriculaCondicionalService.eliminar(id);
-    }
-
-    @PostMapping("/condicionales/{id}/levantar")
-    @Operation(summary = "Levantar una matricula condicional")
-    public MatriculaCondicionalResponse levantarCondicional(@PathVariable Long id) {
-        return matriculaCondicionalService.levantar(id);
-    }
-
     // --- Anulacion de matricula (item 29) ---
 
     @GetMapping("/anulaciones")
@@ -205,81 +136,6 @@ public class MatriculaController {
     @Operation(summary = "Crear una anulacion de matricula")
     public AnulacionMatriculaResponse crearAnulacion(@Valid @RequestBody AnulacionMatriculaRequest request) {
         return anulacionMatriculaService.crear(request);
-    }
-
-    @PutMapping("/anulaciones/{id}")
-    public AnulacionMatriculaResponse actualizarAnulacion(@PathVariable Long id, @Valid @RequestBody AnulacionMatriculaRequest request) {
-        return anulacionMatriculaService.actualizar(id, request);
-    }
-
-    @DeleteMapping("/anulaciones/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminarAnulacion(@PathVariable Long id) {
-        anulacionMatriculaService.eliminar(id);
-    }
-
-    // --- Observacion de matricula (item 30) ---
-
-    @GetMapping("/observaciones")
-    @Operation(summary = "Listar observaciones de matricula")
-    public List<ObservacionMatriculaResponse> listarObservaciones() {
-        return observacionMatriculaService.listar();
-    }
-
-    @GetMapping("/observaciones/{id}")
-    @Operation(summary = "Obtener una observacion de matricula")
-    public ObservacionMatriculaResponse obtenerObservacion(@PathVariable Long id) {
-        return observacionMatriculaService.obtener(id);
-    }
-
-    @PostMapping("/observaciones")
-    @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Crear una observacion de matricula")
-    public ObservacionMatriculaResponse crearObservacion(@Valid @RequestBody ObservacionMatriculaRequest request) {
-        return observacionMatriculaService.crear(request);
-    }
-
-    @PutMapping("/observaciones/{id}")
-    public ObservacionMatriculaResponse actualizarObservacion(@PathVariable Long id, @Valid @RequestBody ObservacionMatriculaRequest request) {
-        return observacionMatriculaService.actualizar(id, request);
-    }
-
-    @DeleteMapping("/observaciones/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminarObservacion(@PathVariable Long id) {
-        observacionMatriculaService.eliminar(id);
-    }
-
-    // --- Notificacion de matricula (item 34) ---
-
-    @GetMapping("/notificaciones")
-    @Operation(summary = "Listar notificaciones de matricula")
-    public List<NotificacionMatriculaResponse> listarNotificaciones() {
-        return notificacionMatriculaService.listar();
-    }
-
-    @GetMapping("/notificaciones/{id}")
-    @Operation(summary = "Obtener una notificacion de matricula")
-    public NotificacionMatriculaResponse obtenerNotificacion(@PathVariable Long id) {
-        return notificacionMatriculaService.obtener(id);
-    }
-
-    @PostMapping("/notificaciones")
-    @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Crear una notificacion de matricula")
-    public NotificacionMatriculaResponse crearNotificacion(@Valid @RequestBody NotificacionMatriculaRequest request) {
-        return notificacionMatriculaService.crear(request);
-    }
-
-    @PutMapping("/notificaciones/{id}")
-    public NotificacionMatriculaResponse actualizarNotificacion(@PathVariable Long id, @Valid @RequestBody NotificacionMatriculaRequest request) {
-        return notificacionMatriculaService.actualizar(id, request);
-    }
-
-    @DeleteMapping("/notificaciones/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminarNotificacion(@PathVariable Long id) {
-        notificacionMatriculaService.eliminar(id);
     }
 
     // --- Constancia de matricula (item 35) ---
@@ -303,14 +159,18 @@ public class MatriculaController {
         return constanciaMatriculaService.crear(request);
     }
 
-    @PutMapping("/constancias/{id}")
-    public ConstanciaMatriculaResponse actualizarConstancia(@PathVariable Long id, @Valid @RequestBody ConstanciaMatriculaRequest request) {
-        return constanciaMatriculaService.actualizar(id, request);
+    // idPersona viaja en el token via protocol mapper (lamb-realm.json); ADMIN/COORDINADOR
+    // ven todo, ESTUDIANTE solo lo suyo (aislamiento por fila, el Gateway solo filtra por rol).
+    private static Long idPersonaDe(Jwt jwt) {
+        return jwt.getClaim("idPersona");
     }
 
-    @DeleteMapping("/constancias/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminarConstancia(@PathVariable Long id) {
-        constanciaMatriculaService.eliminar(id);
+    private static boolean esPrivilegiado(Jwt jwt) {
+        Map<String, Object> realmAccess = jwt.getClaimAsMap("realm_access");
+        Object roles = realmAccess == null ? null : realmAccess.get("roles");
+        if (!(roles instanceof Collection<?> lista)) {
+            return false;
+        }
+        return lista.contains("ADMIN") || lista.contains("COORDINADOR");
     }
 }

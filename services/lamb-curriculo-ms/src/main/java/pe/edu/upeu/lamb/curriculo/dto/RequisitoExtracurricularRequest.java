@@ -19,6 +19,6 @@ public class RequisitoExtracurricularRequest {
 
     @NotNull
     @Min(1)
-    @Max(20)
-    private Integer creditosExigidos;
+    @Max(400)
+    private Integer horasExigidas;
 }

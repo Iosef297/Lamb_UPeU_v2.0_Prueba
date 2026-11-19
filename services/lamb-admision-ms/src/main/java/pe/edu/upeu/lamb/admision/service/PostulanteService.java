@@ -9,10 +9,12 @@ import pe.edu.upeu.lamb.admision.entity.*;
 import pe.edu.upeu.lamb.admision.exception.BusinessRuleException;
 import pe.edu.upeu.lamb.admision.exception.ResourceNotFoundException;
 import pe.edu.upeu.lamb.admision.mapper.PostulanteMapper;
+import pe.edu.upeu.lamb.admision.port.FinanzasPort;
 import pe.edu.upeu.lamb.admision.repository.ConvocatoriaRepository;
 import pe.edu.upeu.lamb.admision.repository.ModalidadAdmisionRepository;
 import pe.edu.upeu.lamb.admision.repository.PostulanteRepository;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
@@ -24,6 +26,9 @@ public class PostulanteService {
     private final ConvocatoriaRepository convocatoriaRepo;
     private final ModalidadAdmisionRepository modalidadRepo;
     private final PostulanteMapper mapper;
+    private final FinanzasPort finanzasPort;
+
+    private static final BigDecimal MONTO_DERECHO_ADMISION = new BigDecimal("450.00");
 
     @Transactional(readOnly = true)
     public List<PostulanteResponse> listar(Long idConvocatoria) {
@@ -40,9 +45,6 @@ public class PostulanteService {
 
     @Transactional
     public PostulanteResponse crear(PostulanteRequest r) {
-        if (repo.existsByCodigoPostulante(r.getCodigoPostulante())) {
-            throw new BusinessRuleException("Ya existe un postulante con codigo " + r.getCodigoPostulante());
-        }
         if (repo.existsByIdPersonaAndConvocatoriaId(r.getIdPersona(), r.getIdConvocatoria())) {
             throw new BusinessRuleException("La persona ya esta registrada en esta convocatoria");
         }
@@ -54,12 +56,20 @@ public class PostulanteService {
         ModalidadAdmision mod = modalidadRepo.findById(r.getIdModalidad())
                 .orElseThrow(() -> new ResourceNotFoundException("Modalidad no encontrada: " + r.getIdModalidad()));
 
+        // Autogenerar codigo si no viene en el request (secretaria no lo escribe)
+        String codigo = (r.getCodigoPostulante() == null || r.getCodigoPostulante().isBlank())
+                ? generarCodigo(conv)
+                : r.getCodigoPostulante();
+        if (repo.existsByCodigoPostulante(codigo)) {
+            throw new BusinessRuleException("Ya existe un postulante con codigo " + codigo);
+        }
+
         Postulante p = Postulante.builder()
                 .idPersona(r.getIdPersona())
                 .convocatoria(conv)
                 .idPrograma(r.getIdPrograma())
                 .modalidad(mod)
-                .codigoPostulante(r.getCodigoPostulante())
+                .codigoPostulante(codigo)
                 .colegioProcedencia(r.getColegioProcedencia())
                 .anioEgresoColegio(r.getAnioEgresoColegio())
                 .promedioColegio(r.getPromedioColegio())
@@ -67,10 +77,12 @@ public class PostulanteService {
                 .correoContacto(r.getCorreoContacto())
                 .nombreApoderado(r.getNombreApoderado())
                 .telefonoApoderado(r.getTelefonoApoderado())
-                .estado(EstadoPostulante.REGISTRADO)
+                .estado(EstadoPostulante.PRE_INSCRITO)
                 .fechaRegistro(Instant.now())
                 .build();
-        return mapper.toResponse(repo.save(p));
+        Postulante guardado = repo.save(p);
+        finanzasPort.crearCargoDerechoAdmision(guardado.getId(), MONTO_DERECHO_ADMISION, conv.getPeriodo());
+        return mapper.toResponse(guardado);
     }
 
     @Transactional
@@ -93,8 +105,8 @@ public class PostulanteService {
     @Transactional
     public void eliminar(Long id) {
         Postulante p = buscar(id);
-        if (p.getEstado() != EstadoPostulante.REGISTRADO) {
-            throw new BusinessRuleException("Solo se puede eliminar un postulante en estado REGISTRADO");
+        if (p.getEstado() != EstadoPostulante.PRE_INSCRITO) {
+            throw new BusinessRuleException("Solo se puede eliminar un postulante en estado PRE_INSCRITO");
         }
         repo.delete(p);
     }
@@ -102,5 +114,16 @@ public class PostulanteService {
     private Postulante buscar(Long id) {
         return repo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Postulante no encontrado: " + id));
+    }
+
+    /**
+     * Genera un codigo unico por convocatoria: POS-{periodo}-{correlativo4}.
+     * Ej: POS-2026-2-0001. El correlativo se calcula contando postulantes de la convocatoria.
+     * TODO: cuando haya alta concurrencia, usar una secuencia dedicada en BD para evitar colisiones.
+     */
+    private String generarCodigo(Convocatoria conv) {
+        long correlativo = repo.findByConvocatoriaId(conv.getId()).size() + 1L;
+        String periodo = conv.getPeriodo() == null ? "0000-0" : conv.getPeriodo();
+        return String.format("POS-%s-%04d", periodo, correlativo);
     }
 }

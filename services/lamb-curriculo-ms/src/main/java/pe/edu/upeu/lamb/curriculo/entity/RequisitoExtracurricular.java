@@ -3,7 +3,7 @@ package pe.edu.upeu.lamb.curriculo.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-// CRUD 37 · Requisito de actividades extracurriculares (creditos exigidos por tipo de actividad)
+// CRUD 37 · Requisito de actividades extracurriculares (horas exigidas por tipo de actividad)
 @Entity
 @Table(name = "requisitos_extracurriculares")
 @Getter
@@ -25,6 +25,6 @@ public class RequisitoExtracurricular {
     @Column(name = "tipo", nullable = false, length = 30)
     private TipoActividadFormacion tipo;
 
-    @Column(name = "creditos_exigidos", nullable = false)
-    private Integer creditosExigidos;
+    @Column(name = "horas_exigidas", nullable = false)
+    private Integer horasExigidas;
 }

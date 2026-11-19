@@ -16,4 +16,20 @@ public final class JwtClaims {
         }
         return idPersona.longValue();
     }
+
+    /**
+     * true si quien llama es ADMIN o COORDINADOR (claim realm_access.roles de Keycloak).
+     * Los permisos por grupo (editar notas, asistencia, silabo) solo restringen al docente.
+     */
+    @SuppressWarnings("unchecked")
+    public static boolean esGestion() {
+        var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (!(auth != null && auth.getPrincipal() instanceof Jwt jwt)) {
+            return true; // llamadas internas (Kafka, pruebas) no tienen usuario
+        }
+        java.util.Map<String, Object> realm = jwt.getClaim("realm_access");
+        java.util.Collection<String> roles = realm == null ? java.util.List.of()
+                : (java.util.Collection<String>) realm.getOrDefault("roles", java.util.List.of());
+        return roles.contains("ADMIN") || roles.contains("COORDINADOR");
+    }
 }

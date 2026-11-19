@@ -1,0 +1,56 @@
+<div class="pagina">
+  <h2>documentos-pago</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+  @if (errorAccion()) {
+    <div class="error">{{ errorAccion() }}</div>
+  }
+  @if (exito()) {
+    <div class="exito">{{ exito() }}</div>
+  }
+
+  <div class="barra">
+    @if (auth.tieneRol('ADMIN')) {
+      <a [routerLink]="['/documentos-pago/nueva']">Nuevo</a>
+    }
+    <button type="button" (click)="cargar()">Actualizar</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+          <th>ID</th>
+          <th>ID Pago</th>
+          <th>Tipo documento</th>
+          <th>Número</th>
+          <th>Fecha emisión</th>
+          <th>URL documento</th>
+        @if (auth.tieneRol('ADMIN')) {
+          <th>Acciones</th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (item of items(); track item.id) {
+        <tr>
+            <td>{{ item.id }}</td>
+            <td>{{ item.idPago }}</td>
+            <td>{{ item.tipoDocumento }}</td>
+            <td>{{ item.numero }}</td>
+            <td>{{ item.fechaEmision }}</td>
+            <td>{{ item.urlDocumento }}</td>
+          @if (auth.tieneRol('ADMIN')) {
+            <td>
+              <a [routerLink]="['/documentos-pago', item.id, 'editar']">Editar</a>
+
+            </td>
+          }
+        </tr>
+      } @empty {
+        <tr><td colspan="7">Sin registros.</td></tr>
+      }
+    </tbody>
+  </table>
+</div>

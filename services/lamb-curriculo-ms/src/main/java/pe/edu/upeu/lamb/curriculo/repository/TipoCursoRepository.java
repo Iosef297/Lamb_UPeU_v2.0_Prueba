@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface TipoCursoRepository extends JpaRepository<TipoCurso, Long> {
 
+    java.util.Optional<pe.edu.upeu.lamb.curriculo.entity.TipoCurso> findByCodigo(String codigo);
+
     boolean existsByCodigo(String codigo);
 
     boolean existsByCodigoAndIdNot(String codigo, Long id);

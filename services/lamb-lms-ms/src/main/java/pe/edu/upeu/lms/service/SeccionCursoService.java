@@ -16,10 +16,8 @@ import pe.edu.upeu.lms.repository.PeriodoAcademicoRepository;
 import pe.edu.upeu.lms.repository.SeccionCursoRepository;
 
 import java.util.List;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class SeccionCursoService {
 
@@ -29,8 +27,11 @@ public class SeccionCursoService {
     private final DocenteRepository docenteRepository;
     private final PeriodoAcademicoRepository periodoAcademicoRepository;
 
-    public List<SeccionCursoResponse> listar() {
-        return seccionCursoRepository.findAllConRelaciones().stream()
+    public List<SeccionCursoResponse> listar(String emailDocente) {
+        List<SeccionCurso> secciones = docenteRepository.findByEmail(emailDocente)
+                .map(d -> seccionCursoRepository.findAllConRelacionesPorDocente(d.getId()))
+                .orElseGet(seccionCursoRepository::findAllConRelaciones);
+        return secciones.stream()
                 .map(seccionCursoMapper::toResponse)
                 .toList();
     }

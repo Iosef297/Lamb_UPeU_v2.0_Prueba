@@ -46,4 +46,17 @@ public class EscalaCalificacionRequest {
 
     @NotNull
     private Boolean vigente;
+
+    // Modo competencia (opcionales: si no vienen se usan 12.5 y 20/70/10)
+    @DecimalMin("0.0")
+    private BigDecimal umbralProducto;
+
+    @DecimalMin("0.0")
+    private BigDecimal pesoSesiones;
+
+    @DecimalMin("0.0")
+    private BigDecimal pesoProducto;
+
+    @DecimalMin("0.0")
+    private BigDecimal pesoCompetenciaGenerica;
 }

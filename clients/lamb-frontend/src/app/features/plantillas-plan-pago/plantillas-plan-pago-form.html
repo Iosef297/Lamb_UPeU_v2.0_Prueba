@@ -1,0 +1,24 @@
+<div class="pagina">
+  <h2>plantillas-plan-pago</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label>
+      Nombre
+      <input type="text" formControlName="nombre" />
+    </label>
+    <label>
+      N° cuotas
+      <input type="number" formControlName="numeroCuotas" />
+    </label>
+    <label>
+      Descripción
+      <input type="text" formControlName="descripcion" />
+    </label>
+
+    <button type="submit">Guardar</button>
+  </form>
+</div>

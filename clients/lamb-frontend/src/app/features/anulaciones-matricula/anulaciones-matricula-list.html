@@ -1,0 +1,54 @@
+<div class="pagina">
+  <h2>anulaciones-matricula</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+  @if (errorAccion()) {
+    <div class="error">{{ errorAccion() }}</div>
+  }
+  @if (exito()) {
+    <div class="exito">{{ exito() }}</div>
+  }
+
+  <div class="barra">
+    @if (auth.tieneRol('ADMIN')) {
+      <a [routerLink]="['/anulaciones-matricula/nueva']">Nuevo</a>
+    }
+    <button type="button" (click)="cargar()">Actualizar</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+          <th>ID</th>
+          <th>ID Matrícula</th>
+          <th>Motivo</th>
+          <th>Fecha anulación</th>
+          <th>Autorizado por</th>
+        @if (auth.tieneRol('ADMIN')) {
+          <th>Acciones</th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (item of items(); track item.id) {
+        <tr>
+            <td>{{ item.id }}</td>
+            <td>{{ item.idMatricula }}</td>
+            <td>{{ item.motivo }}</td>
+            <td>{{ item.fechaAnulacion }}</td>
+            <td>{{ item.autorizadoPor }}</td>
+          @if (auth.tieneRol('ADMIN')) {
+            <td>
+              <a [routerLink]="['/anulaciones-matricula', item.id, 'editar']">Editar</a>
+
+            </td>
+          }
+        </tr>
+      } @empty {
+        <tr><td colspan="6">Sin registros.</td></tr>
+      }
+    </tbody>
+  </table>
+</div>

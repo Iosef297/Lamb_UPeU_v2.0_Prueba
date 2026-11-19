@@ -36,4 +36,42 @@ public class SesionClase {
 
     @Column(name = "actividades", nullable = true, length = 1000)
     private String actividades;
+
+    // TEORIA o PRACTICA (asistencia "Sesion 2: Teoria")
+    @Column(name = "tipo_sesion", length = 20)
+    private String tipoSesion;
+
+    @Column(name = "fecha")
+    private java.time.LocalDate fecha;
+
+    @Column(name = "horas_teoria")
+    private Integer horasTeoria;
+
+    @Column(name = "horas_practica")
+    private Integer horasPractica;
+
+    @Column(name = "horas_autonomas")
+    private Integer horasAutonomas;
+
+    @Column(name = "actividad_practica", length = 1000)
+    private String actividadPractica;
+
+    @Column(name = "actividad_autonoma", length = 1000)
+    private String actividadAutonoma;
+
+    // Plan de clase: evidencia, instrumentos y criterios, fase sincrona y asincrona
+    @Column(name = "evidencia", length = 500)
+    private String evidencia;
+
+    @Column(name = "instrumentos", length = 1000)
+    private String instrumentos;
+
+    @Column(name = "actividad_sincrona", length = 2000)
+    private String actividadSincrona;
+
+    @Column(name = "actividad_asincrona", length = 2000)
+    private String actividadAsincrona;
+
+    @Column(name = "adjunto_url", length = 500)
+    private String adjuntoUrl;
 }
