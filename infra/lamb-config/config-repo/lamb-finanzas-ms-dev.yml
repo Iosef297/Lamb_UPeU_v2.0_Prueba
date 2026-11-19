@@ -52,6 +52,7 @@ app:
   kafka:
     topic:
       matricula: matricula-eventos
+      pago-aceptado: pago-aceptado-eventos
 
 eureka:
   instance:

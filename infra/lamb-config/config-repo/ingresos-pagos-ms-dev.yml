@@ -50,6 +50,12 @@ app:
     topic:
       matriculas: matricula-eventos
       pagos: pago-eventos
+  keycloak:
+    admin:
+      server-url: http://localhost:18180
+      realm: lamb
+      client-id: admin-cli
+      client-secret: changeme
 
 logging:
   level:
