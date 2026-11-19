@@ -20,11 +20,16 @@ export class HomeComponent {
   auth = inject(AuthService);
 
   tiles: Tile[] = [
-    { label: 'ADMISIÓN',    icon: 'how_to_reg', route: ['/crud', 'convocatorias'] },
-    { label: 'TRAYECTORIA', icon: 'route',      route: '/trayectoria/plan' },
-    { label: 'GESTIÓN ACADÉMICA', icon: 'school',    route: '/facultades' },
-    { label: 'MATRÍCULAS Y PAGOS', icon: 'payments', route: '/matriculas' },
-    { label: 'INSTITUCIONAL', icon: 'account_balance', route: ['/crud', 'inst-niveles-academicos'] },
-    { label: 'PERSONAS', icon: 'badge', route: ['/crud', 'per-personas'] }
+    { label: 'ADMISIÓN',      icon: 'how_to_reg',         route: ['/crud', 'convocatorias'] },
+    { label: 'TRAYECTORIA',   icon: 'route',              route: '/trayectoria/plan' },
+    { label: 'CURRÍCULO',     icon: 'menu_book',          route: '/academico/curriculo' },
+    { label: 'PLANIFICACIÓN', icon: 'event_note',         route: '/academico/planificacion' },
+    { label: 'EVALUACIÓN',    icon: 'grading',            route: '/academico/evaluacion' },
+    { label: 'MATRÍCULA',     icon: 'assignment_ind',     route: '/matriculas' },
+    { label: 'FINANZAS',      icon: 'payments',           route: '/pagos' },
+    { label: 'INGRESOS Y PAGOS', icon: 'account_balance_wallet', route: '/estado-cuenta' },
+    { label: 'B-LEARNING',    icon: 'cast_for_education', route: '/b-learning' },
+    { label: 'INSTITUCIONAL', icon: 'account_balance',    route: ['/crud', 'inst-niveles-academicos'] },
+    { label: 'PERSONAS',      icon: 'badge',              route: ['/crud', 'per-personas'] }
   ];
 }

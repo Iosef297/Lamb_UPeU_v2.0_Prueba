@@ -33,6 +33,11 @@ export const routes: Routes = [
     path: '',
     loadComponent: () => import('./layout/shell.component').then(m => m.ShellComponent),
     children: [
+      // --- B-Learning (LMS) ---
+      {
+        path: 'b-learning',
+        loadComponent: () => import('./features/b-learning/portal-cursos.component').then(m => m.PortalCursosComponent)
+      },
       // --- Admision / Trayectoria (CRUD generico, origen) ---
       {
         path: 'crud/:slug',

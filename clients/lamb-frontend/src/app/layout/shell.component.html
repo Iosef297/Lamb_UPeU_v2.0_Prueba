@@ -115,6 +115,125 @@
         }
       }
 
+      @if (showCurriculo()) {
+        <div class="nav-group">Currículo</div>
+        <a class="nav-item" routerLink="/planes-estudio" routerLinkActive="nav-item--active">
+          <span class="material-symbols-outlined nav-item__icon">list_alt</span>
+          <span class="nav-item__label">Planes de estudio</span>
+        </a>
+        <a class="nav-item" routerLink="/cursos" routerLinkActive="nav-item--active">
+          <span class="material-symbols-outlined nav-item__icon">menu_book</span>
+          <span class="nav-item__label">Cursos</span>
+        </a>
+        @for (bucket of curriculoGrouped(); track bucket.subgroup) {
+          <button type="button" class="nav-subgroup" (click)="toggleSubgroup(bucket.subgroup, bucket.items)">
+            <span class="material-symbols-outlined nav-subgroup__chev">
+              {{ isSubgroupOpen(bucket.subgroup, bucket.items) ? 'expand_more' : 'chevron_right' }}
+            </span>
+            <span class="nav-subgroup__label">{{ bucket.subgroup }}</span>
+          </button>
+          @if (isSubgroupOpen(bucket.subgroup, bucket.items)) {
+            @for (item of bucket.items; track item.slug) {
+              <a class="nav-item nav-item--sub" [routerLink]="['/crud', item.slug]" routerLinkActive="nav-item--active">
+                <span class="material-symbols-outlined nav-item__icon">{{ item.icon }}</span>
+                <span class="nav-item__label">{{ item.label }}</span>
+              </a>
+            }
+          }
+        }
+      }
+
+      @if (showPlanificacion()) {
+        <div class="nav-group">Planificación</div>
+        <a class="nav-item" routerLink="/grupos" routerLinkActive="nav-item--active">
+          <span class="material-symbols-outlined nav-item__icon">groups</span>
+          <span class="nav-item__label">Grupos</span>
+        </a>
+      }
+
+      @if (showEvaluacion()) {
+        <div class="nav-group">Evaluación</div>
+        <a class="nav-item" routerLink="/notas" routerLinkActive="nav-item--active">
+          <span class="material-symbols-outlined nav-item__icon">grade</span>
+          <span class="nav-item__label">Notas</span>
+        </a>
+        <a class="nav-item" routerLink="/actas" routerLinkActive="nav-item--active">
+          <span class="material-symbols-outlined nav-item__icon">description</span>
+          <span class="nav-item__label">Actas</span>
+        </a>
+      }
+
+      @if (showMatricula()) {
+        <div class="nav-group">Matrícula</div>
+        <a class="nav-item" routerLink="/matriculas" routerLinkActive="nav-item--active">
+          <span class="material-symbols-outlined nav-item__icon">assignment_turned_in</span>
+          <span class="nav-item__label">Matrículas</span>
+        </a>
+        <a class="nav-item" routerLink="/enrolar" routerLinkActive="nav-item--active">
+          <span class="material-symbols-outlined nav-item__icon">how_to_reg</span>
+          <span class="nav-item__label">Enrolar</span>
+        </a>
+      }
+
+      @if (showFinanzas()) {
+        <div class="nav-group">Finanzas</div>
+        <a class="nav-item" routerLink="/pagos" routerLinkActive="nav-item--active">
+          <span class="material-symbols-outlined nav-item__icon">payments</span>
+          <span class="nav-item__label">Pagos</span>
+        </a>
+        <a class="nav-item" routerLink="/estado-cuenta" routerLinkActive="nav-item--active">
+          <span class="material-symbols-outlined nav-item__icon">account_balance_wallet</span>
+          <span class="nav-item__label">Estado de cuenta</span>
+        </a>
+        <a class="nav-item" routerLink="/realizar-pago" routerLinkActive="nav-item--active">
+          <span class="material-symbols-outlined nav-item__icon">credit_card</span>
+          <span class="nav-item__label">Realizar pago</span>
+        </a>
+        @for (bucket of finanzasGrouped(); track bucket.subgroup) {
+          <button type="button" class="nav-subgroup" (click)="toggleSubgroup(bucket.subgroup, bucket.items)">
+            <span class="material-symbols-outlined nav-subgroup__chev">
+              {{ isSubgroupOpen(bucket.subgroup, bucket.items) ? 'expand_more' : 'chevron_right' }}
+            </span>
+            <span class="nav-subgroup__label">{{ bucket.subgroup }}</span>
+          </button>
+          @if (isSubgroupOpen(bucket.subgroup, bucket.items)) {
+            @for (item of bucket.items; track item.slug) {
+              <a class="nav-item nav-item--sub" [routerLink]="['/crud', item.slug]" routerLinkActive="nav-item--active">
+                <span class="material-symbols-outlined nav-item__icon">{{ item.icon }}</span>
+                <span class="nav-item__label">{{ item.label }}</span>
+              </a>
+            }
+          }
+        }
+      }
+
+      @if (showBLearning()) {
+        <div class="nav-group">B-Learning</div>
+        <a class="nav-item" routerLink="/b-learning" routerLinkActive="nav-item--active">
+          <span class="material-symbols-outlined nav-item__icon">cast_for_education</span>
+          <span class="nav-item__label">Portal del estudiante</span>
+        </a>
+      }
+
+      @if (showInstitucional()) {
+        <!-- Rutas directas de Gestión académica / Institucional -->
+        <a class="nav-item" routerLink="/facultades" routerLinkActive="nav-item--active">
+          <span class="material-symbols-outlined nav-item__icon">account_balance</span>
+          <span class="nav-item__label">Facultades</span>
+        </a>
+        <a class="nav-item" routerLink="/programas" routerLinkActive="nav-item--active">
+          <span class="material-symbols-outlined nav-item__icon">school</span>
+          <span class="nav-item__label">Programas</span>
+        </a>
+      }
+
+      @if (showPersonas()) {
+        <a class="nav-item" routerLink="/personas" routerLinkActive="nav-item--active">
+          <span class="material-symbols-outlined nav-item__icon">person</span>
+          <span class="nav-item__label">Personas (gestión)</span>
+        </a>
+      }
+
       @if (!activeModule()) {
         <div class="nav-group">Módulos</div>
         <a class="nav-item" routerLink="/crud/convocatorias">
@@ -125,59 +244,41 @@
           <span class="material-symbols-outlined nav-item__icon">route</span>
           <span class="nav-item__label">Trayectoria</span>
         </a>
-        <a class="nav-item" routerLink="/crud/inst-programas">
+        <a class="nav-item" routerLink="/planes-estudio">
+          <span class="material-symbols-outlined nav-item__icon">menu_book</span>
+          <span class="nav-item__label">Currículo</span>
+        </a>
+        <a class="nav-item" routerLink="/grupos">
+          <span class="material-symbols-outlined nav-item__icon">event_note</span>
+          <span class="nav-item__label">Planificación</span>
+        </a>
+        <a class="nav-item" routerLink="/notas">
+          <span class="material-symbols-outlined nav-item__icon">grading</span>
+          <span class="nav-item__label">Evaluación</span>
+        </a>
+        <a class="nav-item" routerLink="/matriculas">
+          <span class="material-symbols-outlined nav-item__icon">assignment_ind</span>
+          <span class="nav-item__label">Matrícula</span>
+        </a>
+        <a class="nav-item" routerLink="/pagos">
+          <span class="material-symbols-outlined nav-item__icon">payments</span>
+          <span class="nav-item__label">Finanzas</span>
+        </a>
+        <a class="nav-item" routerLink="/estado-cuenta">
+          <span class="material-symbols-outlined nav-item__icon">account_balance_wallet</span>
+          <span class="nav-item__label">Ingresos y pagos</span>
+        </a>
+        <a class="nav-item" routerLink="/b-learning">
+          <span class="material-symbols-outlined nav-item__icon">cast_for_education</span>
+          <span class="nav-item__label">B-Learning</span>
+        </a>
+        <a class="nav-item" routerLink="/facultades">
           <span class="material-symbols-outlined nav-item__icon">account_balance</span>
           <span class="nav-item__label">Institucional</span>
         </a>
-        <a class="nav-item" routerLink="/crud/per-personas">
+        <a class="nav-item" routerLink="/personas">
           <span class="material-symbols-outlined nav-item__icon">person</span>
           <span class="nav-item__label">Personas</span>
-        </a>
-        <a class="nav-item" routerLink="/crud/curr-mallas-curriculares">
-          <span class="material-symbols-outlined nav-item__icon">schema</span>
-          <span class="nav-item__label">Currículo</span>
-        </a>
-
-        <div class="nav-group">Gestión académica</div>
-        <a class="nav-item" routerLink="/personas" routerLinkActive="nav-item--active">
-          <span class="material-symbols-outlined nav-item__icon">person</span>
-          <span class="nav-item__label">Personas</span>
-        </a>
-        <a class="nav-item" routerLink="/facultades" routerLinkActive="nav-item--active">
-          <span class="material-symbols-outlined nav-item__icon">account_balance</span>
-          <span class="nav-item__label">Facultades</span>
-        </a>
-        <a class="nav-item" routerLink="/programas" routerLinkActive="nav-item--active">
-          <span class="material-symbols-outlined nav-item__icon">school</span>
-          <span class="nav-item__label">Programas</span>
-        </a>
-        <a class="nav-item" routerLink="/cursos" routerLinkActive="nav-item--active">
-          <span class="material-symbols-outlined nav-item__icon">menu_book</span>
-          <span class="nav-item__label">Cursos</span>
-        </a>
-        <a class="nav-item" routerLink="/grupos" routerLinkActive="nav-item--active">
-          <span class="material-symbols-outlined nav-item__icon">groups</span>
-          <span class="nav-item__label">Grupos</span>
-        </a>
-        <a class="nav-item" routerLink="/planes-estudio" routerLinkActive="nav-item--active">
-          <span class="material-symbols-outlined nav-item__icon">list_alt</span>
-          <span class="nav-item__label">Planes de estudio</span>
-        </a>
-        <a class="nav-item" routerLink="/matriculas" routerLinkActive="nav-item--active">
-          <span class="material-symbols-outlined nav-item__icon">assignment_turned_in</span>
-          <span class="nav-item__label">Matrículas</span>
-        </a>
-        <a class="nav-item" routerLink="/notas" routerLinkActive="nav-item--active">
-          <span class="material-symbols-outlined nav-item__icon">grade</span>
-          <span class="nav-item__label">Notas</span>
-        </a>
-        <a class="nav-item" routerLink="/actas" routerLinkActive="nav-item--active">
-          <span class="material-symbols-outlined nav-item__icon">description</span>
-          <span class="nav-item__label">Actas</span>
-        </a>
-        <a class="nav-item" routerLink="/pagos" routerLinkActive="nav-item--active">
-          <span class="material-symbols-outlined nav-item__icon">payments</span>
-          <span class="nav-item__label">Pagos</span>
         </a>
       }
     </nav>
@@ -198,8 +299,8 @@
         <span class="material-symbols-outlined">menu</span>
       </button>
       <div class="topbar__title">
-        <h1>Portal UPeU · Admisión y Trayectoria</h1>
-        <p>Módulo 02 · Filial Juliaca</p>
+        <h1>{{ moduleTitle() }}</h1>
+        <p>Filial Juliaca</p>
       </div>
       <div class="topbar__actions">
         <div class="period-pill">

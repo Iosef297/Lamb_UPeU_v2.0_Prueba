@@ -1,0 +1,231 @@
+.bl-portal {
+  padding: 1.5rem 2rem;
+  font-family: system-ui, -apple-system, sans-serif;
+  color: #333;
+}
+
+.bl-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+
+  h1 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1a365d;
+    margin: 0;
+  }
+}
+
+.bl-select {
+  padding: 0.5rem 1rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 0.9rem;
+  min-width: 140px;
+}
+
+.bl-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 1.5rem;
+
+  @media (max-width: 1100px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bl-main h2 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  color: #1a202c;
+}
+
+.bl-cursos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.bl-curso-card {
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: transform .15s, box-shadow .15s;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  }
+}
+
+.bl-curso-banner {
+  height: 90px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 0.6rem 0.8rem;
+  color: #fff;
+}
+
+.bl-curso-numero {
+  background: rgba(255, 255, 255, 0.85);
+  color: #333;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.bl-curso-upeu {
+  font-weight: 800;
+  letter-spacing: 1px;
+  font-size: 0.75rem;
+  opacity: .85;
+}
+
+.bl-curso-body {
+  padding: 0.9rem 1rem 1rem;
+}
+
+.bl-curso-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: .5rem;
+
+  h3 {
+    margin: 0 0 .4rem;
+    font-size: .95rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: #1a365d;
+  }
+}
+
+.bl-curso-go {
+  background: #f5b840;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.bl-curso-meta {
+  margin: 0;
+  font-size: .78rem;
+  color: #718096;
+  line-height: 1.4;
+}
+
+.bl-curso-docente {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin-top: .8rem;
+  padding-top: .6rem;
+  border-top: 1px solid #edf2f7;
+  font-size: .8rem;
+  color: #4a5568;
+}
+
+.bl-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bl-side {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.bl-widget {
+  background: #fff;
+  border-radius: 10px;
+  padding: 1rem 1.1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+
+  h3 {
+    margin: 0 0 .8rem;
+    font-size: .95rem;
+    font-weight: 600;
+    color: #1a365d;
+  }
+}
+
+.bl-empty {
+  margin: 0;
+  color: #a0aec0;
+  font-size: .85rem;
+  font-style: italic;
+}
+
+.bl-sesion, .bl-pendiente, .bl-comunicado {
+  padding: .6rem 0;
+  border-bottom: 1px solid #edf2f7;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  strong {
+    font-size: .85rem;
+    color: #2d3748;
+  }
+}
+
+.bl-sesion-title {
+  margin: .3rem 0;
+  font-size: .8rem;
+  color: #4a5568;
+}
+
+.bl-pendiente {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: .5rem;
+}
+
+.bl-pendiente-fecha {
+  text-align: right;
+  font-size: .75rem;
+  color: #718096;
+  display: flex;
+  flex-direction: column;
+}
+
+.bl-mapa-btn {
+  display: block;
+  width: 100%;
+  padding: .5rem;
+  margin-bottom: .8rem;
+  background: #fff;
+  border: 1px dashed #4299e1;
+  color: #2b6cb0;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: .85rem;
+
+  &:hover {
+    background: #ebf8ff;
+  }
+}

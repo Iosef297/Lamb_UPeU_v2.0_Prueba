@@ -62,3 +62,172 @@ body {
   font-size: 12px;
   padding: 0 7px;
 }
+
+/* ===================================================================
+   Estilos globales para CRUDs planos (list/form sin SCSS propio).
+   Cubren el patrón <h2> + tabla + botones que usan features/*
+   como facultades, personas, programas, cursos, grupos, planes-estudio,
+   matriculas, pagos, notas, actas, etc. No cambian comportamiento.
+   =================================================================== */
+
+h2, h3 {
+  color: var(--upeu-navy);
+}
+
+.content > h2:first-child,
+router-outlet + h2 {
+  margin-top: 0;
+}
+
+/* Botones */
+.boton, button.boton, a.boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid var(--upeu-border);
+  background: #fff;
+  color: var(--upeu-navy);
+  cursor: pointer;
+  transition: background .15s, box-shadow .15s, transform .05s;
+  margin-right: 6px;
+}
+.boton:hover, button.boton:hover, a.boton:hover {
+  background: #F3F4F6;
+}
+.boton:active { transform: translateY(1px); }
+
+.boton.primario, a.boton.primario, button.boton.primario,
+.primario {
+  background: var(--upeu-navy);
+  color: #fff;
+  border-color: var(--upeu-navy);
+}
+.boton.primario:hover, a.boton.primario:hover, button.boton.primario:hover,
+.primario:hover {
+  background: var(--upeu-navy-dark);
+}
+
+.boton.peligro, button.peligro, .peligro {
+  background: #fff;
+  color: var(--upeu-bad);
+  border: 1px solid #FCA5A5;
+}
+.boton.peligro:hover, button.peligro:hover, .peligro:hover {
+  background: #FEF2F2;
+}
+
+.boton.secundario, .secundario {
+  background: #fff;
+  color: var(--upeu-navy);
+}
+
+/* Botones sueltos tipo "Nueva X" al principio del list */
+a[routerLink][class*="nueva"], a[routerLink][class*="nuevo"] {
+  margin-bottom: 12px;
+  display: inline-block;
+}
+
+/* Tablas */
+table {
+  width: 100%;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  border-collapse: separate;
+  border-spacing: 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,.05);
+  margin-top: 12px;
+  font-size: 13.5px;
+}
+table thead th {
+  background: #F3F4F6;
+  color: var(--upeu-navy);
+  text-align: left;
+  font-weight: 700;
+  font-size: 12.5px;
+  letter-spacing: .3px;
+  text-transform: uppercase;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--upeu-border);
+}
+table tbody td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--upeu-border);
+  color: var(--upeu-ink);
+  vertical-align: middle;
+}
+table tbody tr:last-child td { border-bottom: none; }
+table tbody tr:hover { background: #FAFBFD; }
+
+/* Formularios genericos (los HTML de features sin SCSS propio usan form plano) */
+form {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px 22px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.05);
+  max-width: 820px;
+  margin-top: 12px;
+}
+form label {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--upeu-navy);
+  margin-top: 12px;
+  margin-bottom: 6px;
+  letter-spacing: .3px;
+  text-transform: uppercase;
+}
+form input:not([type="checkbox"]):not([type="radio"]),
+form select,
+form textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--upeu-border);
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--upeu-ink);
+  background: #fff;
+  font-family: inherit;
+  transition: border-color .15s, box-shadow .15s;
+}
+form input:focus, form select:focus, form textarea:focus {
+  outline: none;
+  border-color: var(--upeu-gold);
+  box-shadow: 0 0 0 3px rgba(245,184,0,.18);
+}
+form textarea { resize: vertical; min-height: 90px; }
+form .acciones, form .actions {
+  margin-top: 18px;
+  display: flex;
+  gap: 8px;
+}
+
+/* Mensajes de error / vacíos */
+.error {
+  background: #FEF2F2;
+  color: #991B1B;
+  border: 1px solid #FCA5A5;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  margin: 10px 0;
+}
+.exito, .success {
+  background: #ECFDF5;
+  color: #065F46;
+  border: 1px solid #6EE7B7;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  margin: 10px 0;
+}
+
+/* Links */
+a { color: var(--upeu-navy); }
+a:hover { color: var(--upeu-navy-dark); }

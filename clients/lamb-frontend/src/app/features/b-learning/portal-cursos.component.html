@@ -1,0 +1,91 @@
+<div class="bl-portal">
+  <div class="bl-topbar">
+    <h1>Centro de Aprendizaje Virtual</h1>
+    <select [ngModel]="periodoSeleccionado()" (ngModelChange)="onPeriodoChange($event)" class="bl-select">
+      @for (p of periodos; track p.id) {
+        <option [value]="p.id">{{ p.nombre }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="bl-layout">
+    <section class="bl-main">
+      <h2>Mis cursos matriculados</h2>
+      <div class="bl-cursos-grid">
+        @for (c of cursos(); track c.id) {
+          <article class="bl-curso-card" (click)="irACurso(c.id)">
+            <div class="bl-curso-banner" [style.background]="c.color">
+              <span class="bl-curso-numero">{{ c.numero }}</span>
+              <span class="bl-curso-upeu">UPeU</span>
+            </div>
+            <div class="bl-curso-body">
+              <div class="bl-curso-head">
+                <h3>{{ c.nombre }}</h3>
+                <button class="bl-curso-go" title="Entrar al curso">⚡</button>
+              </div>
+              <p class="bl-curso-meta">Ingeniería de Sistemas - J</p>
+              <p class="bl-curso-meta">{{ c.programa }}</p>
+              <p class="bl-curso-meta">{{ c.ciclo }} {{ c.grupo }} {{ c.nivel }}</p>
+              <div class="bl-curso-docente">
+                <span class="bl-avatar">👤</span>
+                <span>{{ c.docente }}</span>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    </section>
+
+    <aside class="bl-side">
+      <div class="bl-widget">
+        <h3>Sesiones de hoy</h3>
+        @if (sesionesHoy.length === 0) {
+          <p class="bl-empty">Sin sesiones para hoy</p>
+        } @else {
+          @for (s of sesionesHoy; track s.id) {
+            <div class="bl-sesion">
+              <strong>Sesión {{ s.numero }}</strong>
+              <p class="bl-sesion-title">{{ s.titulo }}</p>
+              <p class="bl-curso-meta">{{ s.cursoNombre }}</p>
+            </div>
+          }
+        }
+      </div>
+
+      <div class="bl-widget">
+        <h3>Mis pendientes</h3>
+        <button class="bl-mapa-btn">Mi mapa de cumplimiento</button>
+        @if (pendientes.length === 0) {
+          <p class="bl-empty">Sin trabajos pendientes</p>
+        } @else {
+          @for (p of pendientes; track p.id) {
+            <div class="bl-pendiente">
+              <div>
+                <strong>{{ p.titulo }}</strong>
+                <p class="bl-curso-meta">{{ p.tipo }} · {{ p.cursoNombre }}</p>
+              </div>
+              <div class="bl-pendiente-fecha">
+                <span>{{ p.fecha }}</span>
+                <span>{{ p.hora }}</span>
+              </div>
+            </div>
+          }
+        }
+      </div>
+
+      <div class="bl-widget">
+        <h3>Comunicados</h3>
+        @if (comunicados.length === 0) {
+          <p class="bl-empty">No se encontraron anuncios</p>
+        } @else {
+          @for (c of comunicados; track c.id) {
+            <div class="bl-comunicado">
+              <strong>{{ c.titulo }}</strong>
+              <p class="bl-curso-meta">{{ c.cursoNombre }} · {{ c.fecha }}</p>
+            </div>
+          }
+        }
+      </div>
+    </aside>
+  </div>
+</div>
