@@ -1,5 +1,5 @@
 <div class="pagina">
-  <h2>tipos-matricula</h2>
+  <h2>Tipo de matrícula</h2>
 
   @if (error()) {
     <div class="error">{{ error() }}</div>
@@ -17,6 +17,26 @@
     <label>
       Descripción
       <input type="text" formControlName="descripcion" />
+    </label>
+    <label>
+      Artículo legal
+      <input type="text" formControlName="articuloLegal" />
+    </label>
+    <label>
+      Créditos mínimos
+      <input type="number" formControlName="creditosMinimos" />
+    </label>
+    <label>
+      Días hábiles límite
+      <input type="number" formControlName="diasHabilesLimite" />
+    </label>
+    <label>
+      Máx. veces desaprobado
+      <input type="number" formControlName="maxVecesDesaprobado" />
+    </label>
+    <label>
+      <input type="checkbox" formControlName="requierePago" />
+      Requiere pago
     </label>
     <label>
       <input type="checkbox" formControlName="activo" />

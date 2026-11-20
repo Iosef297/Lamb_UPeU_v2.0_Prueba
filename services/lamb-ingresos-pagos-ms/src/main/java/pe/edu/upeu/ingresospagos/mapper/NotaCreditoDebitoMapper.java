@@ -6,11 +6,11 @@ import pe.edu.upeu.ingresospagos.dto.NotaCreditoDebitoRequest;
 import pe.edu.upeu.ingresospagos.dto.NotaCreditoDebitoResponse;
 import pe.edu.upeu.ingresospagos.entity.NotaCreditoDebito;
 
-@Mapper(componentModel = "spring", uses = PagoMapper.class)
+@Mapper(componentModel = "spring")
 public interface NotaCreditoDebitoMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "pago", ignore = true)
+    @Mapping(target = "idPago", source = "pagoId")
     @Mapping(target = "fechaEmision", ignore = true)
     NotaCreditoDebito toEntity(NotaCreditoDebitoRequest request);
 

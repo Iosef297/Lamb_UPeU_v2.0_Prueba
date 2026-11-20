@@ -20,6 +20,8 @@ export interface CondicionMatriculaResponse {
 export interface MatriculaRequest {
   idPersona: number;
   periodo: string;
+  idTipoMatricula?: number;
+  idModalidadMatricula?: number;
   detalles: DetalleMatriculaRequest[];
 }
 
@@ -27,6 +29,8 @@ export interface MatriculaResponse {
   id: number;
   idPersona: number;
   periodo: string;
+  idTipoMatricula: number;
+  idModalidadMatricula: number;
   fecha: string;
   estado: EstadoMatricula;
   detalles: DetalleMatriculaResponse[];

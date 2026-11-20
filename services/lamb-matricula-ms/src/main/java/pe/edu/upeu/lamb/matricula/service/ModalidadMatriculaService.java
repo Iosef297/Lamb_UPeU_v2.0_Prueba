@@ -35,6 +35,16 @@ public class ModalidadMatriculaService {
         return modalidadMatriculaMapper.toResponse(modalidadMatriculaRepository.save(entity));
     }
 
+    public ModalidadMatriculaResponse actualizar(Long id, ModalidadMatriculaRequest request) {
+        ModalidadMatricula entity = buscarOFallar(id);
+        modalidadMatriculaMapper.actualizarEntity(entity, request);
+        return modalidadMatriculaMapper.toResponse(modalidadMatriculaRepository.save(entity));
+    }
+
+    public void eliminar(Long id) {
+        modalidadMatriculaRepository.delete(buscarOFallar(id));
+    }
+
     private ModalidadMatricula buscarOFallar(Long id) {
         return modalidadMatriculaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Modalidad de matricula no encontrada: " + id));

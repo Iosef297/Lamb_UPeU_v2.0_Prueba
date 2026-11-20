@@ -5,11 +5,9 @@ import org.springframework.stereotype.Service;
 import pe.edu.upeu.ingresospagos.dto.BitacoraAuditoriaPagoRequest;
 import pe.edu.upeu.ingresospagos.dto.BitacoraAuditoriaPagoResponse;
 import pe.edu.upeu.ingresospagos.entity.BitacoraAuditoriaPago;
-import pe.edu.upeu.ingresospagos.entity.Pago;
 import pe.edu.upeu.ingresospagos.exception.ResourceNotFoundException;
 import pe.edu.upeu.ingresospagos.mapper.BitacoraAuditoriaPagoMapper;
 import pe.edu.upeu.ingresospagos.repository.BitacoraAuditoriaPagoRepository;
-import pe.edu.upeu.ingresospagos.repository.PagoRepository;
 
 import java.util.List;
 
@@ -19,10 +17,9 @@ public class BitacoraAuditoriaPagoService {
 
     private final BitacoraAuditoriaPagoRepository bitacoraAuditoriaPagoRepository;
     private final BitacoraAuditoriaPagoMapper bitacoraAuditoriaPagoMapper;
-    private final PagoRepository pagoRepository;
 
     public List<BitacoraAuditoriaPagoResponse> listar() {
-        return bitacoraAuditoriaPagoRepository.findAllConPago().stream()
+        return bitacoraAuditoriaPagoRepository.findAll().stream()
                 .map(bitacoraAuditoriaPagoMapper::toResponse)
                 .toList();
     }
@@ -33,7 +30,6 @@ public class BitacoraAuditoriaPagoService {
 
     public BitacoraAuditoriaPagoResponse crear(BitacoraAuditoriaPagoRequest request) {
         BitacoraAuditoriaPago bitacoraAuditoriaPago = bitacoraAuditoriaPagoMapper.toEntity(request);
-        bitacoraAuditoriaPago.setPago(buscarPagoOFallar(request.getPagoId()));
         return bitacoraAuditoriaPagoMapper.toResponse(bitacoraAuditoriaPagoRepository.save(bitacoraAuditoriaPago));
     }
 
@@ -42,7 +38,7 @@ public class BitacoraAuditoriaPagoService {
         bitacoraAuditoriaPago.setAccion(request.getAccion());
         bitacoraAuditoriaPago.setIdUsuario(request.getIdUsuario());
         bitacoraAuditoriaPago.setObservaciones(request.getObservaciones());
-        bitacoraAuditoriaPago.setPago(buscarPagoOFallar(request.getPagoId()));
+        bitacoraAuditoriaPago.setIdPago(request.getPagoId());
         return bitacoraAuditoriaPagoMapper.toResponse(bitacoraAuditoriaPagoRepository.save(bitacoraAuditoriaPago));
     }
 
@@ -53,10 +49,5 @@ public class BitacoraAuditoriaPagoService {
     private BitacoraAuditoriaPago buscarOFallar(Long id) {
         return bitacoraAuditoriaPagoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Bitacora de auditoria no encontrada: " + id));
-    }
-
-    private Pago buscarPagoOFallar(Long pagoId) {
-        return pagoRepository.findById(pagoId)
-                .orElseThrow(() -> new ResourceNotFoundException("Pago no encontrado: " + pagoId));
     }
 }

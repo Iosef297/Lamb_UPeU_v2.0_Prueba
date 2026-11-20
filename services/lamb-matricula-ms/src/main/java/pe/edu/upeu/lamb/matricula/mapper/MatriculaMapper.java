@@ -20,6 +20,8 @@ public class MatriculaMapper {
         Matricula matricula = Matricula.builder()
                 .idPersona(request.getIdPersona())
                 .periodo(request.getPeriodo())
+                .idTipoMatricula(request.getIdTipoMatricula())
+                .idModalidadMatricula(request.getIdModalidadMatricula())
                 .fecha(Instant.now())
                 .estado(EstadoMatricula.REGISTRADA)
                 .build();
@@ -38,6 +40,8 @@ public class MatriculaMapper {
                 .id(matricula.getId())
                 .idPersona(matricula.getIdPersona())
                 .periodo(matricula.getPeriodo())
+                .idTipoMatricula(matricula.getIdTipoMatricula())
+                .idModalidadMatricula(matricula.getIdModalidadMatricula())
                 .fecha(matricula.getFecha())
                 .estado(matricula.getEstado())
                 .detalles(matricula.getDetalles().stream().map(detalleMatriculaMapper::toResponse).toList())

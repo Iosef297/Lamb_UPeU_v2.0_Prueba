@@ -22,9 +22,8 @@ public class TarifarioPrograma {
     @Column(name = "programa", nullable = false, length = 100)
     private String programa;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_concepto_pago", nullable = false)
-    private ConceptoPago conceptoPago;
+    @Column(name = "id_concepto_pago", nullable = false)
+    private Long idConceptoPago;
 
     @Column(name = "monto", nullable = false, precision = 12, scale = 2)
     private BigDecimal monto;

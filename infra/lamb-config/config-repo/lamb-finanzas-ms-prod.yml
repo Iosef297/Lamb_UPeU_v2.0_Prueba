@@ -47,6 +47,10 @@ app:
       matricula: matricula-eventos
       pago-aceptado: pago-aceptado-eventos
 
+mercadopago:
+  public-key: ${MP_PUBLIC_KEY}
+  access-token: ${MP_ACCESS_TOKEN}
+
 eureka:
   instance:
     instance-id: ${spring.application.name}:${random.value}

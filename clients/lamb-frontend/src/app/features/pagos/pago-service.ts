@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { MetodoPago, PagoRequest, PagoResponse } from './pago.model';
+import { PagoRequest, PagoResponse } from './pago.model';
 
 @Injectable({ providedIn: 'root' })
 export class PagoService {
@@ -21,9 +21,13 @@ export class PagoService {
     return this.http.post<PagoResponse>(this.baseUrl, request);
   }
 
-  // Cancela un cargo PENDIENTE, por ejemplo el que genera la matricula confirmada
-  pagar(id: number, metodo: MetodoPago): Observable<PagoResponse> {
-    return this.http.post<PagoResponse>(`${this.baseUrl}/${id}/pagar`, { metodo });
+  // Confirma un pago EN_PROCESO (el metodo ya quedo fijado al crear el pago).
+  aceptar(id: number): Observable<PagoResponse> {
+    return this.http.post<PagoResponse>(`${this.baseUrl}/${id}/aceptar`, {});
+  }
+
+  rechazar(id: number): Observable<PagoResponse> {
+    return this.http.post<PagoResponse>(`${this.baseUrl}/${id}/rechazar`, {});
   }
 
   reembolsar(id: number): Observable<PagoResponse> {

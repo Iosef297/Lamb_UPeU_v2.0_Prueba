@@ -54,6 +54,13 @@ app:
       matricula: matricula-eventos
       pago-aceptado: pago-aceptado-eventos
 
+# Credenciales de prueba (sandbox) de Mercado Pago. Public key no es secreta.
+# access-token SI es secreto: reemplazar el placeholder de abajo con el token real
+# (ojito en el panel de Mercado Pago) solo en tu copia local, nunca commitear el valor real.
+mercadopago:
+  public-key: APP_USR-849c20b2-4269-4196-aded-4e3d353529a1
+  access-token: CAMBIAR_ACCESS_TOKEN_AQUI
+
 eureka:
   instance:
     hostname: localhost

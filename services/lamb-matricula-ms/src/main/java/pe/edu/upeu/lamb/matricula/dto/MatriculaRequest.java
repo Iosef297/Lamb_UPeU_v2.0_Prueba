@@ -21,6 +21,10 @@ public class MatriculaRequest {
     @Size(max = 20)
     private String periodo;
 
+    private Long idTipoMatricula;
+
+    private Long idModalidadMatricula;
+
     @NotEmpty
     @Valid
     private List<DetalleMatriculaRequest> detalles;

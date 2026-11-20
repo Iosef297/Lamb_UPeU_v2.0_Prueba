@@ -40,6 +40,10 @@ export const routes: Routes = [
       },
       // --- Admision / Trayectoria (CRUD generico, origen) ---
       {
+        path: 'crud/adjudicaciones',
+        loadComponent: () => import('./features/admision/vacantes-ingreso.component').then(m => m.VacantesIngresoComponent)
+      },
+      {
         path: 'crud/:slug',
         loadComponent: () => import('./features/crud-generic/crud-generic.component').then(m => m.CrudGenericComponent)
       },
@@ -728,6 +732,30 @@ export const routes: Routes = [
       {
         path: 'tipos-matricula/:id/editar',
         loadComponent: () => import('./features/tipos-matricula/tipos-matricula-form').then((m) => m.TiposMatriculaForm),
+      },
+      {
+        path: 'periodos-academicos',
+        loadComponent: () => import('./features/periodos-academicos/periodos-academicos-list').then((m) => m.PeriodosAcademicosList),
+      },
+      {
+        path: 'periodos-academicos/nueva',
+        loadComponent: () => import('./features/periodos-academicos/periodos-academicos-form').then((m) => m.PeriodosAcademicosForm),
+      },
+      {
+        path: 'periodos-academicos/:id/editar',
+        loadComponent: () => import('./features/periodos-academicos/periodos-academicos-form').then((m) => m.PeriodosAcademicosForm),
+      },
+      {
+        path: 'tipos-periodo',
+        loadComponent: () => import('./features/tipos-periodo/tipos-periodo-list').then((m) => m.TiposPeriodoList),
+      },
+      {
+        path: 'tipos-periodo/nueva',
+        loadComponent: () => import('./features/tipos-periodo/tipos-periodo-form').then((m) => m.TiposPeriodoForm),
+      },
+      {
+        path: 'tipos-periodo/:id/editar',
+        loadComponent: () => import('./features/tipos-periodo/tipos-periodo-form').then((m) => m.TiposPeriodoForm),
       },
       {
         path: 'modalidades-matricula',

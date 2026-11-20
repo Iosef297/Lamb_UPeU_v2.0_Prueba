@@ -27,4 +27,23 @@ public class ModalidadMatricula {
 
     @Column(name = "activo", nullable = false)
     private Boolean activo;
+
+    // JALA ID DE INSTITUCIONAL (ModalidadEstudio): presencial/virtual/semipresencial
+    @Column(name = "id_modalidad_estudio")
+    private Long idModalidadEstudio;
+
+    @Column(name = "articulo_legal", length = 40)
+    private String articuloLegal;
+
+    @Column(name = "creditos_minimos")
+    private Integer creditosMinimos;
+
+    @Column(name = "requiere_pago", nullable = false)
+    private Boolean requierePago;
+
+    @Column(name = "dias_habiles_limite")
+    private Integer diasHabilesLimite;
+
+    @Column(name = "max_veces_desaprobado")
+    private Integer maxVecesDesaprobado;
 }

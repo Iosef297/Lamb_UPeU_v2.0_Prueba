@@ -35,6 +35,16 @@ public class TipoMatriculaService {
         return tipoMatriculaMapper.toResponse(tipoMatriculaRepository.save(entity));
     }
 
+    public TipoMatriculaResponse actualizar(Long id, TipoMatriculaRequest request) {
+        TipoMatricula entity = buscarOFallar(id);
+        tipoMatriculaMapper.actualizarEntity(entity, request);
+        return tipoMatriculaMapper.toResponse(tipoMatriculaRepository.save(entity));
+    }
+
+    public void eliminar(Long id) {
+        tipoMatriculaRepository.delete(buscarOFallar(id));
+    }
+
     private TipoMatricula buscarOFallar(Long id) {
         return tipoMatriculaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Tipo de matricula no encontrado: " + id));

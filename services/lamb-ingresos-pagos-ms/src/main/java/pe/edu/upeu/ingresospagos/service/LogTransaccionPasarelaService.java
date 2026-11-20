@@ -5,11 +5,9 @@ import org.springframework.stereotype.Service;
 import pe.edu.upeu.ingresospagos.dto.LogTransaccionPasarelaRequest;
 import pe.edu.upeu.ingresospagos.dto.LogTransaccionPasarelaResponse;
 import pe.edu.upeu.ingresospagos.entity.LogTransaccionPasarela;
-import pe.edu.upeu.ingresospagos.entity.Pago;
 import pe.edu.upeu.ingresospagos.exception.ResourceNotFoundException;
 import pe.edu.upeu.ingresospagos.mapper.LogTransaccionPasarelaMapper;
 import pe.edu.upeu.ingresospagos.repository.LogTransaccionPasarelaRepository;
-import pe.edu.upeu.ingresospagos.repository.PagoRepository;
 
 import java.util.List;
 
@@ -19,10 +17,9 @@ public class LogTransaccionPasarelaService {
 
     private final LogTransaccionPasarelaRepository logTransaccionPasarelaRepository;
     private final LogTransaccionPasarelaMapper logTransaccionPasarelaMapper;
-    private final PagoRepository pagoRepository;
 
     public List<LogTransaccionPasarelaResponse> listar() {
-        return logTransaccionPasarelaRepository.findAllConPago().stream()
+        return logTransaccionPasarelaRepository.findAll().stream()
                 .map(logTransaccionPasarelaMapper::toResponse)
                 .toList();
     }
@@ -33,7 +30,6 @@ public class LogTransaccionPasarelaService {
 
     public LogTransaccionPasarelaResponse crear(LogTransaccionPasarelaRequest request) {
         LogTransaccionPasarela logTransaccionPasarela = logTransaccionPasarelaMapper.toEntity(request);
-        logTransaccionPasarela.setPago(buscarPagoOFallar(request.getPagoId()));
         return logTransaccionPasarelaMapper.toResponse(logTransaccionPasarelaRepository.save(logTransaccionPasarela));
     }
 
@@ -43,7 +39,7 @@ public class LogTransaccionPasarelaService {
         logTransaccionPasarela.setReferenciaExterna(request.getReferenciaExterna());
         logTransaccionPasarela.setEstado(request.getEstado());
         logTransaccionPasarela.setPayloadRespuesta(request.getPayloadRespuesta());
-        logTransaccionPasarela.setPago(buscarPagoOFallar(request.getPagoId()));
+        logTransaccionPasarela.setIdPago(request.getPagoId());
         return logTransaccionPasarelaMapper.toResponse(logTransaccionPasarelaRepository.save(logTransaccionPasarela));
     }
 
@@ -54,10 +50,5 @@ public class LogTransaccionPasarelaService {
     private LogTransaccionPasarela buscarOFallar(Long id) {
         return logTransaccionPasarelaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Log de transaccion de pasarela no encontrado: " + id));
-    }
-
-    private Pago buscarPagoOFallar(Long pagoId) {
-        return pagoRepository.findById(pagoId)
-                .orElseThrow(() -> new ResourceNotFoundException("Pago no encontrado: " + pagoId));
     }
 }

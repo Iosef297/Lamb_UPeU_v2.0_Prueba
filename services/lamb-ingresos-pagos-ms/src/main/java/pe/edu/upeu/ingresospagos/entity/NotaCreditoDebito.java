@@ -19,9 +19,8 @@ public class NotaCreditoDebito {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_pago", nullable = false)
-    private Pago pago;
+    @Column(name = "id_pago", nullable = false)
+    private Long idPago;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo", nullable = false, length = 20)

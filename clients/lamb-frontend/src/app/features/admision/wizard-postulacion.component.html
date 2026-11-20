@@ -100,30 +100,61 @@
         <div class="grid-2">
           <div class="field">
             <label class="field__label">Convocatoria *</label>
-            <div class="input">
-              <span class="material-symbols-outlined input__icon">campaign</span>
-              <select [value]="idConvocatoria() ?? ''"
-                      (change)="idConvocatoria.set(+$any($event.target).value || null)">
-                <option value="">— Seleccionar convocatoria abierta —</option>
-                @for (c of convocatorias(); track c.id) {
-                  <option [value]="c.id">{{ c.nombre }} · {{ c.periodo }}</option>
+            @if (convocatorias().length > 0) {
+              <div class="input" style="position: relative;">
+                <span class="material-symbols-outlined input__icon">search</span>
+                <input type="text" placeholder="Buscar convocatoria por nombre o ID..."
+                       [value]="convocatoriaSearchText()"
+                       (input)="onConvocatoriaSearchInput($any($event.target).value)"
+                       (focus)="openConvocatoriaSearch()"
+                       (blur)="closeConvocatoriaSearch()">
+                @if (convocatoriaSearchOpen()) {
+                  <div class="ref-search__list" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 20; background: #fff; border: 1px solid #ddd; border-radius: 6px; max-height: 220px; overflow-y: auto; box-shadow: 0 4px 12px rgba(0,0,0,.12);">
+                    @for (c of convocatoriaSearchResults(); track c.id) {
+                      <div class="ref-search__item" style="padding: 8px 12px; cursor: pointer;"
+                           (mousedown)="selectConvocatoria(c)">
+                        {{ c.nombre }} · {{ c.periodo }} <small style="color:#999;">#{{ c.id }}</small>
+                      </div>
+                    } @empty {
+                      <div style="padding: 8px 12px; color: #999;">Sin resultados</div>
+                    }
+                  </div>
                 }
-              </select>
-            </div>
+              </div>
+            } @else {
+              <div class="input">
+                <span class="material-symbols-outlined input__icon">campaign</span>
+                <select [value]="idConvocatoria() ?? ''"
+                        (change)="idConvocatoria.set(+$any($event.target).value || null)">
+                  <option value="">— Seleccionar convocatoria abierta —</option>
+                </select>
+              </div>
+              <p class="field__hint">Catálogo no disponible — sin convocatorias abiertas.</p>
+            }
           </div>
 
           <div class="field">
             <label class="field__label">Modalidad *</label>
             @if (modalidades().length > 0) {
-              <div class="input">
-                <span class="material-symbols-outlined input__icon">list</span>
-                <select [value]="idModalidad() ?? ''"
-                        (change)="idModalidad.set(+$any($event.target).value || null)">
-                  <option value="">— Seleccionar modalidad —</option>
-                  @for (m of modalidades(); track m.id) {
-                    <option [value]="m.id">{{ m.nombre }}</option>
-                  }
-                </select>
+              <div class="input" style="position: relative;">
+                <span class="material-symbols-outlined input__icon">search</span>
+                <input type="text" placeholder="Buscar modalidad por nombre o ID..."
+                       [value]="modalidadSearchText()"
+                       (input)="onModalidadSearchInput($any($event.target).value)"
+                       (focus)="openModalidadSearch()"
+                       (blur)="closeModalidadSearch()">
+                @if (modalidadSearchOpen()) {
+                  <div class="ref-search__list" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 20; background: #fff; border: 1px solid #ddd; border-radius: 6px; max-height: 220px; overflow-y: auto; box-shadow: 0 4px 12px rgba(0,0,0,.12);">
+                    @for (m of modalidadSearchResults(); track m.id) {
+                      <div class="ref-search__item" style="padding: 8px 12px; cursor: pointer;"
+                           (mousedown)="selectModalidad(m)">
+                        {{ m.nombre }} <small style="color:#999;">#{{ m.id }}</small>
+                      </div>
+                    } @empty {
+                      <div style="padding: 8px 12px; color: #999;">Sin resultados</div>
+                    }
+                  </div>
+                }
               </div>
             } @else {
               <div class="input">
@@ -137,14 +168,37 @@
           </div>
 
           <div class="field field--full">
-            <label class="field__label">Programa académico *</label>
-            <div class="input">
-              <span class="material-symbols-outlined input__icon">menu_book</span>
-              <input type="number" placeholder="ID del programa (ej. 1)"
-                     [value]="idPrograma() ?? ''"
-                     (input)="idPrograma.set(+$any($event.target).value || null)">
-            </div>
-            <p class="field__hint">Pendiente: integración con <code>lamb-institucional-ms</code> → se mostrará select.</p>
+            <label class="field__label">Examen *</label>
+            @if (examenes().length > 0) {
+              <div class="input" style="position: relative;">
+                <span class="material-symbols-outlined input__icon">search</span>
+                <input type="text" placeholder="Buscar por nombre o ID..."
+                       [value]="examenSearchText()"
+                       (input)="onExamenSearchInput($any($event.target).value)"
+                       (focus)="openExamenSearch()"
+                       (blur)="closeExamenSearch()">
+                @if (examenSearchOpen()) {
+                  <div class="ref-search__list" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 20; background: #fff; border: 1px solid #ddd; border-radius: 6px; max-height: 220px; overflow-y: auto; box-shadow: 0 4px 12px rgba(0,0,0,.12);">
+                    @for (ex of examenSearchResults(); track ex.id) {
+                      <div class="ref-search__item" style="padding: 8px 12px; cursor: pointer;"
+                           (mousedown)="selectExamen(ex)">
+                        {{ ex.nombre }} <small style="color:#999;">#{{ ex.id }}</small>
+                      </div>
+                    } @empty {
+                      <div style="padding: 8px 12px; color: #999;">Sin resultados</div>
+                    }
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="input">
+                <span class="material-symbols-outlined input__icon">menu_book</span>
+                <input type="number" placeholder="ID del examen (ej. 1)"
+                       [value]="idExamen() ?? ''"
+                       (input)="idExamen.set(+$any($event.target).value || null)">
+              </div>
+              <p class="field__hint">Catálogo no disponible — ingresar ID manual temporalmente.</p>
+            }
           </div>
         </div>
       </div>

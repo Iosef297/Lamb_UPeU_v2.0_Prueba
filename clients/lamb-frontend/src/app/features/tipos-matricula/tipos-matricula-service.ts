@@ -24,4 +24,8 @@ export class TiposMatriculaService {
   actualizar(id: number, request: TiposMatriculaRequest): Observable<TiposMatriculaResponse> {
     return this.http.put<TiposMatriculaResponse>(`${this.baseUrl}/${id}`, request);
   }
+
+  eliminar(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
 }

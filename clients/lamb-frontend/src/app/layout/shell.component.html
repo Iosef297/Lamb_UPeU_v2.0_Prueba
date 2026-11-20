@@ -95,26 +95,6 @@
         }
       }
 
-      @if (showFinanzas()) {
-        <div class="nav-group">Finanzas</div>
-        @for (bucket of finanzasGrouped(); track bucket.subgroup) {
-          <button type="button" class="nav-subgroup" (click)="toggleSubgroup(bucket.subgroup, bucket.items)">
-            <span class="material-symbols-outlined nav-subgroup__chev">
-              {{ isSubgroupOpen(bucket.subgroup, bucket.items) ? 'expand_more' : 'chevron_right' }}
-            </span>
-            <span class="nav-subgroup__label">{{ bucket.subgroup }}</span>
-          </button>
-          @if (isSubgroupOpen(bucket.subgroup, bucket.items)) {
-            @for (item of bucket.items; track item.slug) {
-              <a class="nav-item nav-item--sub" [routerLink]="['/crud', item.slug]" routerLinkActive="nav-item--active">
-                <span class="material-symbols-outlined nav-item__icon">{{ item.icon }}</span>
-                <span class="nav-item__label">{{ item.label }}</span>
-              </a>
-            }
-          }
-        }
-      }
-
       @if (showCurriculo()) {
         <div class="nav-group">Currículo</div>
         <a class="nav-item" routerLink="/planes-estudio" routerLinkActive="nav-item--active">
@@ -149,6 +129,12 @@
           <span class="material-symbols-outlined nav-item__icon">groups</span>
           <span class="nav-item__label">Grupos</span>
         </a>
+        @for (item of planificacion(); track item.slug) {
+          <a class="nav-item" [routerLink]="['/crud', item.slug]" routerLinkActive="nav-item--active">
+            <span class="material-symbols-outlined nav-item__icon">{{ item.icon }}</span>
+            <span class="nav-item__label">{{ item.label }}</span>
+          </a>
+        }
       }
 
       @if (showEvaluacion()) {
@@ -172,6 +158,36 @@
         <a class="nav-item" routerLink="/enrolar" routerLinkActive="nav-item--active">
           <span class="material-symbols-outlined nav-item__icon">how_to_reg</span>
           <span class="nav-item__label">Enrolar</span>
+        </a>
+
+        <div class="nav-group">Calendario y periodos</div>
+        <a class="nav-item" routerLink="/periodos-academicos" routerLinkActive="nav-item--active">
+          <span class="material-symbols-outlined nav-item__icon">calendar_month</span>
+          <span class="nav-item__label">Periodo académico</span>
+        </a>
+        <a class="nav-item" routerLink="/tipos-periodo" routerLinkActive="nav-item--active">
+          <span class="material-symbols-outlined nav-item__icon">date_range</span>
+          <span class="nav-item__label">Tipo de periodo</span>
+        </a>
+        <a class="nav-item" routerLink="/tipos-matricula" routerLinkActive="nav-item--active">
+          <span class="material-symbols-outlined nav-item__icon">category</span>
+          <span class="nav-item__label">Tipo de matrícula</span>
+        </a>
+        <a class="nav-item" routerLink="/modalidades-matricula" routerLinkActive="nav-item--active">
+          <span class="material-symbols-outlined nav-item__icon">school</span>
+          <span class="nav-item__label">Modalidad de matrícula</span>
+        </a>
+        <a class="nav-item" routerLink="/cronogramas-matricula" routerLinkActive="nav-item--active">
+          <span class="material-symbols-outlined nav-item__icon">event_note</span>
+          <span class="nav-item__label">Cronograma de matrícula</span>
+        </a>
+        <a class="nav-item" routerLink="/variaciones-matricula" routerLinkActive="nav-item--active">
+          <span class="material-symbols-outlined nav-item__icon">sync_alt</span>
+          <span class="nav-item__label">Variación de matrícula</span>
+        </a>
+        <a class="nav-item" routerLink="/ampliaciones-plazo-matricula" routerLinkActive="nav-item--active">
+          <span class="material-symbols-outlined nav-item__icon">more_time</span>
+          <span class="nav-item__label">Ampliación de plazo de matrícula</span>
         </a>
       }
 

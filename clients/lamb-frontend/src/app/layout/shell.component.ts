@@ -45,6 +45,7 @@ export class ShellComponent {
     if (u.startsWith('/notas') || u.startsWith('/actas')) return 'Evaluación';
     // Matrícula
     if (u.startsWith('/matriculas') || u.startsWith('/enrolar')
+        || u.startsWith('/periodos-academicos') || u.startsWith('/tipos-periodo')
         || u.startsWith('/historial-estados-matricula') || u.startsWith('/anulaciones-matricula')
         || u.startsWith('/observaciones-matricula') || u.startsWith('/notificaciones-matricula')
         || u.startsWith('/constancias-matricula') || u.startsWith('/tipos-matricula')
@@ -98,6 +99,7 @@ export class ShellComponent {
   personas      = computed(() => CRUDS.filter(c => c.group === 'Personas' && !c.hidden));
   curriculo     = computed(() => CRUDS.filter(c => c.group === 'Currículo' && !c.hidden));
   finanzas      = computed(() => CRUDS.filter(c => c.group === 'Finanzas' && !c.hidden));
+  planificacion = computed(() => CRUDS.filter(c => c.group === 'Planificación' && !c.hidden));
 
   showAdmision      = computed(() => this.activeModule() === 'Admisión');
   showTrayectoria   = computed(() => this.activeModule() === 'Trayectoria');

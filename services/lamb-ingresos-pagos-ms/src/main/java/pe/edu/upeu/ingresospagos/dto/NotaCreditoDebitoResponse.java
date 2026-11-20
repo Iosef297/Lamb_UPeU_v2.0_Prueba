@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class NotaCreditoDebitoResponse {
     private Long id;
-    private PagoResponse pago;
+    private Long idPago;
     private TipoNotaCreditoDebito tipo;
     private String motivo;
     private BigDecimal monto;

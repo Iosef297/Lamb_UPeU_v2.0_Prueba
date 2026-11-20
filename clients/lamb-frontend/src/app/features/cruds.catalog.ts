@@ -1,4 +1,4 @@
-export type FieldType = 'text' | 'number' | 'decimal' | 'date' | 'datetime' | 'enum' | 'boolean' | 'textarea' | 'id' | 'reniec' | 'ref' | 'file' | 'multiref';
+export type FieldType = 'text' | 'number' | 'decimal' | 'date' | 'datetime' | 'enum' | 'boolean' | 'textarea' | 'id' | 'reniec' | 'ref' | 'file' | 'multiref' | 'checkbox-single' | 'ownedlist';
 
 export interface FieldDef {
   key: string;
@@ -11,14 +11,28 @@ export interface FieldDef {
   default?: any;
   refPath?: string;       // para 'ref': endpoint GET que lista las opciones (FK)
   refLabelKey?: string;   // para 'ref': campo a mostrar de cada opción (default 'nombre')
+  searchable?: boolean;   // para 'ref': input con lupita que filtra opciones por texto/id en vez de <select>
   refResponseKey?: string;// para 'ref': cuando el GET devuelve el objeto anidado (ej. "facultad") en vez del id plano
   refSourceHint?: string; // nota visible debajo del campo indicando de qué microservicio/módulo debe venir el dato (uso: campos todavía sin integrar a otro microservicio)
   disabled?: boolean;     // deshabilita el control en el formulario (uso: campo pendiente de integración externa)
+  autoCode?: boolean | { prefix: string }; // para 'text' deshabilitado: genera automáticamente un código al crear.
+    // boolean: AAAAS### (año + semestre 1=ene-jun/2=jul-dic + 3 dígitos aleatorios).
+    // { prefix }: PREFIJO-AAAA-I|II (año + número romano de semestre, I=ene-jun/II=jul-dic)
+  autoRank?: { groupByKey: string; scoreKey: string; tiebreakKey: string }; // campo numérico no editable: tras guardar, recalcula 1..n dentro del grupo (groupByKey), mejor puntaje primero (scoreKey desc), empate gana el que entregó antes (tiebreakKey asc)
   fileNameTarget?: string;// para 'file': key del campo donde se guarda el nombre del archivo elegido
   fileUrlTarget?: string; // para 'file': key del campo donde se guarda la URL (blob local) del archivo elegido
   suggestOnChange?: {     // para 'ref': al elegir una opción, sugiere (no bloquea) un valor en otro campo 'ref'
     targetKey: string;        // key del campo a sugerir
     labelMap: Record<string, string>; // nombre de la opción elegida -> nombre de la opción a sugerir en targetKey
+  };
+  autoFillOnChange?: {    // para 'ref': al elegir una opción, copia un campo del objeto elegido a otro campo (si ese campo está vacío), ej. Grado -> Nivel académico
+    targetKey: string;        // key del campo 'ref' a completar
+    path: string;             // ruta (dot-path) dentro del objeto elegido, ej. "idNivelAcademico"
+  };
+  refFilter?: {           // para 'ref': restringe las opciones de este campo según el valor elegido en otro campo 'ref'
+    dependsOnKey?: string;    // key del campo 'ref' padre (ej. nivelAcademicoId)
+    matchKey?: string;        // campo de cada opción que debe coincidir con el valor elegido en dependsOnKey (ej. idNivelAcademico)
+    staticMatch?: { key: string; value: any }; // filtra siempre por un campo/valor fijo de cada opción (ej. tipo === 'GRADO'), independiente de otro campo
   };
   multiRef?: {            // para 'multiref': relación N:M vía tabla de union, key del campo debe empezar con "__" (no va en el body de la entidad principal)
     refPath: string;          // endpoint GET que lista las opciones
@@ -27,6 +41,25 @@ export interface FieldDef {
     ownerKey: string;         // nombre del campo (query param y body) que referencia a esta entidad en la tabla de union
     valueKey: string;         // nombre del campo (body) que referencia a la opción elegida en la tabla de union
   };
+  ownedList?: {           // para 'ownedlist': muestra hijos generados por el backend, agrupados por esta fila
+    refPath: string;          // endpoint CRUD (GET/POST/PUT/DELETE) de los hijos
+    refLabelKey?: string;     // campo a mostrar de cada hijo (default 'nombre')
+    ownerKey: string;         // campo de cada hijo que referencia al id de esta fila (ej. idRegimenAcademico)
+    formFields?: {            // si está presente, habilita crear/editar/eliminar hijos inline (si no, solo lectura)
+      key: string;
+      label: string;
+      type: 'text' | 'date' | 'ref';
+      refPath?: string;         // para type 'ref'
+      refLabelKey?: string;     // para type 'ref' (default 'nombre')
+    }[];
+  };
+  halfWidth?: boolean;    // fuerza ancho mitad en el formulario aunque el tipo normalmente ocupe todo el ancho (ej. textarea)
+  colorMap?: Record<string, 'warn' | 'ok' | 'danger' | 'muted'>; // para 'enum': colorea el chip según el valor (tabla y formulario)
+  derivedFromRef?: {      // para 'text'/'number' deshabilitados: deriva el valor desde el objeto elegido en otro campo 'ref'
+    sourceKey: string;        // key del campo 'ref' origen
+    path: string;             // ruta (dot-path) dentro del objeto elegido, ej. "gradoAcademicoCatalogo.nombre"
+    fallbackPath?: string;    // ruta alterna si la principal no tiene valor, ej. "gradoAcademico"
+  };
 }
 
 export interface CrudDef {
@@ -34,7 +67,7 @@ export interface CrudDef {
   label: string;
   icon: string;
   path: string;
-  group: 'Admisión' | 'Trayectoria' | 'Institucional' | 'Personas' | 'Currículo' | 'Finanzas';
+  group: 'Admisión' | 'Trayectoria' | 'Institucional' | 'Personas' | 'Currículo' | 'Planificación' | 'Finanzas';
   subgroup?: string;
   description: string;
   fields: FieldDef[];
@@ -58,9 +91,9 @@ export const CRUDS: CrudDef[] = [
     description: 'Proceso de admisión, modalidad, vacantes y cronograma del periodo',
     fields: [
       f('id', 'ID', 'id', { editable: false }),
-      f('codigo', 'Código', 'text', { required: true }),
+      f('codigo', 'Código', 'text', { required: true, disabled: true, autoCode: { prefix: 'CONV' } }),
       f('nombre', 'Nombre', 'text', { required: true }),
-      f('periodo', 'Periodo', 'text', { required: true, default: '2026-2' }),
+      f('periodo', 'Periodo', 'text', { required: true, listed: false, editable: false, autoCode: { prefix: '' } }),
       f('fechaInicio', 'Inicio', 'date', { required: true }),
       f('fechaFin', 'Fin', 'date', { required: true }),
       f('fechaExamen', 'Fecha examen', 'date'),
@@ -70,16 +103,34 @@ export const CRUDS: CrudDef[] = [
     ]
   },
   {
+    group: 'Admisión', slug: 'examenes-admision', label: 'Examen de admisión',
+    icon: 'quiz', path: '/api/v1/examenes-admision',
+    description: 'Examen, aula asignada, aforo y estado',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('idConvocatoria', 'Convocatoria', 'ref', { required: true, refPath: '/api/v1/convocatorias', refLabelKey: 'nombre', autoFillOnChange: { targetKey: 'fechaExamen', path: 'fechaExamen' } }),
+      f('codigo', 'Código', 'text', { required: true, disabled: true, autoCode: true }),
+      f('nombre', 'Nombre', 'text', { required: true }),
+      f('fechaExamen', 'Fecha', 'datetime', { required: true }),
+      f('duracionMinutos', 'Duración (min)', 'number', { required: true, default: 120 }),
+      f('idAula', 'ID Aula', 'number'),
+      f('aforoMaximo', 'Aforo máx.', 'number', { required: true, default: 30 }),
+      f('aforoAsignado', 'Aforo asignado', 'number', { required: true, default: 0 }),
+      f('estado', 'Estado', 'enum', { required: true, options: ['PROGRAMADO','EN_CURSO','FINALIZADO','CANCELADO'], default: 'PROGRAMADO' }),
+      f('idSupervisor', 'Supervisor', 'number')
+    ]
+  },
+  {
     group: 'Admisión', slug: 'postulantes', label: 'Postulante',
     icon: 'person', path: '/api/v1/postulantes',
     description: 'Datos del postulante, apoderado y colegio de procedencia',
     fields: [
       f('id', 'ID', 'id', { editable: false }),
       f('__reniec', 'Buscar por DNI (RENIEC)', 'reniec', { listed: false }),
-      f('idPersona', 'ID Persona', 'number', { required: true }),
-      f('idConvocatoria', 'ID Convocatoria', 'number', { required: true }),
-      f('idPrograma', 'ID Programa', 'number', { required: true }),
-      f('idModalidad', 'ID Modalidad', 'number', { required: true }),
+      f('idPersona', 'ID Persona', 'number', { required: true, editable: false }),
+      f('idConvocatoria', 'Convocatoria', 'ref', { required: true, refPath: '/api/v1/convocatorias', refLabelKey: 'nombre', searchable: true }),
+      f('idExamen', 'Examen', 'ref', { required: true, refPath: '/api/v1/examenes-admision', refLabelKey: 'nombre', searchable: true }),
+      f('idModalidad', 'Modalidad', 'ref', { required: true, refPath: '/api/v1/programa-academico/modalidades-estudio', refLabelKey: 'nombre', searchable: true }),
       // Código autogenerado por backend: POS-{periodo}-{correlativo}. No se edita.
       f('codigoPostulante', 'Código', 'text', { editable: false }),
       f('colegioProcedencia', 'Colegio', 'text'),
@@ -89,38 +140,7 @@ export const CRUDS: CrudDef[] = [
       f('correoContacto', 'Correo', 'text'),
       f('nombreApoderado', 'Apoderado', 'text'),
       f('telefonoApoderado', 'Tel. apoderado', 'text', { listed: false }),
-      f('estado', 'Estado', 'enum', { required: true, options: ['REGISTRADO','INSCRITO','EVALUADO','ADMITIDO','RECHAZADO','DESISTIDO'], default: 'REGISTRADO' })
-    ]
-  },
-  {
-    group: 'Admisión', slug: 'inscripciones', label: 'Inscripción',
-    icon: 'how_to_reg', path: '/api/v1/inscripciones',
-    description: 'Solicitud de admisión con sus documentos presentados',
-    fields: [
-      f('id', 'ID', 'id', { editable: false }),
-      f('idPersona', 'ID Persona', 'number', { required: true }),
-      f('idPrograma', 'ID Programa', 'number', { required: true }),
-      f('idModalidad', 'ID Modalidad', 'number', { required: true }),
-      f('periodo', 'Periodo', 'text', { required: true, default: '2026-2' }),
-      f('estado', 'Estado', 'enum', { required: true, options: ['PENDIENTE','OBSERVADA','APROBADA','RECHAZADA'], default: 'PENDIENTE' }),
-      f('observacion', 'Observación', 'textarea', { listed: false })
-    ]
-  },
-  {
-    group: 'Admisión', slug: 'examenes-admision', label: 'Examen de admisión',
-    icon: 'quiz', path: '/api/v1/examenes-admision',
-    description: 'Examen, aula asignada, aforo y estado',
-    fields: [
-      f('id', 'ID', 'id', { editable: false }),
-      f('idConvocatoria', 'ID Convocatoria', 'number', { required: true }),
-      f('codigo', 'Código', 'text', { required: true }),
-      f('nombre', 'Nombre', 'text', { required: true }),
-      f('fechaExamen', 'Fecha', 'datetime', { required: true }),
-      f('duracionMinutos', 'Duración (min)', 'number', { required: true, default: 120 }),
-      f('idAula', 'ID Aula', 'number'),
-      f('aforoMaximo', 'Aforo máx.', 'number', { required: true, default: 30 }),
-      f('aforoAsignado', 'Aforo asignado', 'number', { required: true, default: 0 }),
-      f('estado', 'Estado', 'enum', { required: true, options: ['PROGRAMADO','EN_CURSO','FINALIZADO','CANCELADO'], default: 'PROGRAMADO' })
+      f('estado', 'Estado', 'enum', { required: true, options: ['PRE_INSCRITO','FORMALIZADO','PAGADO','APTO_EXAMEN','CALIFICADO','ADMITIDO','NO_ADMITIDO','ANULADO'], default: 'PRE_INSCRITO' })
     ]
   },
   {
@@ -129,12 +149,12 @@ export const CRUDS: CrudDef[] = [
     description: 'Contactos, medios de captación y reclamos',
     fields: [
       f('id', 'ID', 'id', { editable: false }),
-      f('idPostulante', 'ID Postulante', 'number', { required: true }),
+      f('idPostulante', 'Postulante', 'ref', { required: true, refPath: '/api/v1/postulantes', refLabelKey: 'nombreCompleto', searchable: true }),
       f('canal', 'Canal', 'enum', { required: true, options: ['LLAMADA','WHATSAPP','CORREO','PRESENCIAL'], default: 'LLAMADA' }),
-      f('medioCaptacion', 'Medio captación', 'text'),
+      f('medioCaptacion', 'Medio captación', 'enum', { options: ['Facebook','TikTok','WhatsApp','Instagram','Referidos','Ferias vocacionales','Visitas a colegios','Radio local','Volanteo y afiches','Paneles publicitarios','Exámenes de beca'] }),
       f('asunto', 'Asunto', 'text', { required: true }),
       f('detalle', 'Detalle', 'textarea', { listed: false }),
-      f('resultado', 'Resultado', 'enum', { required: true, options: ['CONTACTADO','SIN_RESPUESTA','INTERESADO','DESCARTADO'], default: 'CONTACTADO' }),
+      f('resultado', 'Resultado', 'enum', { required: true, options: ['CONTACTADO','SIN RESPUESTA','INTERESADO','DESCARTADO'], default: 'CONTACTADO' }),
       f('idResponsable', 'ID Responsable', 'number'),
       f('fechaContacto', 'Fecha contacto', 'datetime', { required: true }),
       f('proximoContacto', 'Próximo contacto', 'datetime', { listed: false })
@@ -146,17 +166,12 @@ export const CRUDS: CrudDef[] = [
     description: 'Puntajes del examen, supervisor y encargado',
     fields: [
       f('id', 'ID', 'id', { editable: false }),
-      f('idExamen', 'ID Examen', 'number', { required: true }),
-      f('idPostulante', 'ID Postulante', 'number', { required: true }),
+      f('idExamen', 'Examen', 'ref', { required: true, refPath: '/api/v1/examenes-admision', refLabelKey: 'nombre', searchable: true }),
+      f('idPostulante', 'Postulante', 'ref', { required: true, refPath: '/api/v1/postulantes', refLabelKey: 'nombreCompleto', searchable: true, refFilter: { dependsOnKey: 'idExamen', matchKey: 'idExamen' } }),
       f('puntajeTotal', 'Puntaje total', 'decimal', { required: true }),
-      f('puntajeAptitud', 'Aptitud', 'decimal'),
-      f('puntajeConocimiento', 'Conocimiento', 'decimal'),
-      f('respuestasCorrectas', 'Correctas', 'number'),
-      f('respuestasIncorrectas', 'Incorrectas', 'number'),
-      f('respuestasBlanco', 'Blanco', 'number', { listed: false }),
-      f('ordenMerito', 'Orden mérito', 'number'),
+      f('horaEntrega', 'Hora de entrega', 'datetime', { required: true }),
+      f('ordenMerito', 'Orden mérito', 'number', { editable: false, autoRank: { groupByKey: 'idExamen', scoreKey: 'puntajeTotal', tiebreakKey: 'horaEntrega' } }),
       f('idSupervisor', 'ID Supervisor', 'number'),
-      f('idEncargado', 'ID Encargado', 'number'),
       f('observacion', 'Observación', 'textarea', { listed: false })
     ]
   },
@@ -168,7 +183,7 @@ export const CRUDS: CrudDef[] = [
       f('id', 'ID', 'id', { editable: false }),
       f('idPostulante', 'ID Postulante', 'number', { required: true }),
       f('idModalidad', 'ID Modalidad', 'number', { required: true }),
-      f('idPrograma', 'ID Programa', 'number', { required: true }),
+      f('idPrograma', 'Programa', 'ref', { required: true, refPath: '/api/v1/programas', refLabelKey: 'nombre' }),
       f('puntajeFinal', 'Puntaje final', 'decimal', { required: true }),
       f('ordenMerito', 'Orden mérito', 'number'),
       f('estado', 'Estado', 'enum', { required: true, options: ['PENDIENTE','ADJUDICADA','PUBLICADA','ANULADA'], default: 'PENDIENTE' }),
@@ -184,7 +199,7 @@ export const CRUDS: CrudDef[] = [
     fields: [
       f('id', 'ID', 'id', { editable: false }),
       f('idPostulante', 'ID Postulante', 'number', { required: true }),
-      f('tipoCaso', 'Tipo', 'enum', { required: true, options: ['FICHA_SOCIOECONOMICA','DISCAPACIDAD','PRORROGA_EXAMEN','CONVALIDACION_TRASLADO','ANULACION_INSCRIPCION','CARGA_MASIVA','RECLAMO_APELACION'], default: 'FICHA_SOCIOECONOMICA' }),
+      f('tipoCaso', 'Tipo', 'enum', { required: true, options: ['FICHA SOCIOECONOMICA','DISCAPACIDAD','PRORROGA EXAMEN','CONVALIDACION TRASLADO','ANULACION INSCRIPCION','CARGA MASIVA','RECLAMO APELACION'], default: 'FICHA SOCIOECONOMICA' }),
       f('descripcion', 'Descripción', 'textarea', { required: true }),
       f('requiereAjuste', 'Requiere ajuste', 'boolean', { required: true, default: false }),
       f('ajusteOtorgado', 'Ajuste otorgado', 'textarea', { listed: false }),
@@ -202,7 +217,7 @@ export const CRUDS: CrudDef[] = [
     fields: [
       f('id', 'ID', 'id', { editable: false }),
       f('idPersona', 'ID Persona', 'number', { required: true }),
-      f('idPrograma', 'ID Programa', 'number', { required: true }),
+      f('idPrograma', 'Programa', 'ref', { required: true, refPath: '/api/v1/programas', refLabelKey: 'nombre' }),
       f('idPostulacion', 'ID Postulación', 'number', { required: true }),
       f('idPlan', 'ID Plan', 'number'),
       f('idEscuela', 'ID Escuela', 'number', { listed: false }),
@@ -305,9 +320,9 @@ export const CRUDS: CrudDef[] = [
   // ============ INSTITUCIONAL (46) ============
   {
     group: "Institucional", subgroup: "Programa académico", slug: "inst-niveles-academicos", label: "Nivel académico",
-    hidden: true,
+    lockedCatalog: true, hidden: true,
     icon: "stairs", path: "/api/v1/programa-academico/niveles-academicos",
-    description: "Niveles académicos (pregrado, posgrado, etc.)",
+    description: "Niveles académicos: Pregrado y Posgrado (Ley Universitaria 30220) más Educación Superior Tecnológica para institutos/escuelas (Ley 30512, ej. ISTAT).",
     fields: [
       f("id", "ID", "id", { editable: false }),
       f("nombre", "Nombre", "text", { required: true }),
@@ -316,13 +331,14 @@ export const CRUDS: CrudDef[] = [
   },
   {
     group: "Institucional", subgroup: "Programa académico", slug: "inst-grados-academicos", label: "Grado académico",
-    hidden: true,
+    lockedCatalog: true, hidden: true,
     icon: "workspace_premium", path: "/api/v1/programa-academico/grados-academicos",
-    description: "Grados académicos (bachiller, licenciatura, maestría, doctorado, etc.)",
+    description: "Grados y títulos académicos: Bachiller/Título Profesional/Maestro/Doctor (Ley Universitaria 30220) más Bachiller Técnico/Título de Técnico/Título de Profesional Técnico para institutos (Ley 30512).",
     fields: [
       f("id", "ID", "id", { editable: false }),
-      f("nombre", "Nombre", "text", { required: true }),
-      f("descripcion", "Descripción", "textarea")
+      f("nombre", "Nombre", "text", { required: false }),
+      f("descripcion", "Descripción", "textarea"),
+      f("idNivelAcademico", "Nivel académico", "ref", { required: true, refPath: "/api/v1/programa-academico/niveles-academicos", refLabelKey: "nombre" })
     ]
   },
   {
@@ -332,8 +348,8 @@ export const CRUDS: CrudDef[] = [
     fields: [
       f("id", "ID", "id", { editable: false }),
       f("nombre", "Nombre", "text", { required: true }),
-      f("nivelAcademicoId", "Nivel académico", "ref", { refPath: "/api/v1/programa-academico/niveles-academicos", refLabelKey: "nombre", refResponseKey: "nivelAcademico", default: 1, disabled: true, refSourceHint: "Pendiente: debe jalarse del microservicio Currículo (lamb-curriculo-ms, GET /api/v1/niveles-academicos)." }),
-      f("gradoAcademicoCatalogoId", "Grado académico", "ref", { refPath: "/api/v1/programa-academico/grados-academicos", refLabelKey: "nombre", refResponseKey: "gradoAcademicoCatalogo", default: 1, disabled: true, refSourceHint: "Pendiente: debe jalarse del microservicio Currículo (lamb-curriculo-ms, GET /api/v1/grados-academicos)." }),
+      f("nivelAcademicoId", "Nivel académico", "ref", { required: true, refPath: "/api/v1/programa-academico/niveles-academicos", refLabelKey: "nombre", refResponseKey: "nivelAcademico", default: 2 }),
+      f("gradoAcademicoCatalogoId", "Grado académico", "ref", { required: true, refPath: "/api/v1/programa-academico/grados-academicos", refLabelKey: "nombre", refResponseKey: "gradoAcademicoCatalogo", default: 2, refFilter: { dependsOnKey: "nivelAcademicoId", matchKey: "idNivelAcademico", staticMatch: { key: "tipo", value: "GRADO" } }, autoFillOnChange: { targetKey: "nivelAcademicoId", path: "idNivelAcademico" } }),
       f("duracionSemestres", "Duración (semestres)", "number"),
       f("facultadId", "Facultad", "ref", { required: true, refPath: "/api/v1/facultades", refLabelKey: "nombre", refResponseKey: "facultad" })
     ]
@@ -356,17 +372,45 @@ export const CRUDS: CrudDef[] = [
     fields: [
       f("id", "ID", "id", { editable: false }),
       f("nombre", "Nombre", "text", { required: true }),
-      f("descripcion", "Descripción", "textarea"),
+      f("anio", "Año (automático, según inicio)", "number", { editable: false }),
+      f("descripcion", "Descripción", "textarea", { halfWidth: true }),
+      f("fechaInicio", "Inicio", "date", { required: true }),
+      f("fechaFin", "Fin", "date", { required: true }),
       f("periodosPorAnio", "Periodos por año", "number"),
-      f("activo", "Activo", "boolean", { default: true }),
+      f("estado", "Estado", "enum", {
+        required: true, default: "Planificado", options: ["Planificado", "Abierto", "En curso", "Finalizado"],
+        colorMap: { "Planificado": "warn", "Abierto": "ok", "En curso": "ok", "Finalizado": "danger" }
+      }),
+      f("idTipoPeriodo", "Tipo de periodo", "checkbox-single", {
+        halfWidth: true,
+        refPath: "/api/v1/periodo-academico/tipos-periodo",
+        refLabelKey: "nombre"
+      }),
       f("__modalidades", "Modalidades aplicables", "multiref", {
         listed: true,
+        halfWidth: true,
         multiRef: {
           refPath: "/api/v1/programa-academico/modalidades-estudio",
           refLabelKey: "nombre",
           joinPath: "/api/v1/programa-academico/regimen-modalidad",
           ownerKey: "idRegimenAcademico",
           valueKey: "idModalidadEstudio"
+        }
+      }),
+      f("__periodosGenerados", "Periodos generados", "ownedlist", {
+        listed: false,
+        editable: false,
+        ownedList: {
+          refPath: "/api/v1/periodo-academico/periodos",
+          refLabelKey: "nombre",
+          ownerKey: "idRegimenAcademico",
+          formFields: [
+            { key: "nombre", label: "Nombre", type: "text" },
+            { key: "idAnioAcademico", label: "Año académico", type: "ref", refPath: "/api/v1/periodo-academico/anios-academicos", refLabelKey: "anio" },
+            { key: "idTipoPeriodo", label: "Tipo de periodo", type: "ref", refPath: "/api/v1/periodo-academico/tipos-periodo", refLabelKey: "nombre" },
+            { key: "fechaInicio", label: "Inicio", type: "date" },
+            { key: "fechaFin", label: "Fin", type: "date" }
+          ]
         }
       })
     ]
@@ -392,8 +436,11 @@ export const CRUDS: CrudDef[] = [
     description: "Grados y t\u00edtulos otorgados por programa",
     fields: [
       f("id", "ID", "id", { editable: false }),
-      f("idPrograma", "ID Programa", "number", { required: true }),
-      f("grado", "Grado", "text", { required: true }),
+      f("idPrograma", "Programa", "ref", { required: true, refPath: "/api/v1/programas", refLabelKey: "nombre" }),
+      f("grado", "Grado", "text", {
+        disabled: true, required: false,
+        derivedFromRef: { sourceKey: "idPrograma", path: "gradoAcademicoCatalogo.nombre", fallbackPath: "gradoAcademico" }
+      }),
       f("titulo", "T\u00edtulo", "text")
     ]
   },
@@ -403,7 +450,7 @@ export const CRUDS: CrudDef[] = [
     description: "Resoluciones de creaci\u00f3n/modificaci\u00f3n de programas",
     fields: [
       f("id", "ID", "id", { editable: false }),
-      f("idPrograma", "ID Programa", "number", { required: true }),
+      f("idPrograma", "Programa", "ref", { required: true, refPath: "/api/v1/programas", refLabelKey: "nombre" }),
       f("numeroResolucion", "N\u00b0 Resoluci\u00f3n", "text", { required: true }),
       f("tipoResolucion", "Tipo", "text"),
       f("fechaEmision", "Fecha emisi\u00f3n", "date")
@@ -416,7 +463,7 @@ export const CRUDS: CrudDef[] = [
     fields: [
       f("id", "ID", "id", { editable: false }),
       f("nombre", "Nombre", "text", { required: true }),
-      f("idPrograma", "ID Programa", "number", { required: true }),
+      f("idPrograma", "Programa", "ref", { required: true, refPath: "/api/v1/programas", refLabelKey: "nombre" }),
       f("descripcion", "Descripción", "textarea")
     ]
   },
@@ -426,24 +473,14 @@ export const CRUDS: CrudDef[] = [
     description: "Acreditaciones obtenidas por un programa académico",
     fields: [
       f("id", "ID", "id", { editable: false }),
-      f("idPrograma", "ID Programa", "number", { required: true }),
+      f("idPrograma", "Programa", "ref", { required: true, refPath: "/api/v1/programas", refLabelKey: "nombre" }),
       f("entidadAcreditadora", "Entidad acreditadora", "text", { required: true }),
       f("fechaAcreditacion", "Fecha acreditaci\u00f3n", "date"),
       f("fechaVigencia", "Vigencia", "date")
     ]
   },
   {
-    group: "Institucional", subgroup: "Periodo académico", slug: "inst-anios-academicos", label: "A\u00f1o académico",
-    icon: "event", path: "/api/v1/periodo-academico/anios-academicos",
-    description: "A\u00f1os académicos institucionales",
-    fields: [
-      f("id", "ID", "id", { editable: false }),
-      f("anio", "A\u00f1o", "number", { required: true }),
-      f("descripcion", "Descripción", "textarea")
-    ]
-  },
-  {
-    group: "Institucional", subgroup: "Periodo académico", slug: "inst-tipos-periodo", label: "Tipo de periodo",
+    group: "Institucional", subgroup: "Programa académico", slug: "inst-tipos-periodo", label: "Tipo de periodo",
     icon: "category", path: "/api/v1/periodo-academico/tipos-periodo",
     description: "Tipos de periodo académico (semestre, verano, etc.)",
     fields: [
@@ -453,44 +490,7 @@ export const CRUDS: CrudDef[] = [
     ]
   },
   {
-    group: "Institucional", subgroup: "Periodo académico", slug: "inst-periodos", label: "Periodo académico",
-    icon: "date_range", path: "/api/v1/periodo-academico/periodos",
-    description: "Periodos académicos con a\u00f1o y tipo. Regimen Modular: el módulo lleva como periodo padre el periodo regular (p.ej. 2026-I).",
-    fields: [
-      f("id", "ID", "id", { editable: false }),
-      f("nombre", "Nombre", "text", { required: true }),
-      f("idAnioAcademico", "ID A\u00f1o académico", "number", { required: true }),
-      f("idTipoPeriodo", "ID Tipo periodo", "number", { required: true }),
-      f("fechaInicio", "Inicio", "date", { required: true }),
-      f("fechaFin", "Fin", "date", { required: true }),
-      f("idPeriodoPadre", "Periodo padre (módulo)", "ref", { refPath: "/api/v1/periodo-academico/periodos", refLabelKey: "nombre", refResponseKey: "periodoPadre" })
-    ]
-  },
-  {
-    group: "Institucional", subgroup: "Periodo académico", slug: "inst-estados-periodo", label: "Estado de periodo",
-    icon: "flag", path: "/api/v1/periodo-academico/estados-periodo",
-    description: "Historial de estados de un periodo académico",
-    fields: [
-      f("id", "ID", "id", { editable: false }),
-      f("idPeriodoAcademico", "ID Periodo", "number", { required: true }),
-      f("estado", "Estado", "text", { required: true }),
-      f("fechaCambio", "Fecha cambio", "date")
-    ]
-  },
-  {
-    group: "Institucional", subgroup: "Periodo académico", slug: "inst-periodo-programa-sede", label: "Periodo x programa x sede",
-    icon: "grid_view", path: "/api/v1/periodo-academico/periodo-programa-sede",
-    description: "Vigencia de un programa en una sede durante un periodo",
-    fields: [
-      f("id", "ID", "id", { editable: false }),
-      f("idPeriodoAcademico", "ID Periodo", "number", { required: true }),
-      f("idPrograma", "ID Programa", "number", { required: true }),
-      f("idSede", "ID Sede", "number", { required: true }),
-      f("vigente", "Vigente", "boolean", { default: true })
-    ]
-  },
-  {
-    group: "Institucional", subgroup: "Periodo académico", slug: "inst-ampliaciones-cierre", label: "Ampliaci\u00f3n / cierre de periodo",
+    group: "Institucional", subgroup: "Programa académico", slug: "inst-ampliaciones-cierre", label: "Ampliación / cierre de periodo",
     icon: "update", path: "/api/v1/periodo-academico/ampliaciones-cierre",
     description: "Ampliaciones o cierres excepcionales de un periodo académico",
     fields: [
@@ -500,6 +500,32 @@ export const CRUDS: CrudDef[] = [
       f("numeroResolucion", "N\u00b0 Resoluci\u00f3n", "text"),
       f("fechaAccion", "Fecha acci\u00f3n", "date"),
       f("descripcion", "Descripción", "textarea")
+    ]
+  },
+  // ============ PLANIFICACION (2) ============
+  {
+    group: "Planificación", slug: "plan-tipos-periodo", label: "Tipo de periodo",
+    icon: "category", path: "/api/v1/tipos-periodo",
+    description: "Tipos de periodo de planificación (regular, verano, etc.)",
+    fields: [
+      f("id", "ID", "id", { editable: false }),
+      f("codigo", "Código", "text", { required: true }),
+      f("nombre", "Nombre", "text", { required: true }),
+      f("descripcion", "Descripción", "textarea", { listed: false })
+    ]
+  },
+  {
+    group: "Planificación", slug: "plan-periodos-academicos", label: "Periodo académico",
+    icon: "calendar_month", path: "/api/v1/periodos-academicos",
+    description: "Periodos operativos (2026-1, 2026-2...) usados para programar grupos, ofertas y horarios",
+    fields: [
+      f("id", "ID", "id", { editable: false }),
+      f("codigo", "Código", "text", { required: true }),
+      f("nombre", "Nombre", "text", { required: true }),
+      f("idTipoPeriodo", "Tipo de periodo", "ref", { required: true, refPath: "/api/v1/tipos-periodo", refLabelKey: "nombre" }),
+      f("fechaInicio", "Inicio", "date", { required: true }),
+      f("fechaFin", "Fin", "date", { required: true }),
+      f("estado", "Estado", "enum", { required: true, options: ["PLANIFICADO", "EN_CURSO", "CERRADO"], default: "PLANIFICADO" })
     ]
   },
   {
@@ -1471,26 +1497,37 @@ export const CRUDS: CrudDef[] = [
     ]
   },
   {
-    group: 'Finanzas', subgroup: 'Convenios y Becas', slug: 'fin-becas', label: 'Beca',
-    icon: 'school', path: '/api/v1/becas',
-    description: 'Catálogo de becas y su porcentaje de descuento',
+    group: 'Finanzas', subgroup: 'Convenios y Becas', slug: 'fin-tipos-beca', label: 'Tipo de beca',
+    icon: 'school', path: '/api/v1/descuentos-becas/tipos-beca',
+    description: 'Catálogo de tipos de beca',
     fields: [
       f('id', 'ID', 'id', { editable: false }),
       f('nombre', 'Nombre', 'text', { required: true }),
-      f('descripcion', 'Descripción', 'textarea', { listed: false }),
-      f('porcentajeDescuento', 'Porcentaje descuento', 'number', { required: true }),
-      f('activo', 'Activo', 'boolean', { required: true, default: true })
+      f('descripcion', 'Descripción', 'textarea', { listed: false })
     ]
   },
   {
-    group: 'Finanzas', subgroup: 'Convenios y Becas', slug: 'fin-becas-asignadas', label: 'Beca asignada',
-    icon: 'card_giftcard', path: '/api/v1/becas-asignadas',
-    description: 'Asignación de una beca a un estudiante',
+    group: 'Finanzas', subgroup: 'Convenios y Becas', slug: 'fin-becas-aplicadas', label: 'Beca aplicada',
+    icon: 'card_giftcard', path: '/api/v1/descuentos-becas/becas-aplicadas',
+    description: 'Beca aplicada a una persona (estudiante u otro, dato de otro microservicio)',
     fields: [
       f('id', 'ID', 'id', { editable: false }),
-      f('idEstudiante', 'ID Estudiante', 'text', { required: true }),
-      f('becaId', 'Beca', 'ref', { required: true, refPath: '/api/v1/becas', refLabelKey: 'nombre' }),
-      f('activo', 'Activo', 'boolean', { required: true, default: true })
+      f('idPersona', 'ID Persona', 'number', { required: true }),
+      f('idTipoBeca', 'Tipo de beca', 'ref', { required: true, refPath: '/api/v1/descuentos-becas/tipos-beca', refLabelKey: 'nombre' }),
+      f('porcentaje', 'Porcentaje', 'decimal', { required: true }),
+      f('fechaInicio', 'Fecha inicio', 'date', { required: true })
+    ]
+  },
+  {
+    group: 'Finanzas', subgroup: 'Convenios y Becas', slug: 'fin-renovaciones-becas', label: 'Renovación/suspensión de beca',
+    icon: 'autorenew', path: '/api/v1/descuentos-becas/renovaciones-becas',
+    description: 'Movimiento de renovación o suspensión sobre una beca aplicada',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('idBecaAplicada', 'Beca aplicada', 'ref', { required: true, refPath: '/api/v1/descuentos-becas/becas-aplicadas', refLabelKey: 'id' }),
+      f('tipo', 'Tipo', 'enum', { required: true, options: ['RENOVACION', 'SUSPENSION'] }),
+      f('fecha', 'Fecha', 'date', { required: true }),
+      f('motivo', 'Motivo', 'textarea', { listed: false })
     ]
   },
   {
@@ -1518,28 +1555,25 @@ export const CRUDS: CrudDef[] = [
   },
   {
     group: 'Finanzas', subgroup: 'Configuración Financiera', slug: 'fin-conceptos-pago', label: 'Concepto de pago',
-    icon: 'sell', path: '/api/v1/conceptos-pago',
+    icon: 'sell', path: '/api/v1/catalogos-tarifas/conceptos-pago',
     description: 'Catálogo de conceptos de pago (matrícula, pensión, etc.)',
     fields: [
       f('id', 'ID', 'id', { editable: false }),
+      f('idCategoria', 'Categoría', 'ref', { refPath: '/api/v1/catalogos-tarifas/categorias-concepto', refLabelKey: 'nombre' }),
       f('nombre', 'Nombre', 'text', { required: true }),
-      f('descripcion', 'Descripción', 'textarea', { listed: false }),
       f('monto', 'Monto', 'decimal'),
-      f('activo', 'Activo', 'boolean', { required: true, default: true })
+      f('vigenciaDesde', 'Vigencia desde', 'date'),
+      f('vigenciaHasta', 'Vigencia hasta', 'date')
     ]
   },
   {
     group: 'Finanzas', subgroup: 'Convenios y Becas', slug: 'fin-convenios-institucionales', label: 'Convenio institucional',
     icon: 'handshake', path: '/api/v1/convenios-institucionales',
-    description: 'Convenio con empresas para descuentos institucionales',
+    description: 'Convenio institucional con descuento (item 35: instituciones adventistas)',
     fields: [
       f('id', 'ID', 'id', { editable: false }),
-      f('nombreEmpresa', 'Empresa', 'text', { required: true }),
-      f('ruc', 'RUC', 'text', { required: true }),
-      f('porcentajeDescuento', 'Porcentaje descuento', 'number', { required: true }),
-      f('fechaInicio', 'Inicio', 'date', { required: true }),
-      f('fechaFin', 'Fin', 'date'),
-      f('activo', 'Activo', 'boolean', { required: true, default: true })
+      f('nombreInstitucion', 'Institución', 'text', { required: true }),
+      f('porcentajeDescuento', 'Porcentaje descuento', 'decimal', { required: true })
     ]
   },
   {
@@ -1580,16 +1614,8 @@ export const CRUDS: CrudDef[] = [
       f('payloadRespuesta', 'Payload respuesta', 'textarea', { listed: false })
     ]
   },
-  {
-    group: 'Finanzas', subgroup: 'Configuración Financiera', slug: 'fin-metodos-pago', label: 'Método de pago',
-    icon: 'credit_card', path: '/api/v1/metodos-pago',
-    description: 'Catálogo de métodos de pago disponibles',
-    fields: [
-      f('id', 'ID', 'id', { editable: false }),
-      f('nombre', 'Nombre', 'text', { required: true }),
-      f('activo', 'Activo', 'boolean', { required: true, default: true })
-    ]
-  },
+  // Nota: "Método de pago" no tiene CRUD propio en lamb-finanzas-ms (es un enum fijo:
+  // TARJETA, YAPE, PLIN, TRANSFERENCIA, EFECTIVO), por eso no hay entrada de catálogo aquí.
   {
     group: 'Finanzas', subgroup: 'Configuración Financiera', slug: 'fin-notas-credito-debito', label: 'Nota de crédito/débito',
     icon: 'difference', path: '/api/v1/notas-credito-debito',
@@ -1646,14 +1672,13 @@ export const CRUDS: CrudDef[] = [
   },
   {
     group: 'Finanzas', subgroup: 'Configuración Financiera', slug: 'fin-series-comprobante', label: 'Serie de comprobante',
-    icon: 'format_list_numbered', path: '/api/v1/series-comprobante',
-    description: 'Serie y correlativo vigente de un tipo de comprobante',
+    icon: 'format_list_numbered', path: '/api/v1/comprobantes/series-correlativos-comprobante',
+    description: 'Serie y ultimo correlativo de un tipo de documento (boleta/factura)',
     fields: [
       f('id', 'ID', 'id', { editable: false }),
-      f('tipoComprobanteId', 'Tipo comprobante', 'ref', { required: true, refPath: '/api/v1/tipos-comprobante', refLabelKey: 'nombre' }),
+      f('tipoDocumento', 'Tipo documento', 'enum', { required: true, options: ['BOLETA', 'FACTURA'] }),
       f('serie', 'Serie', 'text', { required: true }),
-      f('correlativoActual', 'Correlativo actual', 'number', { required: true }),
-      f('activo', 'Activo', 'boolean', { required: true, default: true })
+      f('ultimoCorrelativo', 'Último correlativo', 'number', { required: true })
     ]
   },
   {
@@ -1677,7 +1702,7 @@ export const CRUDS: CrudDef[] = [
     fields: [
       f('id', 'ID', 'id', { editable: false }),
       f('programa', 'Programa', 'text', { required: true }),
-      f('conceptoPagoId', 'Concepto de pago', 'ref', { required: true, refPath: '/api/v1/conceptos-pago', refLabelKey: 'nombre' }),
+      f('conceptoPagoId', 'Concepto de pago', 'ref', { required: true, refPath: '/api/v1/catalogos-tarifas/conceptos-pago', refLabelKey: 'nombre' }),
       f('monto', 'Monto', 'decimal', { required: true }),
       f('vigenteDesde', 'Vigente desde', 'date', { required: true }),
       f('vigenteHasta', 'Vigente hasta', 'date'),
@@ -1696,17 +1721,8 @@ export const CRUDS: CrudDef[] = [
       f('valor', 'Valor', 'decimal', { required: true })
     ]
   },
-  {
-    group: 'Finanzas', subgroup: 'Configuración Financiera', slug: 'fin-tipos-comprobante', label: 'Tipo de comprobante',
-    icon: 'description', path: '/api/v1/tipos-comprobante',
-    description: 'Catálogo de tipos de comprobante de pago',
-    fields: [
-      f('id', 'ID', 'id', { editable: false }),
-      f('codigo', 'Código', 'text', { required: true }),
-      f('nombre', 'Nombre', 'text', { required: true }),
-      f('activo', 'Activo', 'boolean', { required: true, default: true })
-    ]
-  },
+  // fin-tipos-comprobante: eliminado. TipoDocumentoPago en finanzas-ms es un enum fijo
+  // (BOLETA, FACTURA), no un catalogo CRUD. Ver 'tipoDocumento' en fin-series-comprobante.
   {
     group: 'Finanzas', subgroup: 'Caja y Transacciones', slug: 'fin-pagos', label: 'Pago',
     icon: 'payments', path: '/api/v1/pagos',
@@ -1718,6 +1734,21 @@ export const CRUDS: CrudDef[] = [
       f('monto', 'Monto', 'decimal', { editable: false }),
       f('estado', 'Estado', 'text'),
       f('fechaPago', 'Fecha pago', 'datetime', { editable: false })
+    ]
+  },
+  {
+    group: 'Finanzas', subgroup: 'Caja y Transacciones', slug: 'fin-pagos-concepto', label: 'Pago de concepto',
+    icon: 'point_of_sale', path: '/api/v1/pagos-concepto',
+    description: 'Pagos reales registrados por concepto (caja o autopago del estudiante)',
+    fields: [
+      f('id', 'ID', 'id', { editable: false }),
+      f('idEstudiante', 'Estudiante (código)', 'text', { required: true }),
+      f('conceptoPagoId', 'Concepto de pago', 'ref', { required: true, refPath: '/api/v1/catalogos-tarifas/conceptos-pago', refLabelKey: 'nombre' }),
+      // TODO: convertir a 'ref' cuando lamb-finanzas-ms tenga catalogo CRUD de MetodoPago (hoy es enum sin id).
+      f('metodoPagoId', 'Método de pago (1 TARJETA, 2 YAPE, 3 PLIN, 4 TRANSFERENCIA, 5 EFECTIVO)', 'number', { required: true }),
+      f('sesionCajaId', 'Sesión Caja (si es en caja)', 'ref', { refPath: '/api/v1/sesiones-caja', refLabelKey: 'idCajero' }),
+      f('monto', 'Monto', 'decimal', { required: true }),
+      f('observacion', 'Observación', 'textarea', { listed: false })
     ]
   },
 

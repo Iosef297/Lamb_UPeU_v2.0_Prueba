@@ -2,9 +2,11 @@ package pe.edu.upeu.lamb.finanzas.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import pe.edu.upeu.lamb.finanzas.dto.PagoPasarelaRequest;
 import pe.edu.upeu.lamb.finanzas.dto.PagoRequest;
 import pe.edu.upeu.lamb.finanzas.dto.PagoResponse;
 import pe.edu.upeu.lamb.finanzas.service.PagoService;
+import pe.edu.upeu.lamb.finanzas.service.PasarelaPagoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,6 +29,7 @@ import java.util.Map;
 public class PagoController {
 
     private final PagoService pagoService;
+    private final PasarelaPagoService pasarelaPagoService;
 
     @GetMapping
     @Operation(summary = "Listar pagos (ESTUDIANTE solo ve los suyos)")
@@ -51,6 +54,12 @@ public class PagoController {
     @Operation(summary = "Reembolsar un pago")
     public PagoResponse reembolsar(@PathVariable Long id) {
         return pagoService.reembolsar(id);
+    }
+
+    @PostMapping("/{id}/pasarela")
+    @Operation(summary = "Pagar un pago EN_PROCESO con tarjeta via Mercado Pago (Payments API)")
+    public PagoResponse pagarConPasarela(@PathVariable Long id, @Valid @RequestBody PagoPasarelaRequest request) {
+        return pasarelaPagoService.pagarConTarjeta(id, request.getCardToken(), request.getPayerEmail());
     }
 
     @PostMapping("/{id}/aceptar")

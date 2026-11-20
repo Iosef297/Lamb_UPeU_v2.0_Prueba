@@ -27,6 +27,26 @@
     <input id="periodo" type="text" formControlName="periodo" placeholder="Se completa al elegir el grupo" />
   </div>
 
+  <div>
+    <label for="idTipoMatricula">Tipo de matricula</label>
+    <select id="idTipoMatricula" formControlName="idTipoMatricula">
+      <option [ngValue]="null">Sin especificar</option>
+      @for (t of tiposMatricula(); track t.id) {
+        <option [ngValue]="t.id">{{ t.codigo }} · {{ t.nombre }}</option>
+      }
+    </select>
+  </div>
+
+  <div>
+    <label for="idModalidadMatricula">Modalidad de matricula</label>
+    <select id="idModalidadMatricula" formControlName="idModalidadMatricula">
+      <option [ngValue]="null">Sin especificar</option>
+      @for (m of modalidadesMatricula(); track m.id) {
+        <option [ngValue]="m.id">{{ m.codigo }} · {{ m.nombre }}</option>
+      }
+    </select>
+  </div>
+
   <h3>Cursos (grupos abiertos)</h3>
   <div formArrayName="detalles">
     @for (detalle of detalles.controls; track $index) {

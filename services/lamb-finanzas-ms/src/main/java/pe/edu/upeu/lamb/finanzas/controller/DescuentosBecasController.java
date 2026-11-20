@@ -6,18 +6,28 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import pe.edu.upeu.lamb.finanzas.dto.BecaAplicadaRequest;
+import pe.edu.upeu.lamb.finanzas.dto.BecaAplicadaResponse;
 import pe.edu.upeu.lamb.finanzas.dto.DescuentoAplicadoRequest;
 import pe.edu.upeu.lamb.finanzas.dto.DescuentoAplicadoResponse;
+import pe.edu.upeu.lamb.finanzas.dto.RenovacionSuspensionBecaRequest;
+import pe.edu.upeu.lamb.finanzas.dto.RenovacionSuspensionBecaResponse;
+import pe.edu.upeu.lamb.finanzas.dto.TipoBecaRequest;
+import pe.edu.upeu.lamb.finanzas.dto.TipoBecaResponse;
 import pe.edu.upeu.lamb.finanzas.dto.TipoDescuentoRequest;
 import pe.edu.upeu.lamb.finanzas.dto.TipoDescuentoResponse;
+import pe.edu.upeu.lamb.finanzas.service.BecaAplicadaService;
 import pe.edu.upeu.lamb.finanzas.service.DescuentoAplicadoService;
+import pe.edu.upeu.lamb.finanzas.service.RenovacionSuspensionBecaService;
+import pe.edu.upeu.lamb.finanzas.service.TipoBecaService;
 import pe.edu.upeu.lamb.finanzas.service.TipoDescuentoService;
 
 import java.util.List;
 
 /**
  * Dominio "Descuentos y becas" (CRUD unificado). Subrecursos: tipo de
- * descuento, descuento aplicado.
+ * descuento, descuento aplicado, tipo de beca, beca aplicada,
+ * renovacion/suspension de beca.
  */
 @RestController
 @RequestMapping("/api/v1/descuentos-becas")
@@ -27,6 +37,9 @@ public class DescuentosBecasController {
 
     private final TipoDescuentoService tipoDescuentoService;
     private final DescuentoAplicadoService descuentoAplicadoService;
+    private final TipoBecaService tipoBecaService;
+    private final BecaAplicadaService becaAplicadaService;
+    private final RenovacionSuspensionBecaService renovacionSuspensionBecaService;
 
     // --- Tipo de descuento ---
 
@@ -68,5 +81,68 @@ public class DescuentosBecasController {
     @Operation(summary = "Crear un descuento aplicado")
     public DescuentoAplicadoResponse crearDescuentoAplicado(@Valid @RequestBody DescuentoAplicadoRequest request) {
         return descuentoAplicadoService.crear(request);
+    }
+
+    // --- Tipo de beca ---
+
+    @GetMapping("/tipos-beca")
+    @Operation(summary = "Listar tipos de beca")
+    public List<TipoBecaResponse> listarTiposBeca() {
+        return tipoBecaService.listar();
+    }
+
+    @GetMapping("/tipos-beca/{id}")
+    @Operation(summary = "Obtener un tipo de beca")
+    public TipoBecaResponse obtenerTipoBeca(@PathVariable Long id) {
+        return tipoBecaService.obtener(id);
+    }
+
+    @PostMapping("/tipos-beca")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Crear un tipo de beca")
+    public TipoBecaResponse crearTipoBeca(@Valid @RequestBody TipoBecaRequest request) {
+        return tipoBecaService.crear(request);
+    }
+
+    // --- Beca aplicada ---
+
+    @GetMapping("/becas-aplicadas")
+    @Operation(summary = "Listar becas aplicadas")
+    public List<BecaAplicadaResponse> listarBecasAplicadas() {
+        return becaAplicadaService.listar();
+    }
+
+    @GetMapping("/becas-aplicadas/{id}")
+    @Operation(summary = "Obtener una beca aplicada")
+    public BecaAplicadaResponse obtenerBecaAplicada(@PathVariable Long id) {
+        return becaAplicadaService.obtener(id);
+    }
+
+    @PostMapping("/becas-aplicadas")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Crear una beca aplicada")
+    public BecaAplicadaResponse crearBecaAplicada(@Valid @RequestBody BecaAplicadaRequest request) {
+        return becaAplicadaService.crear(request);
+    }
+
+    // --- Renovacion/suspension de beca ---
+
+    @GetMapping("/renovaciones-becas")
+    @Operation(summary = "Listar renovaciones/suspensiones de beca")
+    public List<RenovacionSuspensionBecaResponse> listarRenovacionesBecas() {
+        return renovacionSuspensionBecaService.listar();
+    }
+
+    @GetMapping("/renovaciones-becas/{id}")
+    @Operation(summary = "Obtener una renovacion/suspension de beca")
+    public RenovacionSuspensionBecaResponse obtenerRenovacionBeca(@PathVariable Long id) {
+        return renovacionSuspensionBecaService.obtener(id);
+    }
+
+    @PostMapping("/renovaciones-becas")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Crear una renovacion/suspension de beca")
+    public RenovacionSuspensionBecaResponse crearRenovacionBeca(@Valid @RequestBody RenovacionSuspensionBecaRequest request) {
+        return renovacionSuspensionBecaService.crear(request);
     }
 }

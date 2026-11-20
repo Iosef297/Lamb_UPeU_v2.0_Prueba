@@ -46,13 +46,9 @@
         <td>{{ pago.matriculaId ? 'Matricula ' + pago.matriculaId : 'Caja' }}</td>
         @if (auth.tieneRol('ADMIN', 'COORDINADOR')) {
           <td>
-            @if (pago.estado === 'PENDIENTE') {
-              <select (change)="elegirMetodo(pago, $any($event.target).value)">
-                @for (m of metodos; track m) {
-                  <option [value]="m" [selected]="m === 'YAPE'">{{ m }}</option>
-                }
-              </select>
-              <button type="button" (click)="pagar(pago)">Pagar</button>
+            @if (pago.estado === 'EN_PROCESO') {
+              <button type="button" (click)="aceptar(pago)">Aceptar</button>
+              <button type="button" class="peligro" (click)="rechazar(pago)">Rechazar</button>
             }
             @if (pago.estado === 'APROBADO') {
               <button type="button" class="peligro" (click)="reembolsar(pago)">Reembolsar</button>

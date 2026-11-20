@@ -27,4 +27,19 @@ public class TipoMatricula {
 
     @Column(name = "activo", nullable = false)
     private Boolean activo;
+
+    @Column(name = "articulo_legal", length = 40)
+    private String articuloLegal;
+
+    @Column(name = "creditos_minimos")
+    private Integer creditosMinimos;
+
+    @Column(name = "requiere_pago", nullable = false)
+    private Boolean requierePago;
+
+    @Column(name = "dias_habiles_limite")
+    private Integer diasHabilesLimite;
+
+    @Column(name = "max_veces_desaprobado")
+    private Integer maxVecesDesaprobado;
 }

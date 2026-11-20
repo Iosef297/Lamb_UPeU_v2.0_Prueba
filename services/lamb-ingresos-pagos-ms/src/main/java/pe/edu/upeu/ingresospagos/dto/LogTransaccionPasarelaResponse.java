@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class LogTransaccionPasarelaResponse {
     private Long id;
-    private PagoResponse pago;
+    private Long idPago;
     private String proveedor;
     private String referenciaExterna;
     private String estado;

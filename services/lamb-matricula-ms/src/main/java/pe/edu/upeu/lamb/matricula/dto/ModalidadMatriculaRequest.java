@@ -23,4 +23,18 @@ public class ModalidadMatriculaRequest {
 
     @NotNull
     private Boolean activo;
+
+    private Long idModalidadEstudio;
+
+    @Size(max = 40)
+    private String articuloLegal;
+
+    private Integer creditosMinimos;
+
+    @NotNull
+    private Boolean requierePago;
+
+    private Integer diasHabilesLimite;
+
+    private Integer maxVecesDesaprobado;
 }

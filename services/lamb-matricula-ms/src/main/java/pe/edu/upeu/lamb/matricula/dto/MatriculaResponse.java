@@ -19,6 +19,8 @@ public class MatriculaResponse {
     private Long id;
     private Long idPersona;
     private String periodo;
+    private Long idTipoMatricula;
+    private Long idModalidadMatricula;
     private Instant fecha;
     private EstadoMatricula estado;
     private List<DetalleMatriculaResponse> detalles;

@@ -56,7 +56,7 @@
 
         <div class="form-grid">
           @for (field of editableFields(); track field.key) {
-            <div class="field" [class.field--full]="field.type === 'textarea' || field.type === 'reniec' || field.type === 'file' || field.type === 'multiref'">
+            <div class="field" [class.field--full]="!field.halfWidth && (field.type === 'textarea' || field.type === 'reniec' || field.type === 'file' || field.type === 'multiref')">
               <label class="field__label">
                 {{ field.label }}
                 @if (field.required) { <em class="req">*</em> }
@@ -64,9 +64,10 @@
 
               @switch (field.type) {
                 @case ('text') {
-                  <div class="input">
+                  <div class="input" [class.input--disabled]="field.disabled">
                     <span class="material-symbols-outlined input__icon">edit</span>
                     <input type="text"
+                           [disabled]="field.disabled"
                            [value]="form()[field.key] ?? ''"
                            (input)="updateField(field.key, $any($event.target).value)"
                            [placeholder]="field.label">
@@ -107,29 +108,63 @@
                 @case ('enum') {
                   <div class="input" [class.input--disabled]="field.disabled">
                     <span class="material-symbols-outlined input__icon">list</span>
-                    <select [value]="form()[field.key] ?? ''"
-                            [disabled]="field.disabled"
+                    <select [disabled]="field.disabled"
                             (change)="updateField(field.key, $any($event.target).value)">
-                      <option value="">— Seleccionar —</option>
+                      <option value="" [selected]="!form()[field.key]">— Seleccionar —</option>
                       @if (form()[field.key] === 'SIN_ASIGNAR') {
-                        <option value="SIN_ASIGNAR">SIN ASIGNAR</option>
+                        <option value="SIN_ASIGNAR" [selected]="true">SIN ASIGNAR</option>
                       }
                       @for (opt of field.options; track opt) {
-                        <option [value]="opt">{{ opt }}</option>
+                        <option [value]="opt" [selected]="opt === form()[field.key]">{{ opt }}</option>
                       }
                     </select>
                   </div>
                 }
                 @case ('ref') {
-                  <div class="input">
-                    <span class="material-symbols-outlined input__icon">link</span>
-                    <select [value]="form()[field.key] ?? ''"
-                            (change)="onRefChange(field, $any($event.target).value ? +$any($event.target).value : null)">
-                      <option value="">— Seleccionar —</option>
-                      @for (opt of refOptions()[field.key] ?? []; track opt.id) {
-                        <option [value]="opt.id">{{ opt[field.refLabelKey ?? 'nombre'] }}</option>
+                  @if (field.searchable) {
+                    <div class="input ref-search" style="position: relative;">
+                      <span class="material-symbols-outlined input__icon">search</span>
+                      <input type="text" placeholder="Buscar por nombre o ID..."
+                             [value]="refSearchText()[field.key] ?? ''"
+                             (input)="onRefSearchInput(field, $any($event.target).value)"
+                             (focus)="openRefSearch(field)"
+                             (blur)="closeRefSearch(field)">
+                      @if (refSearchOpen() === field.key) {
+                        <div class="ref-search__list" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 20; background: #fff; border: 1px solid #ddd; border-radius: 6px; max-height: 220px; overflow-y: auto; box-shadow: 0 4px 12px rgba(0,0,0,.12);">
+                          @for (opt of refSearchResults(field); track opt.id) {
+                            <div class="ref-search__item" style="padding: 8px 12px; cursor: pointer;"
+                                 (mousedown)="selectRefSearch(field, opt)">
+                              {{ opt[field.refLabelKey ?? 'nombre'] }} <small style="color:#999;">#{{ opt.id }}</small>
+                            </div>
+                          } @empty {
+                            <div style="padding: 8px 12px; color: #999;">Sin resultados</div>
+                          }
+                        </div>
                       }
-                    </select>
+                    </div>
+                  } @else {
+                    <div class="input">
+                      <span class="material-symbols-outlined input__icon">link</span>
+                      <select [value]="form()[field.key] ?? ''"
+                              (change)="onRefChange(field, $any($event.target).value ? +$any($event.target).value : null)">
+                        <option value="">— Seleccionar —</option>
+                        @for (opt of refOptionsFor(field); track opt.id) {
+                          <option [value]="opt.id">{{ opt[field.refLabelKey ?? 'nombre'] }}</option>
+                        }
+                      </select>
+                    </div>
+                  }
+                }
+                @case ('checkbox-single') {
+                  <div class="checkbox-group">
+                    @for (opt of refOptions()[field.key] ?? []; track opt.id) {
+                      <label class="checkbox-group__item">
+                        <input type="checkbox"
+                               [checked]="form()[field.key] === opt.id"
+                               (change)="selectSingleRef(field, opt.id)">
+                        {{ opt[field.refLabelKey ?? 'nombre'] }}
+                      </label>
+                    }
                   </div>
                 }
                 @case ('multiref') {
@@ -278,16 +313,23 @@
           <table class="table">
             <thead>
               <tr>
-                @for (col of listedFields(); track col.key) { <th>{{ col.label }}</th> }
+                @for (col of listedFields(); track col.key) {
+                  <th [class.col--num]="col.type === 'number' || col.type === 'decimal'">{{ col.label }}</th>
+                }
                 <th class="actions-col">ACCIONES</th>
               </tr>
             </thead>
             <tbody>
               @for (row of items(); track row.id) {
-                <tr>
+                <tr [class.row--expandable]="ownedListField()" (click)="toggleExpand(row)">
                   @for (col of listedFields(); track col.key) {
-                    <td [class.col--num]="col.type === 'number' || col.type === 'decimal' || col.type === 'id'">
-                      @if (col.type === 'date' || col.type === 'datetime') {
+                    <td [class.col--num]="col.type === 'number' || col.type === 'decimal'">
+                      @if (col.type === 'id' && ownedListField()) {
+                        <span class="id-expand">
+                          {{ row[col.key] }}
+                          <span class="material-symbols-outlined">{{ expandedRowId() === row.id ? 'expand_less' : 'expand_more' }}</span>
+                        </span>
+                      } @else if (col.type === 'date' || col.type === 'datetime') {
                         {{ row[col.key] | date:(col.type === 'date' ? 'mediumDate' : 'short') }}
                       } @else if (col.type === 'boolean') {
                         <span [class]="row[col.key] ? 'chip chip--ok' : 'chip chip--muted'">
@@ -297,14 +339,14 @@
                         @if (row[col.key] === 'SIN_ASIGNAR') {
                           <span class="chip chip--muted">SIN ASIGNAR</span>
                         } @else {
-                          <span class="chip">{{ fmtCell(row, col) }}</span>
+                          <span [class]="chipClass(col, row[col.key])">{{ fmtCell(row, col) }}</span>
                         }
                       } @else {
                         {{ fmtCell(row, col) }}
                       }
                     </td>
                   }
-                  <td class="actions-col">
+                  <td class="actions-col" (click)="$event.stopPropagation()">
                     <button class="act act--edit" (click)="openEdit(row)" title="editar">
                       <span class="material-symbols-outlined">edit</span>
                     </button>
@@ -315,6 +357,64 @@
                     }
                   </td>
                 </tr>
+                @if (ownedListField() && expandedRowId() === row.id) {
+                  <tr class="row-expanded">
+                    <td [attr.colspan]="listedFields().length + 1" (click)="$event.stopPropagation()">
+                      @if (ownedListItems(row).length) {
+                        @for (p of ownedListItems(row); track p.id) {
+                          <div class="owned-item">
+                            <span class="owned-item__label">{{ p[ownedListField()!.ownedList!.refLabelKey ?? 'nombre'] }}</span>
+                            @if (ownedListField()!.ownedList!.formFields) {
+                              <span class="owned-item__actions">
+                                <button class="act act--edit" (click)="openOwnedListEdit(row.id, p)" title="editar">
+                                  <span class="material-symbols-outlined">edit</span>
+                                </button>
+                                <button class="act act--delete" (click)="deleteOwnedListItem(p)" title="eliminar">
+                                  <span class="material-symbols-outlined">delete</span>
+                                </button>
+                              </span>
+                            }
+                          </div>
+                        }
+                      } @else {
+                        <span class="muted">Sin periodos generados.</span>
+                      }
+
+                      @if (ownedListField()!.ownedList!.formFields; as formFields) {
+                        @if (ownedListOpenFor() === row.id) {
+                          <div class="owned-form">
+                            @for (ff of formFields; track ff.key) {
+                              <label class="owned-form__field">
+                                <span>{{ ff.label }}</span>
+                                @if (ff.type === 'ref') {
+                                  <select [value]="ownedListDraft()?.[ff.key] ?? ''"
+                                          (change)="updateOwnedListDraft(ff.key, $any($event.target).value ? +$any($event.target).value : null)">
+                                    <option value="">— Elige —</option>
+                                    @for (opt of (refOptions()[ff.key] ?? []); track opt.id) {
+                                      <option [value]="opt.id">{{ opt[ff.refLabelKey ?? 'nombre'] }}</option>
+                                    }
+                                  </select>
+                                } @else {
+                                  <input [type]="ff.type"
+                                         [value]="ownedListDraft()?.[ff.key] ?? ''"
+                                         (input)="updateOwnedListDraft(ff.key, $any($event.target).value)">
+                                }
+                              </label>
+                            }
+                            <div class="owned-form__actions">
+                              <button class="btn btn--primary" (click)="saveOwnedListItem(row.id)">Guardar</button>
+                              <button class="btn" (click)="cancelOwnedListForm()">Cancelar</button>
+                            </div>
+                          </div>
+                        } @else {
+                          <button class="btn btn--ghost owned-add" (click)="openOwnedListAdd(row.id)">
+                            <span class="material-symbols-outlined">add</span> Agregar periodo
+                          </button>
+                        }
+                      }
+                    </td>
+                  </tr>
+                }
               }
             </tbody>
           </table>

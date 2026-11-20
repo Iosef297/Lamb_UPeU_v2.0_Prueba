@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
 import { AuthService } from '../../core/auth/auth-service';
 import { PagoService } from './pago-service';
-import { MetodoPago, PagoResponse } from './pago.model';
+import { PagoResponse } from './pago.model';
 
 @Component({
   selector: 'app-pago-list',
@@ -19,9 +19,6 @@ export class PagoList {
   protected readonly error = signal<string | null>(null);
   protected readonly errorAccion = signal<string | null>(null);
   protected readonly exito = signal<string | null>(null);
-  protected readonly metodos: MetodoPago[] = ['TARJETA', 'YAPE', 'PLIN', 'TRANSFERENCIA', 'EFECTIVO'];
-  // Metodo elegido por fila para pagar un cargo pendiente
-  private readonly metodoPorPago = new Map<number, MetodoPago>();
 
   constructor() {
     this.cargar();
@@ -35,13 +32,12 @@ export class PagoList {
     });
   }
 
-  protected elegirMetodo(pago: PagoResponse, metodo: string): void {
-    this.metodoPorPago.set(pago.id, metodo as MetodoPago);
+  protected aceptar(pago: PagoResponse): void {
+    this.accion(this.service.aceptar(pago.id), `Pago ${pago.id} aprobado.`, 'No se pudo aprobar el pago.');
   }
 
-  protected pagar(pago: PagoResponse): void {
-    const metodo = this.metodoPorPago.get(pago.id) ?? 'YAPE';
-    this.accion(this.service.pagar(pago.id, metodo), `Pago ${pago.id} aprobado con ${metodo}.`, 'No se pudo pagar el cargo.');
+  protected rechazar(pago: PagoResponse): void {
+    this.accion(this.service.rechazar(pago.id), `Pago ${pago.id} rechazado.`, 'No se pudo rechazar el pago.');
   }
 
   protected reembolsar(pago: PagoResponse): void {

@@ -199,4 +199,4 @@
   background: var(--upeu-gold);
 }
 
-.content { flex: 1; overflow: auto; padding: 24px; background: #F6F7FB; }
+.content { flex: 1; overflow: auto; scrollbar-gutter: stable; padding: 24px; background: #F6F7FB; }

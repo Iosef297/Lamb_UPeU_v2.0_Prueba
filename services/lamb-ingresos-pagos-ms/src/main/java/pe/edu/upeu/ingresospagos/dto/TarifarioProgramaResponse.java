@@ -17,7 +17,7 @@ import java.time.LocalDate;
 public class TarifarioProgramaResponse {
     private Long id;
     private String programa;
-    private ConceptoPagoResponse conceptoPago;
+    private Long idConceptoPago;
     private BigDecimal monto;
     private LocalDate vigenteDesde;
     private LocalDate vigenteHasta;

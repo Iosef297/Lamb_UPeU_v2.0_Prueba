@@ -26,6 +26,12 @@ public class Matricula {
     @Column(name = "periodo", nullable = false, length = 20)
     private String periodo;
 
+    @Column(name = "id_tipo_matricula")
+    private Long idTipoMatricula;
+
+    @Column(name = "id_modalidad_matricula")
+    private Long idModalidadMatricula;
+
     @Column(name = "fecha", nullable = false)
     private Instant fecha;
 

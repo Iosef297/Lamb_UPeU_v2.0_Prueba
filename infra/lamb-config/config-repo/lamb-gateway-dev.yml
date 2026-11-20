@@ -87,6 +87,14 @@ spring:
               uri: lb://lamb-planificacion-ms
               predicates:
                 - Path=/api/v1/grupos/**
+            - id: lamb-planificacion-periodos-academicos
+              uri: lb://lamb-planificacion-ms
+              predicates:
+                - Path=/api/v1/periodos-academicos/**
+            - id: lamb-planificacion-tipos-periodo
+              uri: lb://lamb-planificacion-ms
+              predicates:
+                - Path=/api/v1/tipos-periodo/**
             - id: lamb-admision
               uri: lb://lamb-admision-ms
               predicates:
@@ -131,6 +139,14 @@ spring:
               uri: lb://lamb-admision-ms
               predicates:
                 - Path=/api/v1/modalidades-admision/**
+            - id: lamb-admision-reniec
+              uri: lb://lamb-admision-ms
+              predicates:
+                - Path=/api/v1/admision/reniec/**
+            - id: lamb-admision-postulacion-wizard
+              uri: lb://lamb-admision-ms
+              predicates:
+                - Path=/api/v1/admision/postulacion-wizard/**
             - id: lamb-curriculo
               uri: lb://lamb-curriculo-ms
               predicates:
@@ -143,6 +159,30 @@ spring:
               uri: lb://lamb-matricula-ms
               predicates:
                 - Path=/api/v1/matriculas/**
+            - id: lamb-matricula-calendario-periodos
+              uri: lb://lamb-matricula-ms
+              predicates:
+                - Path=/api/v1/calendario-periodos/**
+            - id: lamb-matricula-cursos-carga-academica
+              uri: lb://lamb-matricula-ms
+              predicates:
+                - Path=/api/v1/cursos-carga-academica/**
+            - id: lamb-matricula-oferta-cupos
+              uri: lb://lamb-matricula-ms
+              predicates:
+                - Path=/api/v1/oferta-cupos/**
+            - id: lamb-matricula-rectificacion-retiro-reactivacion
+              uri: lb://lamb-matricula-ms
+              predicates:
+                - Path=/api/v1/rectificacion-retiro-reactivacion/**
+            - id: lamb-matricula-reglas-requisitos
+              uri: lb://lamb-matricula-ms
+              predicates:
+                - Path=/api/v1/reglas-requisitos/**
+            - id: lamb-matricula-situacion-estudiante
+              uri: lb://lamb-matricula-ms
+              predicates:
+                - Path=/api/v1/situacion-estudiante/**
             - id: lamb-evaluacion
               uri: lb://lamb-evaluacion-ms
               predicates:
@@ -175,10 +215,103 @@ spring:
               uri: lb://lamb-trayectoria-ms
               predicates:
                 - Path=/api/v1/egresos/**
-            - id: lamb-finanzas
+            - id: lamb-ingresos-pagos-arqueos-caja
+              uri: lb://ingresos-pagos-ms
+              predicates:
+                - Path=/api/v1/arqueos-caja/**
+            - id: lamb-ingresos-pagos-pagos-concepto
+              uri: lb://ingresos-pagos-ms
+              predicates:
+                - Path=/api/v1/pagos-concepto/**
+            - id: lamb-ingresos-pagos-bitacoras-auditoria-pago
+              uri: lb://ingresos-pagos-ms
+              predicates:
+                - Path=/api/v1/bitacoras-auditoria-pago/**
+            - id: lamb-ingresos-pagos-cajas
+              uri: lb://ingresos-pagos-ms
+              predicates:
+                - Path=/api/v1/cajas/**
+            - id: lamb-ingresos-pagos-entidades-financieras
+              uri: lb://ingresos-pagos-ms
+              predicates:
+                - Path=/api/v1/entidades-financieras/**
+            - id: lamb-ingresos-pagos-financiamientos-educativos
+              uri: lb://ingresos-pagos-ms
+              predicates:
+                - Path=/api/v1/financiamientos-educativos/**
+            - id: lamb-ingresos-pagos-logs-transaccion-pasarela
+              uri: lb://ingresos-pagos-ms
+              predicates:
+                - Path=/api/v1/logs-transaccion-pasarela/**
+            - id: lamb-ingresos-pagos-notas-credito-debito
+              uri: lb://ingresos-pagos-ms
+              predicates:
+                - Path=/api/v1/notas-credito-debito/**
+            - id: lamb-ingresos-pagos-pagadores-terceros
+              uri: lb://ingresos-pagos-ms
+              predicates:
+                - Path=/api/v1/pagadores-terceros/**
+            - id: lamb-ingresos-pagos-plantillas-notificacion
+              uri: lb://ingresos-pagos-ms
+              predicates:
+                - Path=/api/v1/plantillas-notificacion/**
+            - id: lamb-ingresos-pagos-recargos-mora
+              uri: lb://ingresos-pagos-ms
+              predicates:
+                - Path=/api/v1/recargos-mora/**
+            - id: lamb-ingresos-pagos-sesiones-caja
+              uri: lb://ingresos-pagos-ms
+              predicates:
+                - Path=/api/v1/sesiones-caja/**
+            - id: lamb-ingresos-pagos-tarifarios-programa
+              uri: lb://ingresos-pagos-ms
+              predicates:
+                - Path=/api/v1/tarifarios-programa/**
+            - id: lamb-ingresos-pagos-tipos-cambio
+              uri: lb://ingresos-pagos-ms
+              predicates:
+                - Path=/api/v1/tipos-cambio/**
+            # lamb-finanzas-ms es dueno canonico de Pago/ConceptoPago/MetodoPago/EstadoPago (saga matricula-finanzas).
+            - id: lamb-finanzas-pagos
               uri: lb://lamb-finanzas-ms
               predicates:
                 - Path=/api/v1/pagos/**
+            - id: lamb-finanzas-catalogos-tarifas
+              uri: lb://lamb-finanzas-ms
+              predicates:
+                - Path=/api/v1/catalogos-tarifas/**
+            - id: lamb-finanzas-saldo-estudiante
+              uri: lb://lamb-finanzas-ms
+              predicates:
+                - Path=/api/v1/saldo-estudiante/**
+            - id: lamb-finanzas-calendario-planes
+              uri: lb://lamb-finanzas-ms
+              predicates:
+                - Path=/api/v1/calendario-planes/**
+            - id: lamb-finanzas-descuentos-becas
+              uri: lb://lamb-finanzas-ms
+              predicates:
+                - Path=/api/v1/descuentos-becas/**
+            - id: lamb-finanzas-convenios-institucionales
+              uri: lb://lamb-finanzas-ms
+              predicates:
+                - Path=/api/v1/convenios-institucionales/**
+            - id: lamb-finanzas-cobros
+              uri: lb://lamb-finanzas-ms
+              predicates:
+                - Path=/api/v1/cobros/**
+            - id: lamb-finanzas-comprobantes
+              uri: lb://lamb-finanzas-ms
+              predicates:
+                - Path=/api/v1/comprobantes/**
+            - id: lamb-finanzas-control-cierre
+              uri: lb://lamb-finanzas-ms
+              predicates:
+                - Path=/api/v1/control-cierre/**
+            - id: lamb-finanzas-reembolsos-cancelaciones
+              uri: lb://lamb-finanzas-ms
+              predicates:
+                - Path=/api/v1/reembolsos-cancelaciones/**
             # Una ruta por microservicio: /ms/<servicio>/api/v1/... -> /api/v1/... en ese servicio.
             # Evita los choques de rutas repetidas entre servicios (/cursos, /pagos, /vistas).
             - id: ms-personas

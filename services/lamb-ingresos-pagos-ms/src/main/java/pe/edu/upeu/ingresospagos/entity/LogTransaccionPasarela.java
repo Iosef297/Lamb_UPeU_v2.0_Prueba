@@ -18,9 +18,8 @@ public class LogTransaccionPasarela {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_pago", nullable = false)
-    private Pago pago;
+    @Column(name = "id_pago", nullable = false)
+    private Long idPago;
 
     @Column(name = "proveedor", nullable = false, length = 30)
     private String proveedor;

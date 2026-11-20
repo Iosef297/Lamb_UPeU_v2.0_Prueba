@@ -23,4 +23,16 @@ public class TipoMatriculaRequest {
 
     @NotNull
     private Boolean activo;
+
+    @Size(max = 40)
+    private String articuloLegal;
+
+    private Integer creditosMinimos;
+
+    @NotNull
+    private Boolean requierePago;
+
+    private Integer diasHabilesLimite;
+
+    private Integer maxVecesDesaprobado;
 }

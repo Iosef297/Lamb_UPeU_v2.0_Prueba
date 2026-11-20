@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { mensajeError } from '../../core/http/mensaje-error';
-import { ModalidadesMatriculaRequest } from './modalidades-matricula.model';
+import { ModalidadEstudioResponse, ModalidadesMatriculaRequest } from './modalidades-matricula.model';
 import { ModalidadesMatriculaService } from './modalidades-matricula-service';
 
 @Component({
@@ -19,15 +19,27 @@ export class ModalidadesMatriculaForm {
 
   protected readonly error = signal<string | null>(null);
   protected readonly id = this.ruta.snapshot.paramMap.get('id');
+  protected readonly modalidadesEstudio = signal<ModalidadEstudioResponse[]>([]);
 
   protected readonly form = this.fb.group({
       codigo: ['', [Validators.required]],
       nombre: ['', [Validators.required]],
       descripcion: ['', []],
       activo: [false, []],
+      idModalidadEstudio: [null as number | null, []],
+      articuloLegal: ['', []],
+      creditosMinimos: [null as number | null, []],
+      requierePago: [false, [Validators.required]],
+      diasHabilesLimite: [null as number | null, []],
+      maxVecesDesaprobado: [null as number | null, []],
   });
 
   constructor() {
+    this.servicio.listarModalidadesEstudio().subscribe({
+      next: (data) => this.modalidadesEstudio.set(data),
+      error: (err) => this.error.set(mensajeError(err, 'No se pudo cargar las modalidades de estudio.')),
+    });
+
     if (this.id) {
       this.servicio.obtener(Number(this.id)).subscribe({
         next: (data) => this.form.patchValue(data),

@@ -1,9 +1,10 @@
 export type MetodoPago = 'TARJETA' | 'YAPE' | 'PLIN' | 'TRANSFERENCIA' | 'EFECTIVO';
 
-export type EstadoPago = 'PENDIENTE' | 'APROBADO' | 'RECHAZADO' | 'REEMBOLSADO';
+export type EstadoPago = 'PENDIENTE' | 'EN_PROCESO' | 'APROBADO' | 'RECHAZADO' | 'REEMBOLSADO';
 
 export interface PagoRequest {
   idPersona: number;
+  matriculaId: number | null;
   concepto: string;
   monto: number;
   metodo: MetodoPago;

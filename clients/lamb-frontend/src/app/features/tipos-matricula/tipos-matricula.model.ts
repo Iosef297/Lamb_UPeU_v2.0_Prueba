@@ -4,6 +4,11 @@ export interface TiposMatriculaRequest {
   nombre: string;
   descripcion?: string;
   activo?: boolean;
+  articuloLegal?: string;
+  creditosMinimos?: number;
+  requierePago: boolean;
+  diasHabilesLimite?: number;
+  maxVecesDesaprobado?: number;
 }
 
 export interface TiposMatriculaResponse {
@@ -12,4 +17,9 @@ export interface TiposMatriculaResponse {
   nombre: string;
   descripcion: string;
   activo: boolean;
+  articuloLegal: string;
+  creditosMinimos: number;
+  requierePago: boolean;
+  diasHabilesLimite: number;
+  maxVecesDesaprobado: number;
 }

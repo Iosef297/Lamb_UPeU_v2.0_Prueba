@@ -11,4 +11,9 @@ public class TipoMatriculaResponse {
     private String nombre;
     private String descripcion;
     private Boolean activo;
+    private String articuloLegal;
+    private Integer creditosMinimos;
+    private Boolean requierePago;
+    private Integer diasHabilesLimite;
+    private Integer maxVecesDesaprobado;
 }

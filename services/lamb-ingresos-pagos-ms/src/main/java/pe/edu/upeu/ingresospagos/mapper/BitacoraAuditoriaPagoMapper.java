@@ -6,11 +6,11 @@ import pe.edu.upeu.ingresospagos.dto.BitacoraAuditoriaPagoRequest;
 import pe.edu.upeu.ingresospagos.dto.BitacoraAuditoriaPagoResponse;
 import pe.edu.upeu.ingresospagos.entity.BitacoraAuditoriaPago;
 
-@Mapper(componentModel = "spring", uses = PagoMapper.class)
+@Mapper(componentModel = "spring")
 public interface BitacoraAuditoriaPagoMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "pago", ignore = true)
+    @Mapping(target = "idPago", source = "pagoId")
     @Mapping(target = "fecha", ignore = true)
     BitacoraAuditoriaPago toEntity(BitacoraAuditoriaPagoRequest request);
 

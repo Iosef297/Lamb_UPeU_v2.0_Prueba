@@ -11,4 +11,10 @@ public class ModalidadMatriculaResponse {
     private String nombre;
     private String descripcion;
     private Boolean activo;
+    private Long idModalidadEstudio;
+    private String articuloLegal;
+    private Integer creditosMinimos;
+    private Boolean requierePago;
+    private Integer diasHabilesLimite;
+    private Integer maxVecesDesaprobado;
 }

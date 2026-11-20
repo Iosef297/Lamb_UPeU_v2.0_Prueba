@@ -48,6 +48,7 @@ export class PagoForm {
     this.service
       .procesar({
         idPersona: Number(valores.idPersona),
+        matriculaId: null,
         concepto: valores.concepto,
         monto: Number(valores.monto),
         metodo: valores.metodo,

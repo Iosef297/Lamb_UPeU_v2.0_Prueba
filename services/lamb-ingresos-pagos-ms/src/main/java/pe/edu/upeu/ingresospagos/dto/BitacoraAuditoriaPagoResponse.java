@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class BitacoraAuditoriaPagoResponse {
     private Long id;
-    private PagoResponse pago;
+    private Long idPago;
     private AccionBitacora accion;
     private String idUsuario;
     private LocalDateTime fecha;

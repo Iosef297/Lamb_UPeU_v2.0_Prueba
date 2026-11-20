@@ -27,6 +27,10 @@ import java.util.List;
 /**
  * Dominio "Calendario y periodos" (CRUD unificado). Subrecursos: cronogramas,
  * variaciones, tipos y modalidades de matricula, ampliaciones de plazo.
+ *
+ * Periodo academico y Tipo de periodo NO viven aqui: los mantiene lamb-planificacion-ms
+ * (/api/v1/periodos-academicos y /api/v1/tipos-periodo). El frontend de Matricula los
+ * consume directamente desde ahi.
  */
 @RestController
 @RequestMapping("/api/v1/calendario-periodos")
@@ -103,6 +107,19 @@ public class CalendarioPeriodosController {
         return tipoMatriculaService.crear(request);
     }
 
+    @PutMapping("/tipos/{id}")
+    @Operation(summary = "Actualizar un tipo de matricula")
+    public TipoMatriculaResponse actualizarTipo(@PathVariable Long id, @Valid @RequestBody TipoMatriculaRequest request) {
+        return tipoMatriculaService.actualizar(id, request);
+    }
+
+    @DeleteMapping("/tipos/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Eliminar un tipo de matricula")
+    public void eliminarTipo(@PathVariable Long id) {
+        tipoMatriculaService.eliminar(id);
+    }
+
     // --- Modalidad de matricula (item 6) ---
 
     @GetMapping("/modalidades")
@@ -122,6 +139,19 @@ public class CalendarioPeriodosController {
     @Operation(summary = "Crear una modalidad de matricula")
     public ModalidadMatriculaResponse crearModalidad(@Valid @RequestBody ModalidadMatriculaRequest request) {
         return modalidadMatriculaService.crear(request);
+    }
+
+    @PutMapping("/modalidades/{id}")
+    @Operation(summary = "Actualizar una modalidad de matricula")
+    public ModalidadMatriculaResponse actualizarModalidad(@PathVariable Long id, @Valid @RequestBody ModalidadMatriculaRequest request) {
+        return modalidadMatriculaService.actualizar(id, request);
+    }
+
+    @DeleteMapping("/modalidades/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Eliminar una modalidad de matricula")
+    public void eliminarModalidad(@PathVariable Long id) {
+        modalidadMatriculaService.eliminar(id);
     }
 
     // --- Ampliacion de plazo de matricula (item 8) ---

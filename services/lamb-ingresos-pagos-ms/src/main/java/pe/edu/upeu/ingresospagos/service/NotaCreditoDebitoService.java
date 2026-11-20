@@ -5,11 +5,9 @@ import org.springframework.stereotype.Service;
 import pe.edu.upeu.ingresospagos.dto.NotaCreditoDebitoRequest;
 import pe.edu.upeu.ingresospagos.dto.NotaCreditoDebitoResponse;
 import pe.edu.upeu.ingresospagos.entity.NotaCreditoDebito;
-import pe.edu.upeu.ingresospagos.entity.Pago;
 import pe.edu.upeu.ingresospagos.exception.ResourceNotFoundException;
 import pe.edu.upeu.ingresospagos.mapper.NotaCreditoDebitoMapper;
 import pe.edu.upeu.ingresospagos.repository.NotaCreditoDebitoRepository;
-import pe.edu.upeu.ingresospagos.repository.PagoRepository;
 
 import java.util.List;
 
@@ -19,10 +17,9 @@ public class NotaCreditoDebitoService {
 
     private final NotaCreditoDebitoRepository notaCreditoDebitoRepository;
     private final NotaCreditoDebitoMapper notaCreditoDebitoMapper;
-    private final PagoRepository pagoRepository;
 
     public List<NotaCreditoDebitoResponse> listar() {
-        return notaCreditoDebitoRepository.findAllConPago().stream()
+        return notaCreditoDebitoRepository.findAll().stream()
                 .map(notaCreditoDebitoMapper::toResponse)
                 .toList();
     }
@@ -33,7 +30,6 @@ public class NotaCreditoDebitoService {
 
     public NotaCreditoDebitoResponse crear(NotaCreditoDebitoRequest request) {
         NotaCreditoDebito notaCreditoDebito = notaCreditoDebitoMapper.toEntity(request);
-        notaCreditoDebito.setPago(buscarPagoOFallar(request.getPagoId()));
         return notaCreditoDebitoMapper.toResponse(notaCreditoDebitoRepository.save(notaCreditoDebito));
     }
 
@@ -42,7 +38,7 @@ public class NotaCreditoDebitoService {
         notaCreditoDebito.setTipo(request.getTipo());
         notaCreditoDebito.setMotivo(request.getMotivo());
         notaCreditoDebito.setMonto(request.getMonto());
-        notaCreditoDebito.setPago(buscarPagoOFallar(request.getPagoId()));
+        notaCreditoDebito.setIdPago(request.getPagoId());
         return notaCreditoDebitoMapper.toResponse(notaCreditoDebitoRepository.save(notaCreditoDebito));
     }
 
@@ -53,10 +49,5 @@ public class NotaCreditoDebitoService {
     private NotaCreditoDebito buscarOFallar(Long id) {
         return notaCreditoDebitoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Nota de credito/debito no encontrada: " + id));
-    }
-
-    private Pago buscarPagoOFallar(Long pagoId) {
-        return pagoRepository.findById(pagoId)
-                .orElseThrow(() -> new ResourceNotFoundException("Pago no encontrado: " + pagoId));
     }
 }

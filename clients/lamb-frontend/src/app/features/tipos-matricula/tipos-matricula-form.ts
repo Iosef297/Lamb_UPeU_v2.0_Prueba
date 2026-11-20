@@ -25,6 +25,11 @@ export class TiposMatriculaForm {
       nombre: ['', [Validators.required]],
       descripcion: ['', []],
       activo: [false, []],
+      articuloLegal: ['', []],
+      creditosMinimos: [null as number | null, []],
+      requierePago: [false, [Validators.required]],
+      diasHabilesLimite: [null as number | null, []],
+      maxVecesDesaprobado: [null as number | null, []],
   });
 
   constructor() {

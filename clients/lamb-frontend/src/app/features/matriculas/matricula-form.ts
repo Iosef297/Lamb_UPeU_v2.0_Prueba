@@ -7,6 +7,10 @@ import { GrupoService } from '../grupos/grupo-service';
 import { GrupoResponse } from '../grupos/grupo.model';
 import { PersonaService } from '../personas/persona-service';
 import { PersonaResponse } from '../personas/persona.model';
+import { TiposMatriculaService } from '../tipos-matricula/tipos-matricula-service';
+import { TiposMatriculaResponse } from '../tipos-matricula/tipos-matricula.model';
+import { ModalidadesMatriculaService } from '../modalidades-matricula/modalidades-matricula-service';
+import { ModalidadesMatriculaResponse } from '../modalidades-matricula/modalidades-matricula.model';
 import { MatriculaService } from './matricula-service';
 
 @Component({
@@ -19,6 +23,8 @@ export class MatriculaForm {
   private readonly service = inject(MatriculaService);
   private readonly grupoService = inject(GrupoService);
   private readonly personaService = inject(PersonaService);
+  private readonly tiposMatriculaService = inject(TiposMatriculaService);
+  private readonly modalidadesMatriculaService = inject(ModalidadesMatriculaService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   protected readonly auth = inject(AuthService);
@@ -27,6 +33,8 @@ export class MatriculaForm {
   protected readonly enviando = signal(false);
   protected readonly estudiantes = signal<PersonaResponse[]>([]);
   protected readonly grupos = signal<GrupoResponse[]>([]);
+  protected readonly tiposMatricula = signal<TiposMatriculaResponse[]>([]);
+  protected readonly modalidadesMatricula = signal<ModalidadesMatriculaResponse[]>([]);
   // Solo grupos ABIERTOS admiten matricula (planificacion los valida de nuevo al registrar)
   protected readonly gruposAbiertos = computed(() => this.grupos().filter((g) => g.estado === 'ABIERTO'));
   protected idMatricula: number | null = null;
@@ -34,6 +42,8 @@ export class MatriculaForm {
   protected readonly form = this.fb.nonNullable.group({
     idPersona: [null as number | null, [Validators.required]],
     periodo: ['', [Validators.required, Validators.maxLength(20)]],
+    idTipoMatricula: [null as number | null],
+    idModalidadMatricula: [null as number | null],
     detalles: this.fb.nonNullable.array([this.crearDetalle()]),
   });
 
@@ -42,6 +52,8 @@ export class MatriculaForm {
       next: (g) => this.grupos.set(g),
       error: (e) => this.error.set(mensajeError(e, 'No se pudieron cargar los grupos.')),
     });
+    this.tiposMatriculaService.listar().subscribe({ next: (t) => this.tiposMatricula.set(t) });
+    this.modalidadesMatriculaService.listar().subscribe({ next: (m) => this.modalidadesMatricula.set(m) });
     // Un estudiante solo se matricula a si mismo
     const propia = this.auth.tieneRol('ESTUDIANTE') && !this.auth.tieneRol('ADMIN', 'COORDINADOR');
     if (propia && this.auth.idPersona()) {
@@ -59,7 +71,12 @@ export class MatriculaForm {
         next: (m) => {
           this.detalles.clear();
           m.detalles.forEach((d) => this.detalles.push(this.crearDetalle(d.idSeccion, d.creditos)));
-          this.form.patchValue({ idPersona: m.idPersona, periodo: m.periodo });
+          this.form.patchValue({
+            idPersona: m.idPersona,
+            periodo: m.periodo,
+            idTipoMatricula: m.idTipoMatricula,
+            idModalidadMatricula: m.idModalidadMatricula,
+          });
         },
         error: (e) => this.error.set(mensajeError(e, 'No se pudo cargar la matricula.')),
       });
@@ -117,6 +134,8 @@ export class MatriculaForm {
     const request = {
       idPersona: Number(valores.idPersona),
       periodo: valores.periodo,
+      idTipoMatricula: valores.idTipoMatricula ? Number(valores.idTipoMatricula) : undefined,
+      idModalidadMatricula: valores.idModalidadMatricula ? Number(valores.idModalidadMatricula) : undefined,
       detalles: valores.detalles.map((d) => ({ idSeccion: Number(d.idSeccion), creditos: Number(d.creditos) })),
     };
     const peticion = this.idMatricula

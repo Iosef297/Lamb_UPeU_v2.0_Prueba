@@ -7,10 +7,8 @@ import pe.edu.upeu.ingresospagos.dto.CrearEstudianteRequest;
 import pe.edu.upeu.ingresospagos.dto.CrearEstudianteResponse;
 import pe.edu.upeu.ingresospagos.dto.EstadoCuentaResponse;
 import pe.edu.upeu.ingresospagos.dto.EstudianteInfoResponse;
-import pe.edu.upeu.ingresospagos.entity.EstadoPago;
 import pe.edu.upeu.ingresospagos.entity.Estudiante;
 import pe.edu.upeu.ingresospagos.repository.EstudianteRepository;
-import pe.edu.upeu.ingresospagos.repository.PagoRepository;
 
 import java.security.SecureRandom;
 import java.time.Year;
@@ -22,7 +20,6 @@ public class EstudianteServiceImpl implements EstudianteService {
     private static final String PASSWORD_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
     private static final SecureRandom RANDOM = new SecureRandom();
 
-    private final PagoRepository pagoRepository;
     private final EstudianteRepository estudianteRepository;
     private final KeycloakAdminService keycloakAdminService;
 
@@ -36,9 +33,9 @@ public class EstudianteServiceImpl implements EstudianteService {
             return null;
         }
 
-        boolean tieneDeudaPendiente = !pagoRepository
-                .findByIdEstudianteAndEstadoNot(estudiante.getId(), EstadoPago.VALIDADO)
-                .isEmpty();
+        // Pago es ahora propiedad exclusiva de lamb-finanzas-ms (saga matricula-finanzas).
+        // TODO: consultar deuda real via llamada M2M a lamb-finanzas-ms (GET /api/v1/pagos) cuando exista ese cliente HTTP.
+        boolean tieneDeudaPendiente = false;
 
         return EstadoCuentaResponse.builder()
                 .idEstudiante(estudiante.getId())

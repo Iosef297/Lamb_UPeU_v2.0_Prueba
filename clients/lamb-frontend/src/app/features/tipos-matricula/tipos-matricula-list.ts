@@ -33,6 +33,10 @@ export class TiposMatriculaList {
     });
   }
 
+  eliminar(id: number) {
+    this.accion(this.servicio.eliminar(id));
+  }
+
   private accion(obs: Observable<unknown>) {
     this.errorAccion.set(null);
     this.exito.set(null);
@@ -44,6 +48,4 @@ export class TiposMatriculaList {
       error: (err) => this.errorAccion.set(mensajeError(err, 'No se pudo completar la operación.')),
     });
   }
-
-
 }

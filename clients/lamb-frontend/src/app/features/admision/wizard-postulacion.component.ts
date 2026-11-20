@@ -47,10 +47,38 @@ export class WizardPostulacionComponent {
 
   // Paso 2 — Académico
   idConvocatoria = signal<number | null>(null);
-  idPrograma = signal<number | null>(null);
+  idExamen = signal<number | null>(null);
   idModalidad = signal<number | null>(null);
   convocatorias = signal<any[]>([]);
   modalidades = signal<any[]>([]);
+  examenes = signal<any[]>([]);
+
+  convocatoriaSearchText = signal('');
+  convocatoriaSearchOpen = signal(false);
+  convocatoriaSearchResults = computed(() => {
+    const q = this.convocatoriaSearchText().trim().toLowerCase();
+    const lista = this.convocatorias();
+    if (!q) return lista;
+    return lista.filter(c => c.nombre?.toLowerCase().includes(q) || String(c.id).includes(q));
+  });
+
+  modalidadSearchText = signal('');
+  modalidadSearchOpen = signal(false);
+  modalidadSearchResults = computed(() => {
+    const q = this.modalidadSearchText().trim().toLowerCase();
+    const lista = this.modalidades();
+    if (!q) return lista;
+    return lista.filter(m => m.nombre?.toLowerCase().includes(q) || String(m.id).includes(q));
+  });
+
+  examenSearchText = signal('');
+  examenSearchOpen = signal(false);
+  examenSearchResults = computed(() => {
+    const q = this.examenSearchText().trim().toLowerCase();
+    const lista = this.examenes();
+    if (!q) return lista;
+    return lista.filter(e => e.nombre?.toLowerCase().includes(q) || String(e.id).includes(q));
+  });
 
   // Paso 3 — Contacto
   colegio = signal('');
@@ -65,7 +93,7 @@ export class WizardPostulacionComponent {
   resultado = signal<WizardResponse | null>(null);
 
   puedePaso2 = computed(() => !!this.reniec()?.encontrado);
-  puedePaso3 = computed(() => !!this.idConvocatoria() && !!this.idPrograma() && !!this.idModalidad());
+  puedePaso3 = computed(() => !!this.idConvocatoria() && !!this.idExamen() && !!this.idModalidad());
 
   constructor() {
     this.cargarCatalogos();
@@ -79,6 +107,10 @@ export class WizardPostulacionComponent {
     this.api.list<any>('/api/v1/modalidades-admision').subscribe({
       next: r => this.modalidades.set(r),
       error: () => this.modalidades.set([])
+    });
+    this.api.list<any>('/api/v1/examenes-admision').subscribe({
+      next: r => this.examenes.set(r),
+      error: () => this.examenes.set([])
     });
   }
 
@@ -103,6 +135,66 @@ export class WizardPostulacionComponent {
     });
   }
 
+  onConvocatoriaSearchInput(valor: string) {
+    this.convocatoriaSearchText.set(valor);
+    this.convocatoriaSearchOpen.set(true);
+    if (!valor.trim()) this.idConvocatoria.set(null);
+  }
+
+  openConvocatoriaSearch() {
+    this.convocatoriaSearchOpen.set(true);
+  }
+
+  closeConvocatoriaSearch() {
+    setTimeout(() => this.convocatoriaSearchOpen.set(false), 150);
+  }
+
+  selectConvocatoria(c: any) {
+    this.idConvocatoria.set(c.id);
+    this.convocatoriaSearchText.set(`${c.nombre} · ${c.periodo}`);
+    this.convocatoriaSearchOpen.set(false);
+  }
+
+  onModalidadSearchInput(valor: string) {
+    this.modalidadSearchText.set(valor);
+    this.modalidadSearchOpen.set(true);
+    if (!valor.trim()) this.idModalidad.set(null);
+  }
+
+  openModalidadSearch() {
+    this.modalidadSearchOpen.set(true);
+  }
+
+  closeModalidadSearch() {
+    setTimeout(() => this.modalidadSearchOpen.set(false), 150);
+  }
+
+  selectModalidad(m: any) {
+    this.idModalidad.set(m.id);
+    this.modalidadSearchText.set(m.nombre);
+    this.modalidadSearchOpen.set(false);
+  }
+
+  onExamenSearchInput(valor: string) {
+    this.examenSearchText.set(valor);
+    this.examenSearchOpen.set(true);
+    if (!valor.trim()) this.idExamen.set(null);
+  }
+
+  openExamenSearch() {
+    this.examenSearchOpen.set(true);
+  }
+
+  closeExamenSearch() {
+    setTimeout(() => this.examenSearchOpen.set(false), 150);
+  }
+
+  selectExamen(ex: any) {
+    this.idExamen.set(ex.id);
+    this.examenSearchText.set(ex.nombre);
+    this.examenSearchOpen.set(false);
+  }
+
   avanzar() {
     if (this.paso() === 1 && !this.puedePaso2()) return;
     if (this.paso() === 2 && !this.puedePaso3()) return;
@@ -122,7 +214,7 @@ export class WizardPostulacionComponent {
       apellidoPaterno: r.apellidoPaterno,
       apellidoMaterno: r.apellidoMaterno,
       idConvocatoria: this.idConvocatoria(),
-      idPrograma: this.idPrograma(),
+      idExamen: this.idExamen(),
       idModalidad: this.idModalidad(),
       colegioProcedencia: this.colegio() || null,
       anioEgresoColegio: this.anioEgreso(),
@@ -153,8 +245,14 @@ export class WizardPostulacionComponent {
     this.dni.set('');
     this.reniec.set(null);
     this.idConvocatoria.set(null);
-    this.idPrograma.set(null);
+    this.idExamen.set(null);
     this.idModalidad.set(null);
+    this.convocatoriaSearchText.set('');
+    this.convocatoriaSearchOpen.set(false);
+    this.modalidadSearchText.set('');
+    this.modalidadSearchOpen.set(false);
+    this.examenSearchText.set('');
+    this.examenSearchOpen.set(false);
     this.colegio.set('');
     this.anioEgreso.set(null);
     this.promedio.set(null);
