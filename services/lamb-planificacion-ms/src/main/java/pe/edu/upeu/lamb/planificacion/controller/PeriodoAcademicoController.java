@@ -2,6 +2,7 @@ package pe.edu.upeu.lamb.planificacion.controller;
 
 import pe.edu.upeu.lamb.planificacion.dto.PeriodoAcademicoRequest;
 import pe.edu.upeu.lamb.planificacion.dto.PeriodoAcademicoResponse;
+import pe.edu.upeu.lamb.planificacion.dto.SyncPeriodoRequest;
 import pe.edu.upeu.lamb.planificacion.service.PeriodoAcademicoService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -44,5 +45,10 @@ public class PeriodoAcademicoController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void eliminar(@PathVariable Long id) {
         periodoAcademicoService.eliminar(id);
+    }
+
+    @PostMapping("/sync-institucional")
+    public PeriodoAcademicoResponse sincronizarDesdeInstitucional(@Valid @RequestBody SyncPeriodoRequest request) {
+        return periodoAcademicoService.sincronizarDesdeInstitucional(request);
     }
 }

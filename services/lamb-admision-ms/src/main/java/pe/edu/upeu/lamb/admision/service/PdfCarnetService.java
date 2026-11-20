@@ -122,7 +122,7 @@ public class PdfCarnetService {
             acad.setSpacingBefore(6);
             acad.addCell(kvCell("Convocatoria",  safe(p.getCodigoConvocatoria()) + "  (#" + str(p.getIdConvocatoria()) + ")"));
             acad.addCell(kvCell("Modalidad",     safe(p.getCodigoModalidad()) + "  (#" + str(p.getIdModalidad()) + ")"));
-            acad.addCell(kvCell("Programa",      "#" + str(p.getIdPrograma())));
+            acad.addCell(kvCell("Examen",         "#" + str(p.getIdExamen())));
             acad.addCell(kvCell("Periodo",       periodoDesdeCodigo(p.getCodigoPostulante())));
             doc.add(acad);
 

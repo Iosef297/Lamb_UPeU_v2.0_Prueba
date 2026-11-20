@@ -4,6 +4,7 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 
 @Getter
 @Setter
@@ -19,6 +20,8 @@ public class CalificacionRequest {
     @Min(0) private Integer respuestasCorrectas;
     @Min(0) private Integer respuestasIncorrectas;
     @Min(0) private Integer respuestasBlanco;
+    private Instant horaEntrega;
+    private Integer ordenMerito;
     private Long idSupervisor;
     private Long idEncargado;
     @Size(max = 500) private String observacion;

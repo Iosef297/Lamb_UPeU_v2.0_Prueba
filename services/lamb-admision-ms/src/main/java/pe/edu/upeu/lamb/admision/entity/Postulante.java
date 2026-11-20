@@ -27,8 +27,8 @@ public class Postulante {
     private Convocatoria convocatoria;
 
     // FUSION: lamb-institucional-ms
-    @Column(name = "id_programa", nullable = false)
-    private Long idPrograma;
+    @Column(name = "id_examen", nullable = false)
+    private Long idExamen;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_modalidad", nullable = false)
@@ -46,7 +46,7 @@ public class Postulante {
     @Column(name = "promedio_colegio", precision = 4, scale = 2)
     private BigDecimal promedioColegio;
 
-    @Column(name = "telefono_contacto", length = 20)
+    @Column(name = "telefono_contacto", length = 9)
     private String telefonoContacto;
 
     @Column(name = "correo_contacto", length = 100)
@@ -55,7 +55,7 @@ public class Postulante {
     @Column(name = "nombre_apoderado", length = 150)
     private String nombreApoderado;
 
-    @Column(name = "telefono_apoderado", length = 20)
+    @Column(name = "telefono_apoderado", length = 9)
     private String telefonoApoderado;
 
     @Enumerated(EnumType.STRING)

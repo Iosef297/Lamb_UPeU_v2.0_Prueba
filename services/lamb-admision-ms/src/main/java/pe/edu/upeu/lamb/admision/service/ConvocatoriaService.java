@@ -49,6 +49,9 @@ public class ConvocatoriaService {
         c.setFechaExamen(r.getFechaExamen());
         c.setVacantesTotales(r.getVacantesTotales());
         c.setObservacion(r.getObservacion());
+        if (r.getEstado() != null) {
+            c.setEstado(pe.edu.upeu.lamb.admision.entity.EstadoConvocatoria.valueOf(r.getEstado()));
+        }
         return mapper.toResponse(c);
     }
 

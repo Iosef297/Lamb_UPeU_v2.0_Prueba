@@ -20,6 +20,7 @@ public class PostulanteAdmitidoEvento {
     private String tipoEvento;
     private Long postulacionId;
     private Long idPersona;
+    private Long idExamen;
     private Long idPrograma;
     private String periodo;
     private BigDecimal puntajeExamen;

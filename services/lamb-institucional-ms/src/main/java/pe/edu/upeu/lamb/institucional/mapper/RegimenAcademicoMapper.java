@@ -11,9 +11,13 @@ public class RegimenAcademicoMapper {
     public RegimenAcademico toEntity(RegimenAcademicoRequest request) {
         return RegimenAcademico.builder()
                 .nombre(request.getNombre())
+                .anio(request.getAnio())
                 .descripcion(request.getDescripcion())
+                .fechaInicio(request.getFechaInicio())
+                .fechaFin(request.getFechaFin())
                 .periodosPorAnio(request.getPeriodosPorAnio())
-                .activo(request.getActivo() != null ? request.getActivo() : Boolean.TRUE)
+                .estado(request.getEstado() != null ? request.getEstado() : "Planificado")
+                .idTipoPeriodo(request.getIdTipoPeriodo())
                 .build();
     }
 
@@ -21,9 +25,13 @@ public class RegimenAcademicoMapper {
         return RegimenAcademicoResponse.builder()
                 .id(entity.getId())
                 .nombre(entity.getNombre())
+                .anio(entity.getAnio())
                 .descripcion(entity.getDescripcion())
+                .fechaInicio(entity.getFechaInicio())
+                .fechaFin(entity.getFechaFin())
                 .periodosPorAnio(entity.getPeriodosPorAnio())
-                .activo(entity.getActivo())
+                .estado(entity.getEstado())
+                .idTipoPeriodo(entity.getIdTipoPeriodo())
                 .build();
     }
 }

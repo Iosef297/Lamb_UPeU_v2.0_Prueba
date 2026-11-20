@@ -21,4 +21,5 @@ public class ExamenAdmisionResponse {
     private Integer aforoMaximo;
     private Integer aforoAsignado;
     private String estado;
+    private Long idSupervisor;
 }

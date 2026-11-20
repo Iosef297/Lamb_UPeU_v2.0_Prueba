@@ -1,0 +1,58 @@
+<div class="pagina">
+  <h2>Periodo académico</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+  @if (errorAccion()) {
+    <div class="error">{{ errorAccion() }}</div>
+  }
+  @if (exito()) {
+    <div class="exito">{{ exito() }}</div>
+  }
+
+  <div class="barra">
+    @if (auth.tieneRol('ADMIN')) {
+      <a [routerLink]="['/periodos-academicos/nueva']">Nuevo</a>
+    }
+    <button type="button" (click)="cargar()">Actualizar</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+          <th>ID</th>
+          <th>Código</th>
+          <th>Nombre</th>
+          <th>Tipo de periodo</th>
+          <th>Inicio</th>
+          <th>Fin</th>
+          <th>Estado</th>
+        @if (auth.tieneRol('ADMIN')) {
+          <th>Acciones</th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (item of items(); track item.id) {
+        <tr>
+            <td>{{ item.id }}</td>
+            <td>{{ item.codigo }}</td>
+            <td>{{ item.nombre }}</td>
+            <td>{{ item.nombreTipoPeriodo }}</td>
+            <td>{{ item.fechaInicio }}</td>
+            <td>{{ item.fechaFin }}</td>
+            <td>{{ item.estado }}</td>
+          @if (auth.tieneRol('ADMIN')) {
+            <td>
+              <a [routerLink]="['/periodos-academicos', item.id, 'editar']">Editar</a>
+              <button type="button" (click)="eliminar(item.id)">Eliminar</button>
+            </td>
+          }
+        </tr>
+      } @empty {
+        <tr><td colspan="8">Sin registros.</td></tr>
+      }
+    </tbody>
+  </table>
+</div>

@@ -12,6 +12,8 @@ public class GradoAcademicoCatalogoMapper {
         return GradoAcademicoCatalogo.builder()
                 .nombre(request.getNombre())
                 .descripcion(request.getDescripcion())
+                .idNivelAcademico(request.getIdNivelAcademico())
+                .tipo(request.getTipo())
                 .build();
     }
 
@@ -20,6 +22,8 @@ public class GradoAcademicoCatalogoMapper {
                 .id(entity.getId())
                 .nombre(entity.getNombre())
                 .descripcion(entity.getDescripcion())
+                .idNivelAcademico(entity.getIdNivelAcademico())
+                .tipo(entity.getTipo())
                 .build();
     }
 }

@@ -2,6 +2,8 @@ package pe.edu.upeu.lamb.planificacion.service;
 
 import pe.edu.upeu.lamb.planificacion.dto.PeriodoAcademicoRequest;
 import pe.edu.upeu.lamb.planificacion.dto.PeriodoAcademicoResponse;
+import pe.edu.upeu.lamb.planificacion.dto.SyncPeriodoRequest;
+import pe.edu.upeu.lamb.planificacion.entity.EstadoPeriodo;
 import pe.edu.upeu.lamb.planificacion.entity.PeriodoAcademico;
 import pe.edu.upeu.lamb.planificacion.entity.TipoPeriodo;
 import pe.edu.upeu.lamb.planificacion.exception.BusinessRuleException;
@@ -60,6 +62,37 @@ public class PeriodoAcademicoService {
     @Transactional
     public void eliminar(Long id) {
         periodoAcademicoRepository.delete(buscarOFallar(id));
+    }
+
+    /**
+     * Crea/actualiza el periodo operativo espejo de un periodo generado en Institucional
+     * (idempotente por codigo). El tipo de periodo se resuelve/crea por su propio codigo
+     * (derivado del id de Institucional), nunca por nombre, para no mezclar catalogos.
+     */
+    @Transactional
+    public PeriodoAcademicoResponse sincronizarDesdeInstitucional(SyncPeriodoRequest request) {
+        TipoPeriodo tipo = tipoPeriodoRepository.findByCodigo(request.getCodigoTipoPeriodo())
+                .orElseGet(() -> tipoPeriodoRepository.save(TipoPeriodo.builder()
+                        .codigo(request.getCodigoTipoPeriodo())
+                        .nombre(request.getNombreTipoPeriodo())
+                        .descripcion("Sincronizado automaticamente desde Institucional")
+                        .build()));
+
+        EstadoPeriodo estado;
+        try {
+            estado = EstadoPeriodo.valueOf(request.getEstado());
+        } catch (Exception e) {
+            estado = EstadoPeriodo.PLANIFICADO;
+        }
+
+        PeriodoAcademico periodo = periodoAcademicoRepository.findByCodigo(request.getCodigo())
+                .orElseGet(() -> PeriodoAcademico.builder().codigo(request.getCodigo()).build());
+        periodo.setNombre(request.getNombre());
+        periodo.setTipoPeriodo(tipo);
+        periodo.setFechaInicio(request.getFechaInicio());
+        periodo.setFechaFin(request.getFechaFin());
+        periodo.setEstado(estado);
+        return periodoAcademicoMapper.toResponse(periodoAcademicoRepository.save(periodo));
     }
 
     PeriodoAcademico buscarOFallar(Long id) {

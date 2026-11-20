@@ -1,0 +1,45 @@
+<div class="pagina">
+  <h2>Periodo académico</h2>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+    <label>
+      Código
+      <input type="text" formControlName="codigo" />
+    </label>
+    <label>
+      Nombre
+      <input type="text" formControlName="nombre" />
+    </label>
+    <label>
+      Tipo de periodo
+      <select formControlName="idTipoPeriodo">
+        <option [ngValue]="null">Seleccione...</option>
+        @for (tp of tiposPeriodo(); track tp.id) {
+          <option [ngValue]="tp.id">{{ tp.nombre }}</option>
+        }
+      </select>
+    </label>
+    <label>
+      Fecha de inicio
+      <input type="date" formControlName="fechaInicio" />
+    </label>
+    <label>
+      Fecha de fin
+      <input type="date" formControlName="fechaFin" />
+    </label>
+    <label>
+      Estado
+      <select formControlName="estado">
+        @for (e of estados; track e) {
+          <option [value]="e">{{ e }}</option>
+        }
+      </select>
+    </label>
+
+    <button type="submit">Guardar</button>
+  </form>
+</div>

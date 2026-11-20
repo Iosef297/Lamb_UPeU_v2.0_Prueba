@@ -44,6 +44,9 @@ public class ExamenAdmision {
     @Column(name = "aforo_asignado", nullable = false)
     private Integer aforoAsignado;
 
+    @Column(name = "id_supervisor")
+    private Long idSupervisor;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false, length = 20)
     private EstadoExamen estado;

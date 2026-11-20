@@ -17,4 +17,5 @@ public class ReniecResponse {
     private String nombreCompleto;
     private boolean encontrado;
     private String fuente;
+    private Long idPersona;
 }

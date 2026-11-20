@@ -26,4 +26,5 @@ public class ConvocatoriaRequest {
     private Integer vacantesTotales;
     @Size(max = 500)
     private String observacion;
+    private String estado;
 }

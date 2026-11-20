@@ -53,6 +53,7 @@ public class ExamenAdmisionService {
                 .aforoMaximo(r.getAforoMaximo())
                 .aforoAsignado(0)
                 .estado(EstadoExamen.PROGRAMADO)
+                .idSupervisor(r.getIdSupervisor())
                 .build();
         return mapper.toResponse(repo.save(e));
     }
@@ -72,6 +73,7 @@ public class ExamenAdmisionService {
         e.setDuracionMinutos(r.getDuracionMinutos());
         e.setIdAula(r.getIdAula());
         e.setAforoMaximo(r.getAforoMaximo());
+        e.setIdSupervisor(r.getIdSupervisor());
         return mapper.toResponse(e);
     }
 

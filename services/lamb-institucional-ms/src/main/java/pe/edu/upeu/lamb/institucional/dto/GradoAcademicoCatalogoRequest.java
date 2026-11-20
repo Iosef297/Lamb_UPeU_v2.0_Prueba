@@ -15,4 +15,8 @@ public class GradoAcademicoCatalogoRequest {
 
     @Size(max = 255)
     private String descripcion;
+
+    private Long idNivelAcademico;
+
+    private String tipo;
 }

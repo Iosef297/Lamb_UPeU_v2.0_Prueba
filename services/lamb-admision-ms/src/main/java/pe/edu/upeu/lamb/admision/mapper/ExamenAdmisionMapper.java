@@ -19,6 +19,7 @@ public class ExamenAdmisionMapper {
                 .aforoMaximo(e.getAforoMaximo())
                 .aforoAsignado(e.getAforoAsignado())
                 .estado(e.getEstado().name())
+                .idSupervisor(e.getIdSupervisor())
                 .build();
     }
 }

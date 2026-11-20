@@ -68,7 +68,7 @@ public class PostulacionWizardService {
         Postulante p = Postulante.builder()
                 .idPersona(idPersona)
                 .convocatoria(conv)
-                .idPrograma(r.getIdPrograma())
+                .idExamen(r.getIdExamen())
                 .modalidad(mod)
                 .codigoPostulante(codigo)
                 .colegioProcedencia(r.getColegioProcedencia())
@@ -90,7 +90,7 @@ public class PostulacionWizardService {
                 .tipoEvento("postulante.pre-inscrito")
                 .postulacionId(guardado.getId())
                 .idPersona(idPersona)
-                .idPrograma(r.getIdPrograma())
+                .idExamen(r.getIdExamen())
                 .periodo(conv.getPeriodo())
                 .puntajeExamen(null) // aún no evaluado
                 .origen("wizard-admision")

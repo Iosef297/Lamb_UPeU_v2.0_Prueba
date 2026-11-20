@@ -13,9 +13,10 @@ import java.time.Instant;
 public class PostulanteResponse {
     private Long id;
     private Long idPersona;
+    private String nombreCompleto;
     private Long idConvocatoria;
     private String codigoConvocatoria;
-    private Long idPrograma;
+    private Long idExamen;
     private Long idModalidad;
     private String codigoModalidad;
     private String codigoPostulante;

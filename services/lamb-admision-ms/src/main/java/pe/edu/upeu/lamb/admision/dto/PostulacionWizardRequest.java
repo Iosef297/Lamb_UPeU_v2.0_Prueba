@@ -25,7 +25,7 @@ public class PostulacionWizardRequest {
 
     // Paso 2 — selección académica
     @NotNull private Long idConvocatoria;
-    @NotNull private Long idPrograma;
+    @NotNull private Long idExamen;
     @NotNull private Long idModalidad;
 
     // Paso 3 — datos complementarios

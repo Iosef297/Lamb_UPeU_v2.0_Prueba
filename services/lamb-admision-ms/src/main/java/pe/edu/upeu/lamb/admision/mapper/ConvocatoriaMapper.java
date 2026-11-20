@@ -18,7 +18,7 @@ public class ConvocatoriaMapper {
                 .fechaExamen(r.getFechaExamen())
                 .vacantesTotales(r.getVacantesTotales())
                 .observacion(r.getObservacion())
-                .estado(EstadoConvocatoria.PLANIFICADA)
+                .estado(r.getEstado() != null ? EstadoConvocatoria.valueOf(r.getEstado()) : EstadoConvocatoria.PLANIFICADA)
                 .build();
     }
     public ConvocatoriaResponse toResponse(Convocatoria c) {

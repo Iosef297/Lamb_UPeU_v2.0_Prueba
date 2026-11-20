@@ -70,6 +70,7 @@ public class CalificacionService {
                 .idEncargado(r.getIdEncargado())
                 .observacion(r.getObservacion())
                 .fechaCalificacion(Instant.now())
+                .horaEntrega(r.getHoraEntrega())
                 .build();
         return mapper.toResponse(repo.save(c));
     }
@@ -83,6 +84,10 @@ public class CalificacionService {
         c.setRespuestasCorrectas(r.getRespuestasCorrectas());
         c.setRespuestasIncorrectas(r.getRespuestasIncorrectas());
         c.setRespuestasBlanco(r.getRespuestasBlanco());
+        c.setHoraEntrega(r.getHoraEntrega());
+        if (r.getOrdenMerito() != null) {
+            c.setOrdenMerito(r.getOrdenMerito());
+        }
         c.setIdSupervisor(r.getIdSupervisor());
         c.setIdEncargado(r.getIdEncargado());
         c.setObservacion(r.getObservacion());

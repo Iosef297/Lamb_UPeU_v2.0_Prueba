@@ -14,8 +14,10 @@ public class CalificacionResponse {
     private Long id;
     private Long idExamen;
     private String codigoExamen;
+    private String nombreExamen;
     private Long idPostulante;
     private String codigoPostulante;
+    private String nombrePostulante;
     private BigDecimal puntajeTotal;
     private BigDecimal puntajeAptitud;
     private BigDecimal puntajeConocimiento;
@@ -27,4 +29,5 @@ public class CalificacionResponse {
     private Long idEncargado;
     private String observacion;
     private Instant fechaCalificacion;
+    private Instant horaEntrega;
 }

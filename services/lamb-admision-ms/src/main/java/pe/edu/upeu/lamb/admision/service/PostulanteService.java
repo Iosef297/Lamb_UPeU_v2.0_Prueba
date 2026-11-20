@@ -67,7 +67,7 @@ public class PostulanteService {
         Postulante p = Postulante.builder()
                 .idPersona(r.getIdPersona())
                 .convocatoria(conv)
-                .idPrograma(r.getIdPrograma())
+                .idExamen(r.getIdExamen())
                 .modalidad(mod)
                 .codigoPostulante(codigo)
                 .colegioProcedencia(r.getColegioProcedencia())
@@ -91,6 +91,19 @@ public class PostulanteService {
         if (repo.existsByCodigoPostulanteAndIdNot(r.getCodigoPostulante(), id)) {
             throw new BusinessRuleException("Ya existe otro postulante con codigo " + r.getCodigoPostulante());
         }
+        if (r.getIdConvocatoria() != null) {
+            Convocatoria conv = convocatoriaRepo.findById(r.getIdConvocatoria())
+                    .orElseThrow(() -> new ResourceNotFoundException("Convocatoria no encontrada: " + r.getIdConvocatoria()));
+            p.setConvocatoria(conv);
+        }
+        if (r.getIdModalidad() != null) {
+            ModalidadAdmision mod = modalidadRepo.findById(r.getIdModalidad())
+                    .orElseThrow(() -> new ResourceNotFoundException("Modalidad no encontrada: " + r.getIdModalidad()));
+            p.setModalidad(mod);
+        }
+        if (r.getIdExamen() != null) {
+            p.setIdExamen(r.getIdExamen());
+        }
         p.setCodigoPostulante(r.getCodigoPostulante());
         p.setColegioProcedencia(r.getColegioProcedencia());
         p.setAnioEgresoColegio(r.getAnioEgresoColegio());
@@ -99,6 +112,9 @@ public class PostulanteService {
         p.setCorreoContacto(r.getCorreoContacto());
         p.setNombreApoderado(r.getNombreApoderado());
         p.setTelefonoApoderado(r.getTelefonoApoderado());
+        if (r.getEstado() != null) {
+            p.setEstado(EstadoPostulante.valueOf(r.getEstado()));
+        }
         return mapper.toResponse(p);
     }
 

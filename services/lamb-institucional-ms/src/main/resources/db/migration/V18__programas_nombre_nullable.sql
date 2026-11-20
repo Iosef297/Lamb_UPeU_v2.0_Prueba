@@ -1,0 +1,1 @@
+ALTER TABLE programas ALTER COLUMN nombre DROP NOT NULL;

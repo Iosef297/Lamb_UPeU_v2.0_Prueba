@@ -60,4 +60,7 @@ public class CalificacionExamen {
 
     @Column(name = "fecha_calificacion", nullable = false)
     private Instant fechaCalificacion;
+
+    @Column(name = "hora_entrega")
+    private Instant horaEntrega;
 }

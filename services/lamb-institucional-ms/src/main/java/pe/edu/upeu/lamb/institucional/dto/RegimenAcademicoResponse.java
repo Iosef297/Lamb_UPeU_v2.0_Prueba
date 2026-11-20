@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @Builder
@@ -14,7 +16,11 @@ import lombok.Setter;
 public class RegimenAcademicoResponse {
     private Long id;
     private String nombre;
+    private Integer anio;
     private String descripcion;
+    private LocalDate fechaInicio;
+    private LocalDate fechaFin;
     private Integer periodosPorAnio;
-    private Boolean activo;
+    private String estado;
+    private Long idTipoPeriodo;
 }

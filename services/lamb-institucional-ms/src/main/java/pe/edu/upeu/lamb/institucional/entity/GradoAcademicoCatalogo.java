@@ -21,4 +21,10 @@ public class GradoAcademicoCatalogo {
 
     @Column(name = "descripcion", length = 255)
     private String descripcion;
+
+    @Column(name = "id_nivel_academico")
+    private Long idNivelAcademico;
+
+    @Column(name = "tipo", length = 10)
+    private String tipo;
 }

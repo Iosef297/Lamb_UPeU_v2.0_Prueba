@@ -53,6 +53,7 @@ public class PersonaLocalAdapter implements PersonaPort {
 
     @Override
     public Optional<PersonaInfo> consultarPorId(Long idPersona) {
+        if (idPersona == null) return Optional.empty();
         return repo.findById(idPersona).map(this::toInfo);
     }
 

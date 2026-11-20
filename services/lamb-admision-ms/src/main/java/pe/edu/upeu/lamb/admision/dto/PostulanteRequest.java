@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 public class PostulanteRequest {
     @NotNull private Long idPersona;
     @NotNull private Long idConvocatoria;
-    @NotNull private Long idPrograma;
+    @NotNull private Long idExamen;
     @NotNull private Long idModalidad;
     // Autogenerado por backend si no viene (formato POS-{yyyy}-{sem}-{correlativo})
     @Size(max = 30) private String codigoPostulante;
@@ -24,4 +24,5 @@ public class PostulanteRequest {
     @Email @Size(max = 100) private String correoContacto;
     @Size(max = 150) private String nombreApoderado;
     @Size(max = 20) private String telefonoApoderado;
+    private String estado;
 }

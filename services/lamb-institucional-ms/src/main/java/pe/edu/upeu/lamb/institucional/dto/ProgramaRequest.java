@@ -12,7 +12,7 @@ import lombok.Setter;
 @Setter
 public class ProgramaRequest {
 
-    @NotBlank
+    @NotBlank 
     @Size(max = 150)
     private String nombre;
 

@@ -5,6 +5,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 public class RegimenAcademicoRequest {
@@ -13,10 +15,18 @@ public class RegimenAcademicoRequest {
     @Size(max = 100)
     private String nombre;
 
+    private Integer anio;
+
     @Size(max = 255)
     private String descripcion;
 
+    private LocalDate fechaInicio;
+
+    private LocalDate fechaFin;
+
     private Integer periodosPorAnio;
 
-    private Boolean activo;
+    private String estado;
+
+    private Long idTipoPeriodo;
 }

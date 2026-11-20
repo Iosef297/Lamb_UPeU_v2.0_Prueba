@@ -18,4 +18,6 @@ public class ExamenAdmisionRequest {
     @NotNull @Min(15) @Max(600) private Integer duracionMinutos;
     private Long idAula;
     @NotNull @Min(1) private Integer aforoMaximo;
+    @NotNull @Min(1) private Integer aforoAsignado;
+    private Long idSupervisor;
 }

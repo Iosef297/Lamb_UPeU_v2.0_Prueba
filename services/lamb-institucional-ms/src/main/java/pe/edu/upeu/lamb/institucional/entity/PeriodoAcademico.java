@@ -40,4 +40,8 @@ public class PeriodoAcademico {
     /** Periodo padre (p.ej. 2026-I) cuando este registro es un subperiodo/modulo. */
     @Column(name = "id_periodo_padre")
     private Long idPeriodoPadre;
+
+    /** Regimen academico que genero este periodo automaticamente (si aplica). */
+    @Column(name = "id_regimen_academico")
+    private Long idRegimenAcademico;
 }
